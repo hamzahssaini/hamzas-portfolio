@@ -1,3 +1,4 @@
+// app.js — DORA Metrics server (GitHub-backed)
 const express = require('express');
 const morgan = require('morgan');
 const fetch = require('node-fetch'); // npm i node-fetch@2
@@ -11,7 +12,7 @@ const OWNER = process.env.OWNER || 'hamzahssaini';
 const REPO = process.env.REPO || 'dora-metrics';
 const BRANCH = process.env.BRANCH || 'main';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || ''; // optional: target a specific workflow
+const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || ''; // optional
 const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 60);
 
 // Middleware
@@ -24,91 +25,25 @@ app.use(express.urlencoded({ extended: true }));
 const users = [];
 const deployments = [];
 
-// Home Page with Form
+// Home: redirect to dashboard
 app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Hamza's Node.js App</title>
-      <style>
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(to right, #e0f7fa, #ffffff); color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px 40px; border-radius: 16px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); text-align: center; width: 100%; max-width: 400px; }
-        h1 { font-size: 1.8rem; color: #0078D7; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
-        input::placeholder { animation: movePlaceholder 3s infinite alternate; color: #aaa; }
-        button { background-color: #0078D7; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-        button:hover { background-color: #005bb5; }
-        @keyframes movePlaceholder { 0% { transform: translateX(0); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>🌐Hello from App.js running in local environment!!</h1>
-        <p>Welcome from <strong>Hamza Hssaini</strong></p>
-        <form action="/register" method="POST">
-          <input type="text" name="name" placeholder="Enter your username" required />
-          <input type="email" name="email" placeholder="Enter your gmail" required />
-          <button type="submit">Register</button>
-        </form>
-      </div>
-    </body>
-    </html>
-  `);
+  res.redirect('/dashboard.html');
 });
 
 // Register route (stores users in memory)
 app.post('/register', (req, res) => {
   const { name, email } = req.body;
   users.push({ id: users.length + 1, name, email });
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Success</title>
-      <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f5fff5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .success-box { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); text-align: center; max-width: 500px; width: 100%; animation: fadeIn 0.6s ease-out; position: relative; }
-        h1 { color: #28a745; font-size: 1.8rem; margin-bottom: 10px; }
-        p { font-size: 1.1rem; color: #333; }
-        .back-btn { margin-top: 20px; display: inline-block; background-color: #0078D7; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: background-color 0.3s ease; }
-        .back-btn:hover { background-color: #005bb5; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-      </style>
-      <script>
-        setTimeout(() => { window.location.href = "/"; }, 5000);
-      </script>
-    </head>
-    <body>
-      <div class="success-box">
-        <h1>👋 Hello ${name}, your registration is <span style="color: green;">successful!</span></h1>
-        <p><strong>Registered Email:</strong> ${email}</p>
-        <p>🎉 Thank you for joining, <strong>${name}</strong>!</p>
-        <a class="back-btn" href="/">← Back to Home</a>
-        <p style="margin-top: 15px; font-size: 0.9rem; color: #555;">Redirecting to home page in 5 seconds...</p>
-      </div>
-    </body>
-    </html>
-  `);
+  res.redirect('/');
 });
 
 // API route to get users (from memory)
-app.get('/api/users', (req, res) => {
-  res.json(users);
-});
+app.get('/api/users', (req, res) => res.json(users));
 
-// Health check route
-app.get('/healthz', (req, res) => {
-  res.status(200).send('OK');
-});
+// Health check
+app.get('/healthz', (req, res) => res.status(200).send('OK'));
 
-// =========================
-// In-memory deployments API
-// =========================
+// Deployments endpoints (in-memory)
 app.post('/api/deployments', (req, res) => {
   const { repo, commit, deployedAt } = req.body;
   if (!repo || !commit || !deployedAt) {
@@ -118,16 +53,12 @@ app.post('/api/deployments', (req, res) => {
   deployments.push(deployment);
   res.status(201).json(deployment);
 });
-
 app.get('/api/deployments', (req, res) => {
   const sorted = [...deployments].sort((a, b) => b.deployedAt - a.deployedAt);
   res.json(sorted);
 });
-
 app.get('/api/metrics', (req, res) => {
-  if (deployments.length === 0) {
-    return res.json({ totalDeployments: 0, deploymentFrequencyPerDay: 0 });
-  }
+  if (deployments.length === 0) return res.json({ totalDeployments: 0, deploymentFrequencyPerDay: 0 });
   const sorted = [...deployments].sort((a, b) => a.deployedAt - b.deployedAt);
   const totalDeployments = sorted.length;
   const first = sorted[0].deployedAt;
@@ -135,21 +66,14 @@ app.get('/api/metrics', (req, res) => {
   const msDiff = last.getTime() - first.getTime() || 1;
   const daysDiff = msDiff / (1000 * 60 * 60 * 24);
   const deploymentFrequencyPerDay = daysDiff === 0 ? totalDeployments : totalDeployments / daysDiff;
-  res.json({
-    totalDeployments,
-    firstDeploymentAt: first,
-    lastDeploymentAt: last,
-    deploymentFrequencyPerDay: Number(deploymentFrequencyPerDay.toFixed(2)),
-  });
+  res.json({ totalDeployments, firstDeploymentAt: first, lastDeploymentAt: last, deploymentFrequencyPerDay: Number(deploymentFrequencyPerDay.toFixed(2)) });
 });
 
-// =========================
-// GitHub-backed DORA metrics
-// =========================
+// ----------------------
+// GitHub API helpers
+// ----------------------
 async function gh(path, params = {}) {
-  if (!GITHUB_TOKEN) {
-    throw new Error('GITHUB_TOKEN is required for GitHub-backed metrics');
-  }
+  if (!GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is required for GitHub-backed metrics');
   const url = new URL(`https://api.github.com${path}`);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
@@ -168,13 +92,13 @@ async function gh(path, params = {}) {
   return res.json();
 }
 
-async function getWorkflowRuns(status, sinceIso) {
+// Get a single page of completed workflow runs (per_page up to 100)
+async function getWorkflowRunsPage(per_page = 100) {
   return gh(`/repos/${OWNER}/${REPO}/actions/runs`, {
-    status,
-    per_page: 100,
+    status: 'completed',
+    per_page,
     branch: BRANCH,
     ...(DEPLOY_WORKFLOW_ID ? { workflow_id: DEPLOY_WORKFLOW_ID } : {}),
-    ...(sinceIso ? { created: `${sinceIso}..` } : {}),
   });
 }
 
@@ -196,42 +120,54 @@ function groupByDay(items, getDate) {
   }, {});
 }
 
+function percentile(arr, p) {
+  if (!arr || !arr.length) return null;
+  const s = [...arr].sort((a, b) => a - b);
+  const idx = (p / 100) * (s.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return s[lo];
+  return s[lo] + (s[hi] - s[lo]) * (idx - lo);
+}
+
+// ----------------------
+// computeGithubMetrics
+// ----------------------
 async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
   const now = Date.now();
   const since = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
   const until = new Date(now).toISOString();
 
-  const [successRuns, failureRuns, commits] = await Promise.all([
-    getWorkflowRuns('success', since),
-    getWorkflowRuns('failure', since),
-    getCommits(since, until),
-  ]);
+  const [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(since, until)]);
+  const runsAll = (runsResp.workflow_runs || []);
+  const sinceDate = new Date(since);
+  const allRuns = runsAll.filter(r => {
+    const d = new Date(r.updated_at || r.run_started_at || r.created_at);
+    return d >= sinceDate;
+  });
 
-  const successes = successRuns.workflow_runs || [];
-  const failures = failureRuns.workflow_runs || [];
+  const successes = allRuns.filter(r => r.conclusion === 'success');
+  const failures = allRuns.filter(r => r.conclusion === 'failure');
 
-  const deploymentEvents = successes
-    .map(r => ({
-      time: new Date(r.updated_at || r.run_started_at || r.created_at),
-      sha: r.head_sha,
-      id: r.id,
-    }))
-    .sort((a, b) => a.time - b.time);
+  const deploymentEvents = successes.map(r => ({
+    time: new Date(r.updated_at || r.run_started_at || r.created_at),
+    sha: r.head_sha,
+    id: r.id,
+  })).sort((a, b) => a.time - b.time);
 
-  // Lead time (simple: commit time -> first deploy after it)
+  // Lead times (ms)
   const leadTimes = [];
   for (const c of commits) {
     const cTime = new Date(c.commit.committer.date);
     const deploy = deploymentEvents.find(d => d.time >= cTime);
-    if (deploy) leadTimes.push({ ms: deploy.time - cTime, deployId: deploy.id });
+    if (deploy) leadTimes.push(deploy.time - cTime);
   }
 
-  // MTTR: failed deploy -> next success
+  // MTTRs (ms)
   const mttrs = [];
   for (const f of failures) {
     const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
     const next = deploymentEvents.find(d => d.time > fTime);
-    if (next) mttrs.push({ ms: next.time - fTime, failureId: f.id, recoveryId: next.id });
+    if (next) mttrs.push(next.time - fTime);
   }
 
   const successByDay = groupByDay(successes, r => r.updated_at || r.run_started_at || r.created_at);
@@ -250,22 +186,27 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     };
   }
 
-  for (const lt of leadTimes) {
-    const deploy = deploymentEvents.find(d => d.id === lt.deployId);
-    if (!deploy) continue;
-    const day = deploy.time.toISOString().slice(0, 10);
-    daily[day] ??= {};
-    daily[day].lead_time_ms_mean ??= [];
-    daily[day].lead_time_ms_mean.push(lt.ms);
+  // Attach per-day arrays and compute means
+  for (const c of commits) {
+    const cTime = new Date(c.commit.committer.date);
+    const deploy = deploymentEvents.find(d => d.time >= cTime);
+    if (deploy) {
+      const day = deploy.time.toISOString().slice(0, 10);
+      daily[day] ??= {};
+      daily[day].lead_time_ms_mean ??= [];
+      daily[day].lead_time_ms_mean.push(deploy.time - cTime);
+    }
   }
 
-  for (const m of mttrs) {
-    const failure = failures.find(f => f.id === m.failureId);
-    if (!failure) continue;
-    const day = (failure.updated_at || failure.run_started_at || failure.created_at).slice(0, 10);
-    daily[day] ??= {};
-    daily[day].mttr_ms_mean ??= [];
-    daily[day].mttr_ms_mean.push(m.ms);
+  for (const f of failures) {
+    const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
+    const next = deploymentEvents.find(d => d.time > fTime);
+    if (next) {
+      const day = (f.updated_at || f.run_started_at || f.created_at).slice(0, 10);
+      daily[day] ??= {};
+      daily[day].mttr_ms_mean ??= [];
+      daily[day].mttr_ms_mean.push(next.time - fTime);
+    }
   }
 
   for (const day of Object.keys(daily)) {
@@ -282,11 +223,77 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
       failures: failures.length,
       commits: commits.length,
       window_days: days,
+      total_deployments: successes.length + failures.length,
+      lead_times_ms_all: leadTimes,
+      mttr_ms_all: mttrs,
     },
   };
 }
 
-// GET /api/metrics/github -> GitHub-backed DORA metrics
+// ----------------------
+// Pro endpoints
+// ----------------------
+app.get('/api/runs', async (req, res) => {
+  try {
+    const per_page = Number(req.query.per_page || 50);
+    const resp = await getWorkflowRunsPage(per_page);
+    const runs = (resp.workflow_runs || []).map(r => ({
+      id: r.id,
+      name: r.name,
+      conclusion: r.conclusion,
+      updated_at: r.updated_at,
+      run_number: r.run_number,
+      html_url: r.html_url,
+      head_sha: r.head_sha,
+    }));
+    res.json({ runs });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/summary', async (req, res) => {
+  try {
+    const days = Number(req.query.days || WINDOW_DAYS);
+    const data = await computeGithubMetrics({ days });
+    const meta = data.meta || {};
+    const leadAll = meta.lead_times_ms_all || [];
+    const mttrAll = meta.mttr_ms_all || [];
+
+    const medianLead = leadAll.length ? percentile(leadAll, 50) / 3600000 : null;
+    const p95Lead = leadAll.length ? percentile(leadAll, 95) / 3600000 : null;
+    const medianMttr = mttrAll.length ? percentile(mttrAll, 50) / 3600000 : null;
+    const p95Mttr = mttrAll.length ? percentile(mttrAll, 95) / 3600000 : null;
+
+    // contributors
+    let contributors_count = 0;
+    try {
+      const contributorsResp = await gh(`/repos/${OWNER}/${REPO}/contributors`, { per_page: 100 });
+      contributors_count = Array.isArray(contributorsResp) ? contributorsResp.length : (contributorsResp.length || 0);
+    } catch (err) {
+      contributors_count = 0;
+    }
+
+    res.json({
+      window_days: meta.window_days,
+      total_deployments: meta.total_deployments,
+      successes: meta.successes,
+      failures: meta.failures,
+      commits: meta.commits,
+      median_lead_hours: medianLead !== null ? Number(medianLead.toFixed(2)) : null,
+      p95_lead_hours: p95Lead !== null ? Number(p95Lead.toFixed(2)) : null,
+      median_mttr_hours: medianMttr !== null ? Number(medianMttr.toFixed(2)) : null,
+      p95_mttr_hours: p95Mttr !== null ? Number(p95Mttr.toFixed(2)) : null,
+      contributors_count,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Existing metrics endpoint (daily + meta)
 app.get('/api/metrics/github', async (req, res) => {
   try {
     const days = Number(req.query.days || WINDOW_DAYS);
@@ -298,12 +305,11 @@ app.get('/api/metrics/github', async (req, res) => {
   }
 });
 
-// Start server
+// Start
 const server = app.listen(PORT, () => {
   console.log(`✅ Server is running on http://localhost:${PORT}`);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('🛑 SIGTERM received. Shutting down gracefully...');
   server.close(() => {
