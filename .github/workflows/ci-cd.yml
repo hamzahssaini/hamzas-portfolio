@@ -58,7 +58,7 @@ jobs:
           echo "$DEPLOY_JSON" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Notify DORA API about deployment
+      - name: Notify DORA API about deployme
         env:
           DORA_URL: ${{ secrets.DORA_API_URL }}
           DORA_KEY: ${{ secrets.DORA_API_KEY }}
