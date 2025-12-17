@@ -16,6 +16,7 @@ const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 60);
 
 // Middleware
 app.use(morgan('dev'));
+app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
