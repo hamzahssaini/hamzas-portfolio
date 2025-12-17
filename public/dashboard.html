@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DORA Metrics Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; margin: 24px; color: #0f172a; }
+    h1 { margin-bottom: 4px; }
+    .meta { color: #475569; font-size: 14px; margin-bottom: 12px; }
+    .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+    canvas { width: 100%; height: 260px; }
+  </style>
+</head>
+<body>
+  <h1>DORA Metrics</h1>
+  <div class="meta" id="meta"></div>
+  <div class="grid">
+    <div class="card"><h3>Deployment Frequency</h3><canvas id="dfChart"></canvas></div>
+    <div class="card"><h3>Change Failure Rate</h3><canvas id="cfrChart"></canvas></div>
+    <div class="card"><h3>Lead Time (hours)</h3><canvas id="ltChart"></canvas></div>
+    <div class="card"><h3>MTTR (hours)</h3><canvas id="mttrChart"></canvas></div>
+  </div>
+
+  <script>
+    function hours(ms) { return ms == null ? null : +(ms / 3_600_000).toFixed(2); }
+
+    async function loadMetrics() {
+      const res = await fetch('/api/metrics/github');
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    function buildDatasets(daily) {
+      const days = Object.keys(daily).sort();
+      return {
+        labels: days,
+        df: days.map(d => daily[d].deployment_frequency ?? 0),
+        cfr: days.map(d => daily[d].change_failure_rate == null ? null : +daily[d].change_failure_rate.toFixed(2)),
+        lt: days.map(d => hours(daily[d].lead_time_ms_mean)),
+        mttr: days.map(d => hours(daily[d].mttr_ms_mean)),
+      };
+    }
+
+    function makeChart(id, labels, data, label, type = 'bar') {
+      new Chart(document.getElementById(id), {
+        type,
+        data: { labels, datasets: [{ label, data, backgroundColor: '#3b82f6', borderColor: '#1d4ed8', tension: 0.2 }] },
+        options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: true } } }
+      });
+    }
+
+    (async () => {
+      try {
+        const { daily, meta } = await loadMetrics();
+        const ds = buildDatasets(daily);
+        document.getElementById('meta').textContent =
+          `Window: ${meta.window_days} days · Successes: ${meta.successes} · Failures: ${meta.failures} · Commits: ${meta.commits}`;
+        makeChart('dfChart', ds.labels, ds.df, 'Deploys per day', 'bar');
+        makeChart('cfrChart', ds.labels, ds.cfr, 'CFR', 'line');
+        makeChart('ltChart', ds.labels, ds.lt, 'Lead Time (hours)', 'line');
+        makeChart('mttrChart', ds.labels, ds.mttr, 'MTTR (hours)', 'line');
+      } catch (e) {
+        alert('Failed to load metrics: ' + e.message);
+        console.error(e);
+      }
+    })();
+  </script>
+</body>
+</html>
