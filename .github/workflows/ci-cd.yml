@@ -1,14 +1,15 @@
-name: CI-CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
   build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,21 +23,84 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run lint (optional)
+        run: npm run lint || echo "no lint script"
+
       - name: Run tests
         run: npm test || echo "no tests yet"
 
-      - name: Deploy
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          echo "Simulated deployment at $(date -u)"
+      - name: Build (optional)
+        run: npm run build || echo "no build step"
 
-      #- name: Record deployment in DORA API
-        #if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        #run: |
-          #curl -X POST "https://URL/api/deployments" \
-            #-H "Content-Type: application/json" \
-            #-d '{
-              #"repo": "${{ github.repository }}",
-              #"commit": "${{ github.sha }}",
-              #"deployedAt": "'"$(date -u +"%Y-%m-%dT%H:%M:%SZ")"'"
-            #}'
+  deploy:
+    name: Deploy to DigitalOcean & notify DORA
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout (for context)
+        uses: actions/checkout@v4
+
+      - name: Setup doctl (DigitalOcean CLI)
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: Trigger DigitalOcean App Platform deployment
+        id: do_deploy
+        run: |
+          echo "Triggering DO App Platform deployment for app id: ${{ secrets.DO_APP_ID }}"
+          # Launch deployment; output JSON will be printed. We capture it.
+          DEPLOY_JSON="$(doctl apps create-deployment ${{ secrets.DO_APP_ID }} --output json)"
+          echo "$DEPLOY_JSON"
+          # Save the JSON to be used by next steps
+          echo "deploy_json<<EOF" >> $GITHUB_OUTPUT
+          echo "$DEPLOY_JSON" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Notify DORA API about deployment
+        env:
+          DORA_URL: ${{ secrets.DORA_API_URL }}
+          DORA_KEY: ${{ secrets.DORA_API_KEY }}
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "Notifying DORA API at $DORA_URL (commit=${{ github.sha }})"
+          curl -s -S -X POST "$DORA_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $DORA_KEY" \
+            -d "{
+              \"repo\": \"${{ github.repository }}\",
+              \"commit\": \"${{ github.sha }}\",
+              \"deployedAt\": \"$TIMESTAMP\"
+            }"
+
+      # Optional: wait for deploy to finish and fail the job if deployment fails
+      - name: (optional) Wait for DO deployment to finish
+        if: always()
+        env:
+          APP_ID: ${{ secrets.DO_APP_ID }}
+        run: |
+          # NOTE: This block is optional — it polls DO for deployment status.
+          # It needs 'jq' in the runner or then use 'python -c' parsing.
+          echo "Waiting for deployment status (up to ~10 minutes)..."
+          DEPLOY_ID=$(echo "${{ steps.do_deploy.outputs.deploy_json }}" | jq -r '.[0].id' 2>/dev/null || true)
+          if [ -z "$DEPLOY_ID" ]; then
+            echo "Could not extract deployment id from doctl output; skipping wait."
+            exit 0
+          fi
+          echo "Deployment id: $DEPLOY_ID"
+          for i in $(seq 1 60); do
+            STATUS=$(doctl apps get-deployment $APP_ID $DEPLOY_ID --output json | jq -r '.[0].phase' 2>/dev/null || true)
+            echo "Attempt $i: status=$STATUS"
+            if [ "$STATUS" = "ACTIVE" ]; then
+              echo "Deployment succeeded."
+              exit 0
+            fi
+            if [ "$STATUS" = "ERROR" ]; then
+              echo "Deployment failed."
+              exit 2
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for deployment."
+          exit 1
