@@ -74,7 +74,7 @@ jobs:
               \"deployedAt\": \"$TIMESTAMP\"
             }"
 
-      # Optional: wait for deploy to finish and fail the job if deployment fails
+      # Optional: wait for deploy to finish and fail the job if deployment
       - name: (optional) Wait for DO deployment to finish
         if: always()
         env:
