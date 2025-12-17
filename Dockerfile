@@ -1,23 +1,17 @@
-# Use official Node.js image
-FROM node:18
+# Use official Node LTS image
+FROM node:18-alpine
 
-# Set working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json first
+# Install dependencies first (package*.json)
 COPY package*.json ./
+RUN npm ci --only=production
 
-# Install dependencies
-RUN npm install
-
-# Copy the .env file to the container
-COPY .env .env
-
-# Copy the rest of the app
+# Copy app source (do not copy .env)
 COPY . .
 
-# Expose app port (change if not 3000)
-EXPOSE 8080
+# Expose port (optional)
+EXPOSE 3000
 
-# Start app
+# Use runtime env var PORT in your app (process.env.PORT)
 CMD ["node", "app.js"]
