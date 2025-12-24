@@ -1,50 +1,62 @@
 // app.js — DORA Metrics server (GitHub-backed)
+// - Serves a static dashboard from /public
+// - Secure POST /api/deployments (Bearer DORA_API_KEY)
+// - GitHub-backed metrics endpoints used by the dashboard
+//
+// Required env vars (recommended):
+//   PORT (default 3000), GITHUB_TOKEN (optional for GitHub metrics), DORA_API_KEY
+//
+// Install deps:
+//   npm install express morgan node-fetch@2 dotenv
+
 const express = require('express');
 const morgan = require('morgan');
 const fetch = require('node-fetch'); // npm i node-fetch@2
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 3000;
 
-// --- GitHub config ---
+// --- Config (env)
 const OWNER = process.env.OWNER || 'hamzahssaini';
 const REPO = process.env.REPO || 'dora-metrics';
 const BRANCH = process.env.BRANCH || 'main';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || ''; // optional
+const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || '';
 const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 60);
+const DORA_API_KEY = process.env.DORA_API_KEY || '';
 
-// Middleware
+// Startup log (mask sensitive)
+console.log('Starting app with:');
+console.log(`  OWNER=${OWNER} REPO=${REPO} BRANCH=${BRANCH} PORT=${PORT} WINDOW_DAYS=${WINDOW_DAYS}`);
+console.log(`  GITHUB_TOKEN set: ${GITHUB_TOKEN ? 'yes' : 'no'}`);
+console.log(`  DORA_API_KEY set: ${DORA_API_KEY ? 'yes' : 'no'}`);
+
+// Middleware (body + logging)
 app.use(morgan('dev'));
-app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// In-memory "database" for users and deployments
+// In-memory stores (simple demo)
 const users = [];
 const deployments = [];
 
-// Home: redirect to dashboard
-app.get('/', (req, res) => {
-  res.redirect('/dashboard.html');
-});
-
-// Register route (stores users in memory)
-app.post('/register', (req, res) => {
-  const { name, email } = req.body;
-  users.push({ id: users.length + 1, name, email });
-  res.redirect('/');
-});
-
-// API route to get users (from memory)
+// ----- Routes (API) -----
+// Health & users
+app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/users', (req, res) => res.json(users));
 
-// Health check
-app.get('/healthz', (req, res) => res.status(200).send('OK'));
-
-// Deployments endpoints (in-memory)
+// Secure POST /api/deployments — requires Authorization: Bearer <DORA_API_KEY>
 app.post('/api/deployments', (req, res) => {
+  if (!DORA_API_KEY) {
+    console.warn('DORA_API_KEY not configured — rejecting external POST /api/deployments');
+    return res.status(500).json({ error: 'Server not configured to accept external deployment records' });
+  }
+  const auth = (req.get('authorization') || '');
+  if (!auth.startsWith('Bearer ') || auth.slice(7) !== DORA_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { repo, commit, deployedAt } = req.body;
   if (!repo || !commit || !deployedAt) {
     return res.status(400).json({ error: 'repo, commit and deployedAt are required' });
@@ -53,10 +65,13 @@ app.post('/api/deployments', (req, res) => {
   deployments.push(deployment);
   res.status(201).json(deployment);
 });
+
 app.get('/api/deployments', (req, res) => {
   const sorted = [...deployments].sort((a, b) => b.deployedAt - a.deployedAt);
   res.json(sorted);
 });
+
+// Basic aggregated metrics from in-memory deployments
 app.get('/api/metrics', (req, res) => {
   if (deployments.length === 0) return res.json({ totalDeployments: 0, deploymentFrequencyPerDay: 0 });
   const sorted = [...deployments].sort((a, b) => a.deployedAt - b.deployedAt);
@@ -66,11 +81,16 @@ app.get('/api/metrics', (req, res) => {
   const msDiff = last.getTime() - first.getTime() || 1;
   const daysDiff = msDiff / (1000 * 60 * 60 * 24);
   const deploymentFrequencyPerDay = daysDiff === 0 ? totalDeployments : totalDeployments / daysDiff;
-  res.json({ totalDeployments, firstDeploymentAt: first, lastDeploymentAt: last, deploymentFrequencyPerDay: Number(deploymentFrequencyPerDay.toFixed(2)) });
+  res.json({
+    totalDeployments,
+    firstDeploymentAt: first,
+    lastDeploymentAt: last,
+    deploymentFrequencyPerDay: Number(deploymentFrequencyPerDay.toFixed(2)),
+  });
 });
 
 // ----------------------
-// GitHub API helpers
+// GitHub helpers and DORA metrics (used by dashboard)
 // ----------------------
 async function gh(path, params = {}) {
   if (!GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is required for GitHub-backed metrics');
@@ -92,7 +112,6 @@ async function gh(path, params = {}) {
   return res.json();
 }
 
-// Get a single page of completed workflow runs (per_page up to 100)
 async function getWorkflowRunsPage(per_page = 100) {
   return gh(`/repos/${OWNER}/${REPO}/actions/runs`, {
     status: 'completed',
@@ -129,10 +148,12 @@ function percentile(arr, p) {
   return s[lo] + (s[hi] - s[lo]) * (idx - lo);
 }
 
-// ----------------------
-// computeGithubMetrics
-// ----------------------
 async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
+  // If no GitHub token, return an empty-but-valid structure (avoid throwing uncaught)
+  if (!GITHUB_TOKEN) {
+    return { daily: {}, meta: { successes: 0, failures: 0, commits: 0, window_days: days, total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] } };
+  }
+
   const now = Date.now();
   const since = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
   const until = new Date(now).toISOString();
@@ -154,7 +175,6 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     id: r.id,
   })).sort((a, b) => a.time - b.time);
 
-  // Lead times (ms)
   const leadTimes = [];
   for (const c of commits) {
     const cTime = new Date(c.commit.committer.date);
@@ -162,7 +182,6 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     if (deploy) leadTimes.push(deploy.time - cTime);
   }
 
-  // MTTRs (ms)
   const mttrs = [];
   for (const f of failures) {
     const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
@@ -186,7 +205,6 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     };
   }
 
-  // Attach per-day arrays and compute means
   for (const c of commits) {
     const cTime = new Date(c.commit.committer.date);
     const deploy = deploymentEvents.find(d => d.time >= cTime);
@@ -230,11 +248,13 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
   };
 }
 
-// ----------------------
-// Pro endpoints
-// ----------------------
+// Pro endpoints (runs & summary)
 app.get('/api/runs', async (req, res) => {
   try {
+    if (!GITHUB_TOKEN) {
+      // Return an empty list with a helpful warning rather than a 500
+      return res.json({ runs: [], warning: 'GITHUB_TOKEN not set; set it in .env to enable GitHub-backed runs' });
+    }
     const per_page = Number(req.query.per_page || 50);
     const resp = await getWorkflowRunsPage(per_page);
     const runs = (resp.workflow_runs || []).map(r => ({
@@ -248,8 +268,8 @@ app.get('/api/runs', async (req, res) => {
     }));
     res.json({ runs });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    console.error('GET /api/runs error:', e && (e.stack || e.message || e));
+    res.status(500).json({ error: e.message || 'Failed to fetch runs' });
   }
 });
 
@@ -266,11 +286,14 @@ app.get('/api/summary', async (req, res) => {
     const medianMttr = mttrAll.length ? percentile(mttrAll, 50) / 3600000 : null;
     const p95Mttr = mttrAll.length ? percentile(mttrAll, 95) / 3600000 : null;
 
-    // contributors
     let contributors_count = 0;
     try {
-      const contributorsResp = await gh(`/repos/${OWNER}/${REPO}/contributors`, { per_page: 100 });
-      contributors_count = Array.isArray(contributorsResp) ? contributorsResp.length : (contributorsResp.length || 0);
+      if (GITHUB_TOKEN) {
+        const contributorsResp = await gh(`/repos/${OWNER}/${REPO}/contributors`, { per_page: 100 });
+        contributors_count = Array.isArray(contributorsResp) ? contributorsResp.length : (contributorsResp.length || 0);
+      } else {
+        contributors_count = 0;
+      }
     } catch (err) {
       contributors_count = 0;
     }
@@ -288,20 +311,48 @@ app.get('/api/summary', async (req, res) => {
       contributors_count,
     });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    console.error('GET /api/summary error:', e && (e.stack || e.message || e));
+    res.status(500).json({ error: e.message || 'Failed to compute summary' });
   }
 });
 
-// Existing metrics endpoint (daily + meta)
+// Add this before: app.use(express.static('public'));
 app.get('/api/metrics/github', async (req, res) => {
   try {
     const days = Number(req.query.days || WINDOW_DAYS);
     const data = await computeGithubMetrics({ days });
-    res.json(data);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    // If token missing, include a friendly warning so front-end can show it
+    if (!GITHUB_TOKEN) {
+      return res.json({ ...data, warning: 'GITHUB_TOKEN not set; GitHub-backed metrics are disabled' });
+    }
+    return res.json(data);
+  } catch (err) {
+    console.error('GET /api/metrics/github error', err && (err.stack || err.message || err));
+    res.status(500).json({ error: err.message || 'Failed to compute GitHub metrics' });
+  }
+});
+
+// ----- Serve static dashboard & fallback -----
+// Serve public files (this comes after API routes so /api/* isn't captured by static)
+app.use(express.static('public'));
+
+// Fallback root -> index.html if present
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: __dirname + '/public' });
+});
+
+// API 404 handler (return JSON for unknown API endpoints)
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// Error handler — return JSON for API paths, plain text for others
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err && (err.stack || err.message || err));
+  if (req.path && req.path.startsWith('/api/')) {
+    res.status(500).json({ error: err.message || 'Internal Server Error' });
+  } else {
+    res.status(500).send('Internal Server Error');
   }
 });
 

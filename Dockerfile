@@ -11,7 +11,7 @@ RUN npm ci --only=production
 COPY . .
 
 # Expose port (optional)
-EXPOSE 3000
+EXPOSE 3000 
 
 # Use runtime env var PORT in your app (process.env.PORT)
 CMD ["node", "app.js"]
