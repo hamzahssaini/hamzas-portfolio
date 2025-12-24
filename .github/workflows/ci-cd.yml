@@ -90,7 +90,7 @@ jobs:
         if: success()
         env:
           DORA_URL: ${{ secrets.DORA_API_URL }}
-          DORA_KEY: ${{ secrets.DORA_API_KEY }}
+          DORA_KEY: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
           if [ -n "$DORA_URL" ]; then
             TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
