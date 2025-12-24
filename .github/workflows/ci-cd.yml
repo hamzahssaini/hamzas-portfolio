@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOCKERHUB_REPO: 'dora-metrics' # Update this if your Docker Hub repo name is different
+  DOCKERHUB_REPO: 'hamzas-portfolio'
 
 jobs:
   test-and-lint:
