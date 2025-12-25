@@ -183,7 +183,7 @@
 
             <div class="contact-cards-list">
               <!-- Email -->
-              <a href="hamzahssaini0@gmail.com" class="contact-detail-card">
+              <div class="contact-detail-card email-card" id="emailCard" style="cursor: pointer;">
                 <div class="detail-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -192,10 +192,12 @@
                   </svg>
                 </div>
                 <div class="detail-content">
-                  <span class="detail-label">Mail me</span>
+                  <span class="detail-label" data-i18n="contact_mail_label">Mail me</span>
                   <span class="detail-value">hamzahssaini0@gmail.com</span>
+                  <span class="copy-feedback" data-i18n="email_copied"
+                    style="display: none; color: var(--accent-blue); font-size: 0.8rem; font-weight: 600;">Copied!</span>
                 </div>
-              </a>
+              </div>
 
               <!-- Phone -->
               <div class="contact-detail-card">
@@ -235,7 +237,7 @@
 
           <!-- Right Column: Form -->
           <div class="contact-form-col">
-            <form class="clean-form" action="mailto:hamzahssaini0@gmail.com" method="post" enctype="text/plain">
+            <form class="clean-form">
               <div class="form-row">
                 <div class="form-group half">
                   <label for="name" data-i18n="form_name">Name</label>

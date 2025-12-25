@@ -12,6 +12,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const fetch = require('node-fetch'); // npm i node-fetch@2
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -34,6 +35,20 @@ console.log(`  DORA_API_KEY set: ${DORA_API_KEY ? 'yes' : 'no'}`);
 
 // Middleware (body + logging)
 app.use(morgan('dev'));
+// Debug raw body for POST /api/contact if needed
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', () => {
+      req.rawBody = data;
+      // We don't want to interfere with body-parser, so we need to be careful.
+      // Actually, body-parser will not work if the stream is already consumed.
+      // So we must NOT consume the stream here if we want express.json() to work.
+    });
+  }
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,10 +56,59 @@ app.use(express.urlencoded({ extended: true }));
 const users = [];
 const deployments = [];
 
+// --- Email Config (Nodemailer)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
 // ----- Routes (API) -----
 // Health & users
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/users', (req, res) => res.json(users));
+
+// Contact Form Endpoint
+app.post('/api/contact', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  if (!name || !email || !subject || !message) {
+    return res.status(400).json({ error: 'All fields are required.' });
+  }
+
+  const mailOptions = {
+    from: `"${name}" <${process.env.SMTP_USER}>`,
+    to: process.env.CONTACT_EMAIL || 'hamzahssaini0@gmail.com',
+    replyTo: email,
+    subject: `Contact Form: ${subject}`,
+    text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+    html: `
+      <h3>New message from your portfolio</h3>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong></p>
+      <p>${message.replace(/\n/g, '<br>')}</p>
+    `,
+  };
+
+  try {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('SMTP credentials not configured. Email not sent.');
+      return res.status(200).json({ success: true, message: 'Message received (Development Mode: No SMTP configured).' });
+    }
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: 'Email sent successfully!' });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+  }
+});
 
 // Secure POST /api/deployments — requires Authorization: Bearer <DORA_API_KEY>
 app.post('/api/deployments', (req, res) => {

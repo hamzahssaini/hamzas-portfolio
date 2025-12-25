@@ -380,7 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
       search_placeholder: 'Search by keywords',
       btn_see_all: 'See all projects',
       form_success_title: 'Message Sent!',
-      form_success_msg: 'Thank you for reaching out. Your message has been generated. Your email client should open shortly to send it.',
+      form_success_msg: 'Thank you for reaching out. Your message has been sent successfully.',
+      form_error_title: 'Submission Failed',
+      form_error_msg: 'There was an error sending your message. Please try again later or contact me via LinkedIn.',
+      form_sending: 'Sending...',
       about_text: `
         <p>
           Hi! I'm Hamza, a Cloud & DevOps Specialist with a strong foundation in systems, networks, Azure
@@ -402,7 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `,
       more: 'More',
       less: 'Less',
-      form_name: 'Full Name'
+      form_name: 'Full Name',
+      contact_mail_label: 'Mail me',
+      email_copied: 'Copied!'
     },
     fr: {
       nav_about: 'À propos',
@@ -421,7 +426,10 @@ document.addEventListener('DOMContentLoaded', () => {
       search_placeholder: 'Rechercher par mots-clés',
       btn_see_all: 'Voir tous les projets',
       form_success_title: 'Message Envoyé !',
-      form_success_msg: 'Merci de m\'avoir contacté. Votre message a été généré. Votre client de messagerie devrait s\'ouvrir sous peu pour l\'envoyer.',
+      form_success_msg: 'Merci de m\'avoir contacté. Votre message a été envoyé avec succès.',
+      form_error_title: 'Échec de l\'envoi',
+      form_error_msg: 'Une erreur est survenue lors de l\'envoi de votre message. Veuillez réessayer plus tard ou me contacter via LinkedIn.',
+      form_sending: 'Envoi en cours...',
       about_text: `
         <p>
           Bonjour ! Je suis Hamza, spécialiste Cloud & DevOps avec une solide expérience en systèmes, réseaux,
@@ -443,7 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `,
       more: 'Voir plus',
       less: 'Réduire',
-      form_name: 'Nom Complet'
+      form_name: 'Nom Complet',
+      contact_mail_label: 'M\'envoyer un mail',
+      email_copied: 'Copié !'
     }
   };
 
@@ -649,23 +659,38 @@ document.addEventListener('DOMContentLoaded', () => {
   if (contactForm) {
     const originalFormHTML = contactForm.innerHTML;
 
-    contactForm.addEventListener('submit', function handleSubmit(e) {
+    contactForm.addEventListener('submit', async function handleSubmit(e) {
       e.preventDefault();
 
-      const formData = new FormData(contactForm);
-      const name = formData.get('name');
-      const email = formData.get('email');
-      const subject = formData.get('subject');
-      const message = formData.get('message');
-
-      // Construct mailto link
-      const mailtoLink = `mailto:hamzahssaini0@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("Name: " + name + "\nEmail: " + email + "\n\n" + message)}`;
-
-      // Show success state UI
       const lang = localStorage.getItem('lang') || 'fr';
       const map = I18N[lang] || I18N.fr;
 
-      const successHTML = `
+      // Disable button and show sending state
+      const submitBtn = contactForm.querySelector('.submit-btn');
+      const originalBtnHTML = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>${map.form_sending}</span>`;
+
+      const formData = new FormData(contactForm);
+      const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message')
+      };
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          // Show success state UI
+          const successHTML = `
             <div class="form-success reveal visible">
                <div class="success-icon">
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -674,19 +699,66 @@ document.addEventListener('DOMContentLoaded', () => {
                <p>${map.form_success_msg}</p>
             </div>
           `;
+          contactForm.innerHTML = successHTML;
 
-      contactForm.innerHTML = successHTML;
-      window.location.href = mailtoLink;
+          // Revert to fresh form and scroll to top after 5 seconds
+          setTimeout(() => {
+            contactForm.innerHTML = originalFormHTML;
+            // Clear any potential leftover values (though re-injecting HTML should do it)
+            contactForm.reset?.();
 
-      // Revert to fresh form after 5 seconds
-      setTimeout(() => {
-        contactForm.innerHTML = originalFormHTML;
-        // Need to re-apply language for labels and re-attach listener or just use the same handler
-        applyLanguage(localStorage.getItem('lang') || 'fr');
-        // The listener is lost because innerHTML was replaced. Re-attach it.
-        contactForm.addEventListener('submit', handleSubmit);
-      }, 5000);
+            applyLanguage(localStorage.getItem('lang') || 'fr');
+            contactForm.addEventListener('submit', handleSubmit);
+
+            // "back to the page principal show clean"
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 5000);
+        } else {
+          throw new Error('Failed to send');
+        }
+      } catch (error) {
+        console.error('Contact form error:', error);
+        // Show error state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-error-msg';
+        errorDiv.style.color = 'var(--accent-red, #ff4d4d)';
+        errorDiv.style.marginTop = '1rem';
+        errorDiv.textContent = map.form_error_msg;
+
+        // Remove existing error if any
+        const existingError = contactForm.querySelector('.form-error-msg');
+        if (existingError) existingError.remove();
+
+        contactForm.appendChild(errorDiv);
+
+        setTimeout(() => { if (errorDiv) errorDiv.remove(); }, 6000);
+      }
     });
+
+    // Email Copy Logic
+    const emailCard = document.getElementById('emailCard');
+    if (emailCard) {
+      emailCard.addEventListener('click', () => {
+        const email = "hamzahssaini0@gmail.com";
+        navigator.clipboard.writeText(email).then(() => {
+          const feedback = emailCard.querySelector('.copy-feedback');
+          const value = emailCard.querySelector('.detail-value');
+          if (feedback && value) {
+            value.style.display = 'none';
+            feedback.style.display = 'inline';
+            setTimeout(() => {
+              feedback.style.display = 'none';
+              value.style.display = 'inline';
+            }, 2000);
+          }
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+      });
+    }
   }
 
   // debounce helper
