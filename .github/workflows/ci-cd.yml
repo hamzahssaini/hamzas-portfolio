@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOCKERHUB_REPO: 'hamzas-portfolio' # reponames
+  DOCKERHUB_REPO: 'hamzas-portfolio' # reponameshamza
 
 jobs:
   test-and-lint:
