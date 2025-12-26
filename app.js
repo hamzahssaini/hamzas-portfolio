@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 
 // --- Config (env)
 const OWNER = process.env.OWNER || 'hamzahssaini';
-const REPO = process.env.REPO || 'dora-metrics';
+const REPO = process.env.REPO || 'hamzas-portfolio';
 const BRANCH = process.env.BRANCH || 'main';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || '';
@@ -60,11 +60,21 @@ const deployments = [];
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+});
+
+// Verify SMTP connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ SMTP Verification Failed:', error.message);
+    console.error('Check your SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS environment variables.');
+  } else {
+    console.log('✅ SMTP Server is ready to take our messages');
+  }
 });
 
 // ----- Routes (API) -----
@@ -98,15 +108,15 @@ app.post('/api/contact', async (req, res) => {
 
   try {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error('SMTP credentials missing (SMTP_USER or SMTP_PASS)');
-      return res.status(500).json({ error: 'Mail server not configured correctly. Please check server environment variables.' });
+      console.warn('SMTP credentials not configured. Email not sent.');
+      return res.status(200).json({ success: true, message: 'Message received (Development Mode: No SMTP configured).' });
     }
 
     await transporter.sendMail(mailOptions);
     res.status(200).json({ success: true, message: 'Email sent successfully!' });
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send message. ' + error.message });
+    res.status(500).json({ error: `Failed to send message: ${error.message}. Please check your SMTP settings.` });
   }
 });
 
