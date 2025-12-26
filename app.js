@@ -98,15 +98,15 @@ app.post('/api/contact', async (req, res) => {
 
   try {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.warn('SMTP credentials not configured. Email not sent.');
-      return res.status(200).json({ success: true, message: 'Message received (Development Mode: No SMTP configured).' });
+      console.error('SMTP credentials missing (SMTP_USER or SMTP_PASS)');
+      return res.status(500).json({ error: 'Mail server not configured correctly. Please check server environment variables.' });
     }
 
     await transporter.sendMail(mailOptions);
     res.status(200).json({ success: true, message: 'Email sent successfully!' });
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+    res.status(500).json({ error: 'Failed to send message. ' + error.message });
   }
 });
 
