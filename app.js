@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 
 // --- Config (env)
 const OWNER = process.env.OWNER || 'hamzahssaini';
-const REPO = process.env.REPO || 'hamzas-portfolio';
+const REPO = process.env.REPO || 'dora-metrics';
 const BRANCH = process.env.BRANCH || 'main';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || '';
@@ -60,21 +60,11 @@ const deployments = [];
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
+  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-});
-
-// Verify SMTP connection on startup
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ SMTP Verification Failed:', error.message);
-    console.error('Check your SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS environment variables.');
-  } else {
-    console.log('✅ SMTP Server is ready to take our messages');
-  }
 });
 
 // ----- Routes (API) -----
@@ -116,7 +106,7 @@ app.post('/api/contact', async (req, res) => {
     res.status(200).json({ success: true, message: 'Email sent successfully!' });
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ error: `Failed to send message: ${error.message}. Please check your SMTP settings.` });
+    res.status(500).json({ error: 'Failed to send message. Please try again later.' });
   }
 });
 
