@@ -38,52 +38,42 @@ document.addEventListener('DOMContentLoaded', () => {
         fr: 'Application web multicouche conteneurisée hautement disponible sur AWS.'
       },
       problem: {
-        en: 'The absence of a standardized, automated deployment pipeline led to frequent manual configuration errors, inconsistent environment states, and significant downtime during production releases. Scaling was reactive rather than proactive, creating bottlenecks during high-traffic periods and increasing operational costs.',
-        fr: 'L’absence d’un pipeline de déploiement standardisé et automatisé entraînait de fréquentes erreurs de configuration manuelle, des états d’environnement incohérents et des temps d’arrêt importants lors des mises en production. Le passage à l’échelle était réactif plutôt qu’analytique.'
+        en: [
+          'Frequent manual configuration errors and inconsistent environment states.',
+          'Significant downtime during production releases.',
+          'Reactive scaling causing bottlenecks and high operational costs.'
+        ],
+        fr: [
+          'Erreurs fréquentes de configuration manuelle et environnements inconsistants.',
+          'Temps d\'arrêt importants lors des mises en production.',
+          'Scaling réactif entraînant des goulots d\'étranglement.'
+        ]
       },
       impact: {
         en: [
-          'Achieved **100% automated deployments**, reducing release cycles from days to minutes.',
-          'Maintained **99.9% uptime** by implementing multi-AZ redundancy and automated health checks.',
-          'Reduced **Lead Time for Changes (LTC)** by 70% while ensuring 100% traceability.',
-          'Zero manual intervention required for scaling events, reducing operational overhead.'
+          '**100%** Automated Deployment Cycle',
+          '**99.9%** Infrastructure Availability',
+          '**70%** Reduction in Lead Time for Changes',
+          '**40%** Cost reduction via Fargate right-sizing'
         ],
         fr: [
-          'Déploiements **100% automatisés**, réduisant les cycles de mise à jour de plusieurs jours à quelques minutes.',
-          'Disponibilité de **99,9%** grâce à la redondance multi-AZ et aux bilans de santé automatisés.',
-          'Réduction du **Délai de mise en œuvre (Lead Time)** de 70% avec une traçabilité totale.',
-          'Zéro intervention manuelle pour le scaling, optimisant les coûts opérationnels.'
+          '**100%** de déploiements automatisés.',
+          'Disponibilité de **99,9%** via redondance multi-AZ.',
+          'Réduction du **Lead Time** de 70%.',
+          'Réduction des coûts de **40%**.'
         ]
       },
       solution: {
-        en: 'Engineered a production-grade containerized infrastructure utilizing Amazon ECS (Fargate) for serverless compute, managed by Terraform (IaC) to ensure environment parity across Dev/Stage/Prod. Developed a robust CI/CD pipeline in GitHub Actions that integrates automated security scanning (Trivy), multi-stage Docker builds, and Blue/Green deployment strategies.',
-        fr: 'Architecture conteneurisée de niveau production utilisant Amazon ECS (Fargate), gérée par Terraform (IaC) pour garantir la parité des environnements (Dev/Prod). Pipeline CI/CD robuste via GitHub Actions intégrant des scans de sécurité (Trivy), des builds Docker multi-étapes et des stratégies de déploiement Blue/Green.'
-      },
-      decisions: {
-        en: [
-          '**Serverless Compute (Fargate)**: Selected to offload OS patching and infrastructure management, allowing for higher team focus on application logic.',
-          '**GitOps with Terraform**: Adopted to treat infrastructure as a living document, enabling 1-click disaster recovery and instant auditing.',
-          '**Security-First Pipeline**: Integrated automated image scanning and IAM least-privilege principles at build time to catch vulnerabilities before they reach production.'
-        ],
-        fr: [
-          '**Informatique Sans Serveur (Fargate)** : Choisi pour éliminer la maintenance des OS et se concentrer sur la logique applicative.',
-          '**GitOps avec Terraform** : Pour traiter l\'infrastructure comme du code, permettant une reprise après sinistre en un clic.',
-          '**Sécurité Intégrée (DevSecOps)** : Scans d\'images automatisés et principes de moindre privilège IAM dès la phase de build.'
-        ]
-      },
-      future: {
-        en: [
-          '**Observability Hub**: Implementation of Prometheus/Grafana for deep-node monitoring and proactive alerting.',
-          '**Service Mesh**: Integration of AWS App Mesh to handle complex service discovery and traffic routing for microservices.'
-        ],
-        fr: [
-          '**Hub d\'Observabilité** : Implémentation de Prometheus/Grafana pour une surveillance approfondie et des alertes proactives.',
-          '**Service Mesh** : Intégration d\'AWS App Mesh pour gérer la découverte de services et le routage du trafic microservices.'
-        ]
+        en: 'Production-grade containerized infrastructure utilizing Amazon ECS (Fargate). Managed via Terraform (IaC) for environment parity. Robust CI/CD in GitHub Actions with automated security scanning (Trivy) and Blue/Green strategies.',
+        fr: 'Architecture conteneurisée de niveau production via Amazon ECS (Fargate). Gérée par Terraform (IaC). Pipeline CI/CD GitHub Actions avec scans de sécurité (Trivy) et stratégies Blue/Green.'
       },
       tech: ['AWS', 'Ansible', 'Docker', 'Node.js', 'GitHub Actions', 'CloudWatch', 'EBS'],
-      repo: 'https://github.com/hamzahssaini/kubernetes-K8s-nodejs-mongodb-ci-cd',
+      repo: 'https://github.com/hamzahssaini/kubernetes-K8s-nodejs-nodejs-mongodb-ci-cd',
       img: '/assets/images/kubernetes.png',
+      archiCaption: {
+        en: "Production-grade multi-AZ container platform with automated CI/CD and vulnerability scanning.",
+        fr: "Plateforme conteneurisée multi-AZ avec CI/CD automatisé et scans de vulnérabilités."
+      }
     },
     {
       id: 'azure-hybrid',
@@ -96,50 +86,42 @@ document.addEventListener('DOMContentLoaded', () => {
         fr: 'Connectivité hybride sécurisée entre on-premises et Azure.'
       },
       problem: {
-        en: 'The organization lacked a secure, compliant method for bidirectional communication between on-premises legacy systems and modern cloud workloads. Data transfers were traversing public endpoints, exposing sensitive traffic to unnecessary risks and high latencies.',
-        fr: 'L’organisation manquait d’une méthode sécurisée et conforme pour la communication bidirectionnelle entre les systèmes hérités sur site et les workloads cloud modernes. Les transferts de données utilisaient des points de terminaison publics.'
+        en: [
+          'Lack of secure bidirectional communication for legacy workloads.',
+          'Sensitive traffic traversing public endpoints (security risk).',
+          'High latencies for hybrid data transfers.'
+        ],
+        fr: [
+          'Manque de communication bidirectionnelle sécurisée.',
+          'Trafic sensible transitant par des points d\'accès publics.',
+          'Latences élevées pour les transferts de données hybrides.'
+        ]
       },
       impact: {
         en: [
-          'Eliminated **100% of public endpoint exposures** for internal data transfers.',
-          'Guaranteed **consistent latency <20ms**, improving hybrid application reliability.',
-          'Achieved **zero security breaches** since deployment through unified firewall logging.'
+          '**100%** Elimination of public endpoint exposures',
+          '**<20ms** Guaranteed consistent latency',
+          '**Zero** Security breaches since deployment',
+          '**30%** Optimization of inter-service traffic costs'
         ],
         fr: [
-          'Élimination de **100% des expositions publiques** pour les transferts de données internes.',
-          'Latence **constante <20ms**, améliorant considérablement la fiabilité des applications hybrides.',
-          '**Zéro faille de sécurité** depuis le déploiement grâce à la centralisation des logs du pare-feu.'
+          'Élimination de **100%** des expositions publiques.',
+          'Latence constante **<20ms** garantie.',
+          '**Zéro** faille de sécurité depuis le déploiement.',
+          'Optimisation des coûts de **30%**.'
         ]
       },
       solution: {
-        en: 'Architected a secure Hub-and-Spoke network topology in Azure. Implemented a centralized Hub containing an Azure Firewall for traffic inspection and a Site-to-Site VPN Gateway for encrypted on-prem connectivity. Spoke VNets were peer-to-peer isolated, ensuring a strict Zero-Trust network boundary.',
-        fr: 'Architecture réseau Hub-and-Spoke sécurisée dans Azure. Implémentation d\'un Hub centralisé contenant un Azure Firewall pour l\'inspection du trafic et une passerelle VPN Site-to-Site pour la connectivité cryptée avec le site local.'
-      },
-      decisions: {
-        en: [
-          '**Hub-and-Spoke Topology**: Implemented to centralize governance and security controls while allowing spokes to scale independently.',
-          '**Azure Firewall**: Chosen as a managed service to provide stateful L4/L7 inspection without the management overhead of virtual appliances.',
-          '**NSG Micro-segmentation**: Applied granular rules within spokes to prevent lateral movement between unrelated services.'
-        ],
-        fr: [
-          '**Topologie Hub-and-Spoke** : Mise en œuvre pour centraliser la gouvernance et les contrôles de sécurité.',
-          '**Azure Firewall** : Choisi comme service géré pour fournir une inspection L4/L7 avec état (stateful) sans surcharge de gestion.',
-          '**Micro-segmentation NSG** : Règles granulaires appliquées au sein des Spokes pour empêcher tout mouvement latéral suspect.'
-        ]
-      },
-      future: {
-        en: [
-          '**Azure Front Door Integration**: To provide global acceleration and WAF protection for public-facing spokes.',
-          '**ER (ExpressRoute) Transition**: Planning for a dedicated 10Gbps line as data volume grows to replace the current VPN transit.'
-        ],
-        fr: [
-          '**Intégration Azure Front Door** : Pour fournir une accélération globale et une protection WAF pour les Spokes publics.',
-          '**Transition ExpressRoute** : Planification d\'une ligne dédiée 10 Gbps pour remplacer le transit VPN actuel.'
-        ]
+        en: 'Secure Hub-and-Spoke network topology in Azure. Centralized Azure Firewall for inspection and Site-to-Site VPN for encrypted on-prem connectivity. Zero-Trust network boundary.',
+        fr: 'Topologie réseau Hub-and-Spoke sécurisée dans Azure. Azure Firewall centralisé et VPN Site-to-Site pour la connectivité on-prem cryptée.'
       },
       tech: ['Azure', 'VPN Gateway', 'VNet', 'NSG', 'Azure Firewall', 'Routing'],
       repo: 'https://github.com/hamzahssaini/azure-nginx-deployment-with-ansible',
       img: '/assets/images/archi.png',
+      archiCaption: {
+        en: "Zero-Trust Hub-and-Spoke topology with centralized traffic inspection and VPN tunnel.",
+        fr: "Topologie Hub-and-Spoke Zero-Trust avec inspection centralisée et tunnel VPN."
+      }
     },
     {
       id: 'ansible-automation',
@@ -438,15 +420,15 @@ document.addEventListener('DOMContentLoaded', () => {
       hero_role: 'Cloud & DevOps Specialist',
       btn_contact: 'Get in touch',
       btn_cv: 'Download CV',
+      btn_github: 'View Source Code',
       about_title: 'About Myself',
       projects_title: 'Project Highlights',
       contact_title: 'Let\'s start a project together',
-      brief_label_problem: 'Problem Statement',
-      brief_label_impact: 'Impact & Results (KPIs)',
-      brief_label_solution: 'Technical Solution',
-      brief_label_decisions: 'Key Technical Decisions',
-      brief_label_archi: 'Architecture Review',
-      brief_label_future: 'Future Roadmap',
+      brief_label_problem: 'PROBLEM',
+      brief_label_impact: 'IMPACT / RESULTS',
+      brief_label_solution: 'SOLUTION + TECHNOLOGIES',
+      brief_label_archi: 'ARCHITECTURE',
+      archi_zoom_hint: 'Click to zoom',
       contact_sub: 'Interested in working together? We should queue up a time to chat. I’ll buy the coffee.',
       hero_scroll: 'Scroll to find out more',
       footer_text: '&copy; {year} Hamza Hssaini. Built with Node.js & GitHub Actions.',
@@ -490,15 +472,15 @@ document.addEventListener('DOMContentLoaded', () => {
       hero_role: "Cloud & DevOps Spécialiste",
       btn_contact: 'Me contacter',
       btn_cv: 'Télécharger CV',
+      btn_github: 'Voir Code Source',
       about_title: 'À propos de moi',
       projects_title: 'Projets en vedette',
       contact_title: 'Commençons un projet ensemble',
-      brief_label_problem: 'Problématique Métier',
-      brief_label_impact: 'Impact & Résultats (KPIs)',
-      brief_label_solution: 'Solution Technique',
-      brief_label_decisions: 'Décisions Techniques Clés',
-      brief_label_archi: 'Revue d’Architecture',
-      brief_label_future: 'Roadmap & Améliorations',
+      brief_label_problem: 'PROBLÉMATIQUE',
+      brief_label_impact: 'IMPACT / RÉSULTATS',
+      brief_label_solution: 'SOLUTION + TECHNOLOGIES',
+      brief_label_archi: 'ARCHITECTURE',
+      archi_zoom_hint: 'Cliquer pour zoomer',
       contact_sub: 'Intéressé à travailler ensemble ? Discutons-en. Je paie le café.',
       hero_scroll: 'Faites défiler pour en savoir plus',
       footer_text: '&copy; {year} Hamza Hssaini. Construit avec Node.js & GitHub Actions.',
@@ -893,29 +875,30 @@ document.addEventListener('DOMContentLoaded', () => {
         content = [labels[lang] || labels.en];
       }
       if (!Array.isArray(content)) content = [content];
-      el.innerHTML = `<ul>${content.map(item => `<li>${escapeHtml(loc(item))}</li>`).join('')}</ul>`;
+      const html = content.map(item => {
+        let text = escapeHtml(loc(item));
+        // Handle basic bolding **text**
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        return `<li>${text}</li>`;
+      }).join('');
+      el.innerHTML = `<ul>${html}</ul>`;
     };
 
     // Populate Header
     const titleEl = document.getElementById('briefModalTitle');
     if (titleEl) titleEl.textContent = loc(p.title) || "Project Review";
 
-    // 1. Problem Statement
-    renderList(p.problem || p.lessons || p.desc, 'briefModalProblem');
+    // 1. Problem Statement (2-3 bullets)
+    renderList(p.problem, 'briefModalProblem');
 
-    // 2. Impact & Results (KPIs)
+    // 2. Impact & Results (Quantified metrics only)
     renderList(p.impact, 'briefModalImpact');
 
-    // 3. Technical Solution
-    renderList(p.solution, 'briefModalSolution');
+    // 4. Solution + Technologies
+    const solEl = document.getElementById('briefModalSolution');
+    if (solEl) solEl.textContent = loc(p.solution) || loc(p.desc);
 
-    // 4. Key Technical Decisions
-    renderList(p.decisions, 'briefModalDecisions');
-
-    // 5. Future Roadmap
-    renderList(p.future, 'briefModalFuture');
-
-    // Populate Tech stack
+    // Populate Tech stack inside solution quadrant
     const techEl = document.getElementById('briefModalTech');
     if (techEl) {
       const tech = p.tech || [];
@@ -924,13 +907,14 @@ document.addEventListener('DOMContentLoaded', () => {
         : `<span class="brief-badge">Cloud Native</span>`;
     }
 
-    // Populate Architecture Image
+    // Populate Architecture Image & Caption
     const archiImg = document.getElementById('briefModalArchiImg');
+    const archiCaption = document.getElementById('briefModalArchiCaption');
     const archiPreview = document.querySelector('.brief-archi-preview');
+    const downArchi = document.getElementById('briefDownloadArchi');
     const imgUrl = p.img || (Array.isArray(p.gallery) && p.gallery.length > 0 ? p.gallery[0] : '');
 
     if (archiImg && archiPreview) {
-      // Clear previous placeholders
       const existingMsg = archiPreview.querySelector('.no-diag-msg');
       if (existingMsg) existingMsg.remove();
 
@@ -939,25 +923,51 @@ document.addEventListener('DOMContentLoaded', () => {
         archiImg.style.display = 'block';
         archiPreview.style.cursor = 'zoom-in';
         archiPreview.onclick = () => openLightbox(imgUrl, loc(p.title));
+        if (downArchi) {
+          downArchi.style.display = 'flex';
+          downArchi.onclick = (e) => {
+            e.stopPropagation();
+            const link = document.createElement('a');
+            link.href = imgUrl;
+            link.download = imgUrl.split('/').pop() || 'architecture.png';
+            link.click();
+          };
+        }
       } else {
         archiImg.style.display = 'none';
         archiPreview.style.cursor = 'default';
         archiPreview.onclick = null;
+        if (downArchi) downArchi.style.display = 'none';
 
-        // Add professional placeholder message
         const msg = document.createElement('div');
         msg.className = 'no-diag-msg';
         msg.style.color = 'var(--text-secondary)';
         msg.style.fontSize = '0.75rem';
         msg.style.textAlign = 'center';
         msg.style.padding = '20px';
-        msg.textContent = (localStorage.getItem('lang') === 'en')
+        msg.textContent = (lang === 'en')
           ? 'Architecture diagram available in technical documentation.'
           : 'Schéma d\'architecture disponible dans la documentation technique.';
         archiPreview.appendChild(msg);
       }
       archiImg.alt = loc(p.title);
-      archiImg.style.opacity = "1";
+    }
+
+    if (archiCaption) {
+      const cap = loc(p.archiCaption);
+      archiCaption.textContent = cap || "";
+      archiCaption.style.display = cap ? 'block' : 'none';
+    }
+
+    // GitHub Link
+    const ghLink = document.getElementById('briefGithubLink');
+    if (ghLink) {
+      if (p.repo && p.repo !== '#') {
+        ghLink.href = p.repo;
+        ghLink.style.display = 'flex';
+      } else {
+        ghLink.style.display = 'none';
+      }
     }
 
     briefModal.classList.add('active');

@@ -9,7 +9,7 @@ on:
 env:
   DOCKERHUB_REPO: 'hamzas-portfolio' # Update this if your Docker Hub repo name is different
 
-jobs: #Salma zeendl3alam
+jobs: 
   test-and-lint:
     name: Test & Lint
     runs-on: ubuntu-latest

@@ -333,49 +333,61 @@
     </div>
   </div>
 
-  <!-- Single-Screen Executive Technical Brief Modal -->
   <div id="briefModal" class="brief-modal-overlay" aria-hidden="true">
     <div class="brief-modal-window" role="dialog" aria-modal="true">
       <div class="brief-header">
-        <h2 id="briefModalTitle" class="brief-project-title">Project Title</h2>
-        <button id="closeBriefModal" class="brief-close-btn" aria-label="Close">✕</button>
+        <div class="brief-header-left">
+          <h2 id="briefModalTitle" class="brief-project-title">Project Title</h2>
+        </div>
+        <div class="brief-header-actions">
+          <a id="briefGithubLink" href="#" target="_blank" class="brief-action-link" title="View Source Code">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+              </path>
+            </svg>
+            <span data-i18n="btn_github">View GitHub</span>
+          </a>
+          <button id="closeBriefModal" class="brief-close-btn" aria-label="Close">✕</button>
+        </div>
       </div>
 
       <div class="brief-grid">
-        <!-- Row 1: PROBLEM & IMPACT -->
+        <!-- Top Left: PROBLEM -->
         <section class="brief-section section-problem">
           <h3 class="brief-section-label" data-i18n="brief_label_problem">PROBLEM</h3>
           <div id="briefModalProblem" class="brief-content-list"></div>
         </section>
 
+        <!-- Top Right: IMPACT / RESULTS -->
         <section class="brief-section section-impact">
           <h3 class="brief-section-label" data-i18n="brief_label_impact">IMPACT / RESULTS</h3>
-          <div id="briefModalImpact" class="brief-content-text highlight"></div>
+          <div id="briefModalImpact" class="brief-content-list kpi-mode"></div>
         </section>
 
-        <!-- Row 2: SOLUTION & DECISIONS -->
+        <!-- Bottom Left: SOLUTION + TECH -->
         <section class="brief-section section-solution">
-          <h3 class="brief-section-label" data-i18n="brief_label_solution">SOLUTION & TECHNOLOGIES</h3>
-          <div id="briefModalSolution" class="brief-content-list"></div>
+          <h3 class="brief-section-label" data-i18n="brief_label_solution">SOLUTION + TECHNOLOGIES</h3>
+          <div id="briefModalSolution" class="brief-content-text"></div>
           <div id="briefModalTech" class="brief-tech-stack"></div>
         </section>
 
-        <section class="brief-section section-decisions">
-          <h3 class="brief-section-label" data-i18n="brief_label_decisions">KEY TECHNICAL DECISIONS</h3>
-          <div id="briefModalDecisions" class="brief-content-list"></div>
-        </section>
-
-        <!-- Row 3: ARCHITECTURE & FUTURE -->
+        <!-- Bottom Right: ARCHITECTURE -->
         <section class="brief-section section-archi">
-          <h3 class="brief-section-label" data-i18n="brief_label_archi" style="margin-bottom: 8px;">ARCHITECTURE</h3>
+          <h3 class="brief-section-label" data-i18n="brief_label_archi">ARCHITECTURE</h3>
           <div class="brief-archi-preview">
             <img id="briefModalArchiImg" src="" alt="Architecture diagram">
+            <button id="briefDownloadArchi" class="btn-archi-download" title="Download Diagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <div class="archi-zoom-hint" data-i18n="archi_zoom_hint">Click to zoom</div>
           </div>
-        </section>
-
-        <section class="brief-section section-future">
-          <h3 class="brief-section-label" data-i18n="brief_label_future">FUTURE IMPROVEMENTS</h3>
-          <div id="briefModalFuture" class="brief-content-list"></div>
+          <p id="briefModalArchiCaption" class="brief-archi-caption"></p>
         </section>
       </div>
     </div>
