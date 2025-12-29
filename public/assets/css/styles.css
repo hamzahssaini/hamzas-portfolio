@@ -2812,7 +2812,7 @@ section#education .timeline {
   height: calc(68vh - 48px);
   /* Grid height = panel height - header */
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: repeat(3, 1fr);
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   padding: 16px;
@@ -2823,11 +2823,11 @@ section#education .timeline {
 .brief-section {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
-  padding: 16px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  /* Nothing may overflow */
+  overflow-y: auto;
+  /* Allow scrolling if 3 rows get too tight */
 }
 
 .brief-section-label {
