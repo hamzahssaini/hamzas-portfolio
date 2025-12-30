@@ -2749,24 +2749,34 @@ section#education .timeline {
 .brief-modal-window {
   width: 65vw;
   height: 60vh;
-  min-width: 900px;
-  min-height: 520px;
-  background: var(--bg-color);
+  min-width: 920px;
+  min-height: 540px;
+  background: rgba(var(--bg-color-rgb, 255, 255, 255), 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   color: var(--text-primary);
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--text-primary-rgb, 0, 0, 0), 0.08);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* NO internal scrolling */
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
-  transform: scale(0.98);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  transform: translateY(12px) scale(0.99);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease;
   position: relative;
 }
 
+[data-theme="dark"] .brief-modal-window {
+  background: rgba(13, 13, 13, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
 .brief-modal-overlay.active .brief-modal-window {
-  transform: scale(1);
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 .brief-header {
@@ -2806,13 +2816,15 @@ section#education .timeline {
   color: #fff !important;
   font-size: 13px;
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: 6px;
   text-decoration: none;
-  transition: opacity 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brief-action-link:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+  opacity: 1;
 }
 
 .brief-action-link svg {
@@ -2832,27 +2844,36 @@ section#education .timeline {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: 4px;
-  transition: all 0.2s;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.brief-close-btn:hover {
+.brief-close-btn:hover,
+.brief-close-btn:focus {
   color: var(--accent-red);
   background: rgba(239, 68, 68, 0.1);
   border-color: var(--accent-red);
+  outline: none;
+}
+
+.brief-close-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-red);
+}
+
+.brief-action-link:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 /* CONTENT GRID (EXACT 2x2 LAYOUT - NO SCROLL) */
 .brief-grid {
   flex: 1;
   display: grid;
-  grid-template-rows: 1fr 1.3fr;
-  /* Bottom row taller for Archi */
-  grid-template-columns: 1fr 1.35fr;
-  /* Right column wider for Archi/Impact */
-  gap: 1.2rem;
-  padding: 24px;
-  background: var(--bg-color);
+  grid-template-rows: 1fr 1.6fr;
+  grid-template-columns: 1fr 1.7fr;
+  gap: 1rem;
+  padding: 18px 22px;
+  background: transparent;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -2864,7 +2885,22 @@ section#education .timeline {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* STRICT: No internal scrolling */
+  border-radius: 10px;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.2, 0, 0.2, 1),
+    border-color 0.2s ease;
+}
+
+.brief-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  border-color: var(--accent-primary);
+  z-index: 2;
+}
+
+[data-theme="dark"] .brief-section:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  background: var(--surface-hover);
 }
 
 /* Specific alignments for 2x2 */
@@ -2894,25 +2930,28 @@ section#education .timeline {
   font-size: 11px;
   font-weight: 800;
   color: var(--accent-primary);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  opacity: 0.8;
+  margin-bottom: 8px;
+  opacity: 1;
+  /* Full visibility in both modes */
 }
 
 .brief-content-list,
 .brief-content-text {
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.5;
   color: var(--text-secondary);
+  font-family: var(--font-main);
+  letter-spacing: -0.01em;
   overflow: hidden;
 }
 
 .kpi-mode li {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
-  font-size: 14px;
-  margin-bottom: 8px !important;
+  font-size: 13.5px;
+  margin-bottom: 6px !important;
 }
 
 .kpi-mode li strong {
@@ -2959,30 +2998,34 @@ section#education .timeline {
 
 /* Architecture Image Cell */
 .brief-section.section-archi {
-  padding: 0;
+  padding: 12px 0 0 0;
+  /* Space for the title at top */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background: var(--bg-color);
-  /* Neutral background from theme */
   border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
 }
 
+.section-archi .brief-section-label {
+  width: 100%;
+  padding-left: 16px;
+  margin-bottom: 4px;
+}
+
 .brief-archi-caption {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 500;
-  padding: 6px 10px;
-  background: rgba(var(--bg-color-rgb, 255, 255, 255), 0.85);
-  backdrop-filter: blur(4px);
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  background: linear-gradient(0deg, var(--bg-color) 60%, transparent 100%);
   z-index: 5;
   margin: 0;
   line-height: 1.4;
@@ -2990,7 +3033,7 @@ section#education .timeline {
 }
 
 [data-theme="dark"] .brief-archi-caption {
-  background: rgba(0, 0, 0, 0.7);
+  background: linear-gradient(0deg, #111 60%, transparent 100%);
 }
 
 [data-theme="dark"] .brief-section.section-archi {
@@ -3018,48 +3061,32 @@ section#education .timeline {
 
 [data-theme="dark"] .brief-archi-preview {
   background: #1e1e1e;
-  /* Neutral dark */
+  /* Neutral dark - clearly different from modal bg */
 }
 
-/* Ensure image is clearly readable */
+/* Ensure image is clearly readable and fits perfectly */
 #briefModalArchiImg {
   max-width: 100%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   opacity: 1 !important;
   filter: none !important;
   display: block;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.archi-zoom-hint {
+.brief-archi-preview:hover #briefModalArchiImg {
+  transform: scale(1.03);
+}
+
+.btn-archi-download,
+.btn-archi-expand {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent-primary);
-  background: linear-gradient(0deg, var(--surface-color) 0%, transparent 100%);
-  padding: 15px 0 5px 0;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.brief-archi-preview:hover .archi-zoom-hint {
-  opacity: 1;
-}
-
-.btn-archi-download {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 6px;
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
@@ -3067,21 +3094,82 @@ section#education .timeline {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s;
+  z-index: 15;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.75;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-archi-download:hover {
+.btn-archi-expand {
+  top: 12px;
+  right: 12px;
+}
+
+.btn-archi-download {
+  bottom: 12px;
+  right: 12px;
+}
+
+.btn-archi-download:hover,
+.btn-archi-expand:hover,
+.btn-archi-download:focus,
+.btn-archi-expand:focus {
   background: var(--accent-primary);
   color: #fff;
   border-color: var(--accent-primary);
-  transform: scale(1.1);
+  transform: scale(1.08);
+  opacity: 1;
+  outline: none;
 }
 
-.btn-archi-download svg {
+.btn-archi-download svg,
+.btn-archi-expand svg {
   width: 16px;
   height: 16px;
+}
+
+.archi-zoom-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 6px 12px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.brief-archi-preview:hover .archi-zoom-hint {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+.toolbar-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff !important;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: scale(1.05);
 }
 
 /* --- Advanced Engineering Lightbox (FUNCTIONAL REQUIREMENTS) --- */
@@ -3118,24 +3206,27 @@ section#education .timeline {
 }
 
 .lightbox-toolbar {
-  height: 48px;
-  min-height: 48px;
-  background: rgba(30, 30, 30, 0.7);
-  /* Slightly opaque background */
-  backdrop-filter: blur(4px);
+  height: 52px;
+  background: rgba(10, 10, 10, 0.85);
+  /* Proper dark background for contrast */
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  z-index: 10;
+  padding: 0 20px;
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 .toolbar-left .toolbar-title {
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.02em;
 }
 
 .toolbar-right {
@@ -3187,7 +3278,8 @@ section#education .timeline {
 
 .lightbox-container {
   display: inline-block;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+  will-change: transform;
 }
 
 #lightboxImage {
@@ -3198,6 +3290,17 @@ section#education .timeline {
   pointer-events: none;
   opacity: 1 !important;
   filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .brief-modal-window,
+  .brief-section,
+  #briefModalArchiImg,
+  .lightbox-container {
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
 /* Theme Support for Panel */

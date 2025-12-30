@@ -911,6 +911,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const archiImg = document.getElementById('briefModalArchiImg');
     const archiCaption = document.getElementById('briefModalArchiCaption');
     const archiPreview = document.querySelector('.brief-archi-preview');
+    const expandArchi = document.getElementById('briefExpandArchi');
     const downArchi = document.getElementById('briefDownloadArchi');
     const imgUrl = p.img || (Array.isArray(p.gallery) && p.gallery.length > 0 ? p.gallery[0] : '');
 
@@ -923,6 +924,15 @@ document.addEventListener('DOMContentLoaded', () => {
         archiImg.style.display = 'block';
         archiPreview.style.cursor = 'zoom-in';
         archiPreview.onclick = () => openLightbox(imgUrl, loc(p.title));
+
+        if (expandArchi) {
+          expandArchi.style.display = 'flex';
+          expandArchi.onclick = (e) => {
+            e.stopPropagation();
+            openLightbox(imgUrl, loc(p.title));
+          };
+        }
+
         if (downArchi) {
           downArchi.style.display = 'flex';
           downArchi.onclick = (e) => {
@@ -937,6 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
         archiImg.style.display = 'none';
         archiPreview.style.cursor = 'default';
         archiPreview.onclick = null;
+        if (expandArchi) expandArchi.style.display = 'none';
         if (downArchi) downArchi.style.display = 'none';
 
         const msg = document.createElement('div');
@@ -1019,25 +1030,64 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('closeLightbox')?.addEventListener('click', closeLightbox);
   document.getElementById('closeBriefModal')?.addEventListener('click', closeBriefModal);
 
-  // Panning Support
+  // Panning with Momentum (Inertia)
+  let velocityX = 0, velocityY = 0;
+  let lastX = 0, lastY = 0;
+  let lastTime = 0;
+
   const startPan = (x, y) => {
     if (scale > 1) {
       isDragging = true;
       startX = x - translateX;
       startY = y - translateY;
+      lastX = x;
+      lastY = y;
+      lastTime = performance.now();
+      velocityX = 0;
+      velocityY = 0;
       lightboxContainer.style.transition = 'none';
     }
   };
+
   const movePan = (x, y) => {
     if (isDragging) {
+      const now = performance.now();
+      const dt = now - lastTime;
+      if (dt > 0) {
+        velocityX = (x - lastX) / dt;
+        velocityY = (y - lastY) / dt;
+      }
+      lastX = x;
+      lastY = y;
+      lastTime = now;
+
       translateX = x - startX;
       translateY = y - startY;
       applyTransform();
     }
   };
+
   const endPan = () => {
+    if (!isDragging) return;
     isDragging = false;
-    lightboxContainer.style.transition = 'transform 0.1s ease-out';
+
+    // Simple momentum simulation
+    if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
+      const decay = 0.95;
+      const step = () => {
+        if (isDragging) return;
+        translateX += velocityX * 16;
+        translateY += velocityY * 16;
+        velocityX *= decay;
+        velocityY *= decay;
+        applyTransform();
+        if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+          requestAnimationFrame(step);
+        }
+      };
+      requestAnimationFrame(step);
+    }
+    lightboxContainer.style.transition = 'transform 0.3s cubic-bezier(0.2, 0, 0.2, 1)';
   };
 
   // Attach events
