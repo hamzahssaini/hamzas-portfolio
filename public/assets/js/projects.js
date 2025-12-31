@@ -1,123 +1,266 @@
 /**
  * Projects Section Logic (Vanilla JS)
- * Replaces the React widget for production.
+ * Production-ready, accessible, i18n-enabled.
  */
 
-// --- Data ---
+// --- Data (i18n enabled) ---
 const projectsData = [
     {
         id: "mission-devops",
-        title: "Mission DevOps",
-        role: "Collaboration professionnelle Application microservices",
+        title: {
+            en: "Mission DevOps - Microservices App",
+            fr: "Mission DevOps - App Microservices"
+        },
+        role: {
+            en: "Professional Collaboration",
+            fr: "Collaboration Professionnelle"
+        },
         location: "Casablanca, Maroc",
         date: "Déc 2025",
-        problem: "Need for automated deployment workflows for a microservices application comprising .NET Auth and React Frontend components.",
-        solution: "Created GitLab CI Pipelines for Auth (.NET) & Frontend (React) including build, test, and automated deployment to Azure Web App.",
-        impact: "Streamlined deployment process, ensuring consistent builds and faster release cycles.",
-        architecture: "GitLab CI -> Build Stages -> Test Stages -> Deploy to Azure Web App",
+        problem: {
+            en: "Need for updated and automated deployment workflows for a microservices application (.NET Auth + React Frontend).",
+            fr: "Besoin de workflows de déploiement automatisés pour une application microservices (.NET Auth + React Frontend)."
+        },
+        solution: {
+            en: "Created GitLab CI Pipelines for Auth (.NET) & Frontend (React) including build, test, and automated deployment to Azure Web App.",
+            fr: "Création de pipelines GitLab CI pour Auth (.NET) & Frontend (React) incluant build, test et déploiement automatisé sur Azure Web App."
+        },
+        impact: {
+            en: "Streamlined deployment process, ensuring consistent builds and faster release cycles.",
+            fr: "Processus de déploiement rationalisé, garantissant des builds cohérents et des cycles de release plus rapides."
+        },
+        architecture: "GitLab CI -> Build -> Test -> Deploy (Azure Web App)",
         technologies: ["GitLab CI", ".NET", "React", "Azure Web App"],
         tags: ["DevOps", "CI/CD", "Cloud Azure"],
         architectureImage: "/images/mission-devops-arch.png"
     },
     {
         id: "ansible-project",
-        title: "Administrateur Cloud & DevOps",
-        role: "Projet Ansible – Orange Digital Center",
+        title: {
+            en: "Ansible Cloud Automation",
+            fr: "Automatisation Cloud Ansible"
+        },
+        role: {
+            en: "Orange Digital Center Project",
+            fr: "Projet Orange Digital Center"
+        },
         location: "Casablanca, Maroc",
         date: "Déc 2025",
-        problem: "Manual configuration of AWS EC2 servers was time-consuming and prone to errors.",
-        solution: "Automated AWS EC2 server management with Ansible (dynamic inventory aws_ec2). Deployed and secured Nginx, Docker, MySQL, Redis via roles and Ansible Vault.",
-        impact: "Standardized server configuration and improved security with encrypted secrets.",
-        architecture: "Ansible Control Node -> AWS API -> EC2 Instances (Nginx, Docker, DBs)",
+        problem: {
+            en: "Manual configuration of AWS EC2 servers was time-consuming, inconsistent, and prone to human errors.",
+            fr: "La configuration manuelle des serveurs AWS EC2 était longue, incohérente et sujette aux erreurs humaines."
+        },
+        solution: {
+            en: "Automated AWS EC2 management with Ansible (dynamic inventory). Secured Nginx, Docker, MySQL, Redis via roles and Ansible Vault.",
+            fr: "Automatisation de la gestion AWS EC2 avec Ansible (inventaire dynamique). Sécurisation de Nginx, Docker, MySQL, Redis via rôles et Ansible Vault."
+        },
+        impact: {
+            en: "Standardized server configuration and improved security with encrypted secrets.",
+            fr: "Configuration serveur standardisée et sécurité améliorée avec secrets chiffrés."
+        },
+        architecture: "Ansible Node -> AWS API -> EC2 (Nginx, Docker, DBs)",
         technologies: ["Ansible", "AWS EC2", "IAM", "Linux", "MySQL", "Redis", "Nginx"],
         tags: ["Cloud AWS", "DevOps", "Infrastructure"],
         architectureImage: "/images/ansible-project-arch.png"
     },
     {
         id: "azure-hub-spoke",
-        title: "Administrateur Cloud & DevOps",
-        role: "Projet Collaboratif",
+        title: {
+            en: "Azure Hub & Spoke Architecture",
+            fr: "Architecture Azure Hub & Spoke"
+        },
+        role: {
+            en: "Collaborative Project",
+            fr: "Projet Collaboratif"
+        },
         location: "Casablanca, Maroc",
         date: "Oct 2025 – Nov 2025",
-        problem: "Requirement for a secure, scalable network architecture for hybrid cloud connectivity.",
-        solution: "Deployed a secure Azure Hub & Spoke architecture via VPN IPSec. Implemented IaC with Terraform and CI/CD pipelines.",
-        impact: "Reduced delivery times by 50% through automation and established secure hybrid connectivity.",
-        architecture: "On-Premises -> VPN IPSec -> Azure Hub VNet -> Spoke VNets",
-        technologies: ["Azure", "Terraform", "Azure DevOps", "Active Directory", "Sécurité Réseau"],
+        problem: {
+            en: "Requirement for a secure, scalable network architecture to manage hybrid cloud connectivity effectively.",
+            fr: "Besoin d'une architecture réseau sécurisée et évolutive pour gérer efficacement la connectivité cloud hybride."
+        },
+        solution: {
+            en: "Deployed secure Azure Hub & Spoke topology via VPN IPSec. Implemented IaC with Terraform and CI/CD pipelines.",
+            fr: "Déploiement d'une topologie Azure Hub & Spoke sécurisée via VPN IPSec. Implémentation IaC avec Terraform et pipelines CI/CD."
+        },
+        impact: {
+            en: "Reduced delivery times by 50% through automation and established secure hybrid connectivity.",
+            fr: "Réduction des délais de livraison de 50% grâce à l'automatisation et connectivité hybride sécurisée établie."
+        },
+        architecture: "On-Prem -> VPN -> Azure Hub VNet -> Spokes",
+        technologies: ["Azure", "Terraform", "Azure DevOps", "Active Directory", "Network Security"],
         tags: ["Cloud Azure", "DevOps", "Infrastructure", "CI/CD"],
         architectureImage: "/images/hub-spoke-arch.png"
     },
     {
         id: "azure-migration",
-        title: "Administrateur Cloud / Migration",
-        role: "Projet Collaboratif",
+        title: {
+            en: "Azure App Service Migration",
+            fr: "Migration Azure App Service"
+        },
+        role: {
+            en: "Migration Project",
+            fr: "Projet de Migration"
+        },
         location: "Casablanca, Maroc",
         date: "Août 2025 – Oct 2025",
-        problem: "Legacy application needed modernization and migration to the cloud to improve performance and reduce costs.",
-        solution: "Performed Rehost & Refactor migration to Azure App Service. Implemented CI/CD with GitHub Actions.",
-        impact: "+30% performance increase, −20% cost reduction.",
-        architecture: "GitHub Actions -> Build -> Deploy -> Azure App Service + Azure DB for MySQL",
-        technologies: ["Azure App Service", "GitHub Actions", "Azure Database for MySQL", "Node.js"],
+        problem: {
+            en: "Legacy application needed modernization and migration to cloud to improve performance and reduce maintenance costs.",
+            fr: "L'application existante nécessitait une modernisation et une migration vers le cloud pour améliorer les performances."
+        },
+        solution: {
+            en: "Performed Rehost & Refactor migration to Azure App Service. Implemented CI/CD with GitHub Actions.",
+            fr: "Migration Rehost & Refactor vers Azure App Service. Mise en place de CI/CD avec GitHub Actions."
+        },
+        impact: {
+            en: "+30% performance increase, −20% cost reduction.",
+            fr: "Augmentation de +30% des performances, réduction de coût de −20%."
+        },
+        architecture: "GitHub Actions -> Azure App Service + MySQL",
+        technologies: ["Azure App Service", "GitHub Actions", "Azure MySQL", "Node.js"],
         tags: ["Cloud Azure", "DevOps", "CI/CD", "Infrastructure"],
         architectureImage: "/images/migration-arch.png"
     },
     {
         id: "pfe-bairoutech",
-        title: "Stagiaire DevOps (Projet de Fin d'Études)",
-        role: "BAIROUTECH",
+        title: {
+            en: "Kubernetes Orchestration (PFE)",
+            fr: "Orchestration Kubernetes (PFE)"
+        },
+        role: {
+            en: "DevOps Intern @ BAIROUTECH",
+            fr: "Stagiaire DevOps @ BAIROUTECH"
+        },
         location: "Fès, Maroc",
         date: "Févr 2025 – Juin 2025",
-        problem: "Application faced scalability and deployment downtime issues.",
-        solution: "Containerized Node.js/MongoDB application. Orchestrated with Kubernetes (Ingress, PVC, probes).",
-        impact: "−40% deployment time, achieved high availability.",
-        architecture: "Kubernetes Cluster -> Ingress -> Service -> Pods (Node.js) -> PVC (MongoDB)",
+        problem: {
+            en: "Application faced scalability limits and deployment downtime issues during high traffic.",
+            fr: "L'application rencontrait des limites de scalabilité et des temps d'arrêt lors des déploiements."
+        },
+        solution: {
+            en: "Containerized Node.js/MongoDB app. Orchestrated with Kubernetes (Ingress, PVC, Liveness/Readiness probes).",
+            fr: "Conteneurisation Node.js/MongoDB. Orchestration avec Kubernetes (Ingress, PVC, sondes)."
+        },
+        impact: {
+            en: "−40% deployment time, achieved high availability.",
+            fr: "−40% de temps de déploiement, haute disponibilité atteinte."
+        },
+        architecture: "K8s Cluster -> Ingress -> Svc -> Pods -> PVC",
         technologies: ["Kubernetes", "Docker", "Node.js", "MongoDB"],
         tags: ["Kubernetes", "DevOps", "Infrastructure"],
         architectureImage: "/images/k8s-arch.png"
     },
     {
         id: "rag-chatbot",
-        title: "Chatbot Intelligent RAG",
-        role: "Azure OpenAI & Azure AI Search",
+        title: {
+            en: "Intelligent RAG Chatbot",
+            fr: "Chatbot RAG Intelligent"
+        },
+        role: {
+            en: "Azure OpenAI & AI Search",
+            fr: "Azure OpenAI & AI Search"
+        },
         location: "Casablanca, Maroc",
         date: "Déc 2025",
-        problem: "Need to effectively index and query internal documents (PDF/DOCX) using AI.",
-        solution: "Built complete RAG pipeline: Blob Storage, chunking, embeddings, vector indexing. Backend Node.js orchestrating Azure AI Search & Azure OpenAI.",
-        impact: "Enabled intelligent document querying and data extraction.",
-        architecture: "Documents -> Blob -> Azure AI Search (Index) <-> Backend <-> Azure OpenAI",
+        problem: {
+            en: "Need to effectively index and query internal documents (PDF/DOCX) using AI for rapid info retrieval.",
+            fr: "Besoin d'indexer et d'interroger efficacement des documents internes (PDF/DOCX) via l'IA."
+        },
+        solution: {
+            en: "Built complete RAG pipeline: Blob Storage, chunking, embeddings, vector indexing. Backend Node.js orchestrating Azure AI.",
+            fr: "Pipeline RAG complet : Blob Storage, chunking, embeddings, indexation vectorielle. Backend Node.js."
+        },
+        impact: {
+            en: "Enabled intelligent document querying and data extraction.",
+            fr: "A permis l'interrogation intelligente de documents et l'extraction de données."
+        },
+        architecture: "Docs -> Blob -> AI Search (Index) -> OpenAI",
         technologies: ["Azure OpenAI", "Azure AI Search", "Node.js", "Bootstrap"],
         tags: ["AI / RAG", "Cloud Azure"],
         architectureImage: "/images/rag-arch.png"
     },
     {
         id: "bairoutech-admin",
-        title: "Administration Infrastructure & Support Microsoft 365",
-        role: "BAIROUTECH",
+        title: {
+            en: "Infra Admin & Support",
+            fr: "Admin Infra & Support"
+        },
+        role: {
+            en: "BAIROUTECH",
+            fr: "BAIROUTECH"
+        },
         location: "",
         date: "",
-        problem: "Managing corporate infrastructure and user support required structured administration.",
-        solution: "Managed Active Directory, DNS, DHCP, GPO. Configured Site-to-Site VPN and MFA security.",
-        impact: "Ensured secure and stable infrastructure and user productivity.",
-        architecture: "Active Directory + Microsoft 365 Environment",
-        technologies: ["Active Directory", "DNS", "DHCP", "GPO", "VPN", "Microsoft 365"],
+        problem: {
+            en: "Managing corporate infrastructure and user support required structured administration and security.",
+            fr: "La gestion de l'infrastructure et le support utilisateur nécessitaient une administration structurée."
+        },
+        solution: {
+            en: "Managed Active Directory, DNS, DHCP, GPO. Configured Site-to-Site VPN and MFA security.",
+            fr: "Gestion Active Directory, DNS, DHCP, GPO. Configuration VPN Site-à-Site et sécurité MFA."
+        },
+        impact: {
+            en: "Ensured secure, stable infrastructure and user productivity.",
+            fr: "Infrastructure sécurisée et stable garantie, productivité utilisateur maintenue."
+        },
+        architecture: "AD + Microsoft 365 Hybrid",
+        technologies: ["Active Directory", "DNS/DHCP", "GPO", "VPN", "M365"],
         tags: ["Systems & Support", "Infrastructure"],
         architectureImage: "/images/admin-arch.png"
     },
     {
         id: "ifmotica-network",
-        title: "Déploiement Réseau & Installation Postes",
-        role: "IFMOTICA",
-        location: "",
+        title: {
+            en: "Network Deployment",
+            fr: "Déploiement Réseau"
+        },
+        role: {
+            en: "IFMOTICA",
+            fr: "IFMOTICA"
+        },
+        location: "Fès, Maroc",
         date: "",
-        problem: "New office setup required network deployment and workstation configuration.",
-        solution: "Deployed Windows 10/11, configured Routers/Switches. Created PowerShell GUI for Active Directory management.",
-        impact: "Operational network application and efficient user workstation setup.",
-        architecture: "Physical Network Topology + Windows Domain",
-        technologies: ["Windows 10/11", "Réseau (Routeurs, Switches)", "PowerShell", "Support N1/N2"],
+        problem: {
+            en: "New office setup required complete physical network deployment and workstation configuration.",
+            fr: "La configuration des nouveaux bureaux nécessitait un déploiement réseau physique complet."
+        },
+        solution: {
+            en: "Deployed Windows 10/11, configured Routers/Switches. Created PowerShell tools for AD management.",
+            fr: "Déploiement Windows 10/11, configuration Routeurs/Switchs. Outils PowerShell pour gestion AD."
+        },
+        impact: {
+            en: "Operational network and efficient user workstation setup.",
+            fr: "Réseau opérationnel et configuration efficace des postes utilisateurs."
+        },
+        architecture: "Physical Topology + Windows Domain",
+        technologies: ["Windows 10/11", "Networking", "PowerShell", "Support"],
         tags: ["Systems & Support", "Infrastructure"],
         architectureImage: "/images/network-arch.png"
     }
 ];
+
+const I18N_LABELS = {
+    en: {
+        problem: "PROBLEM",
+        solution: "SOLUTION & TECH",
+        impact: "IMPACT / RESULTS",
+        architecture: "ARCHITECTURE",
+        viewDiagram: "View Diagram",
+        searchPlaceholder: "Search projects or technologies...",
+        noResults: "No projects match your search.",
+        clearFilter: "Clear Filter"
+    },
+    fr: {
+        problem: "PROBLÉMATIQUE",
+        solution: "SOLUTION & TECH",
+        impact: "IMPACT / RÉSULTATS",
+        architecture: "ARCHITECTURE",
+        viewDiagram: "Voir le Diagramme",
+        searchPlaceholder: "Rechercher projets ou technologies...",
+        noResults: "Aucun projet ne correspond à votre recherche.",
+        clearFilter: "Effacer le filtre"
+    }
+};
 
 const CATEGORIES = [
     "All",
@@ -148,6 +291,7 @@ const icons = {
 // --- State ---
 let activeCategory = 'All';
 let searchQuery = '';
+let currentLang = localStorage.getItem('lang') || 'fr';
 let currentModalProject = null;
 let currentScale = 1;
 
@@ -156,10 +300,7 @@ const container = document.getElementById('projects-container');
 
 // --- Initialization ---
 function init() {
-    if (!container) {
-        console.error('Projects container not found');
-        return;
-    }
+    if (!container) return; // Silent fail if not present (handled by main.js)
 
     // Create Wrapper
     const wrapper = document.createElement('div');
@@ -175,13 +316,22 @@ function init() {
     gridEl.id = 'projects-grid-root';
     wrapper.appendChild(gridEl);
 
+    container.innerHTML = '';
     container.appendChild(wrapper);
 
     // 3. Render Initial Projects
-    renderProjects(gridEl);
+    renderProjects();
 
     // 4. Create Modal (hidden by default)
-    createModal();
+    if (!document.getElementById('project-modal')) {
+        createModal();
+    }
+
+    // Expose global updater for main.js to call
+    window.updateProjectsLanguage = (lang) => {
+        currentLang = lang;
+        updateUIForLanguage();
+    };
 }
 
 // --- Rendering Functions ---
@@ -193,9 +343,11 @@ function renderFilters() {
     // Search Bar
     const searchWrapper = document.createElement('div');
     searchWrapper.className = 'search-wrapper';
+    const labels = I18N_LABELS[currentLang] || I18N_LABELS.fr;
+
     searchWrapper.innerHTML = `
         <div class="search-icon">${icons.search}</div>
-        <input type="text" class="search-input" placeholder="Search projects or technologies..." value="${searchQuery}">
+        <input type="text" class="search-input" id="project-search-input" placeholder="${labels.searchPlaceholder}" value="${searchQuery}">
     `;
     const input = searchWrapper.querySelector('input');
     input.addEventListener('input', (e) => {
@@ -236,17 +388,40 @@ function updateCategoryButtons(wrapper) {
     });
 }
 
-function renderProjects(gridRoot = document.getElementById('projects-grid-root')) {
+function updateUIForLanguage() {
+    // 1. Update search placeholder
+    const searchInput = document.getElementById('project-search-input');
+    const labels = I18N_LABELS[currentLang] || I18N_LABELS.fr;
+    if (searchInput) {
+        searchInput.placeholder = labels.searchPlaceholder;
+    }
+    // 2. Re-render projects grid
+    renderProjects();
+}
+
+function getLoc(field) {
+    if (typeof field === 'string') return field;
+    if (typeof field === 'object') return field[currentLang] || field.en || field.fr || '';
+    return '';
+}
+
+function renderProjects() {
+    const gridRoot = document.getElementById('projects-grid-root');
     if (!gridRoot) return;
+
+    const labels = I18N_LABELS[currentLang] || I18N_LABELS.fr;
 
     // Filter Data
     const filtered = projectsData.filter(project => {
         const matchesCategory = activeCategory === 'All' || project.tags.includes(activeCategory);
         const query = searchQuery.toLowerCase();
-        const matchesSearch =
-            project.title.toLowerCase().includes(query) ||
-            project.technologies.some(t => t.toLowerCase().includes(query)) ||
-            project.tags.some(t => t.toLowerCase().includes(query));
+
+        const titleVal = getLoc(project.title).toLowerCase();
+        const techVal = project.technologies.some(t => t.toLowerCase().includes(query));
+        const tagsVal = project.tags.some(t => t.toLowerCase().includes(query));
+
+        const matchesSearch = titleVal.includes(query) || techVal || tagsVal;
+
         return matchesCategory && matchesSearch;
     });
 
@@ -255,8 +430,8 @@ function renderProjects(gridRoot = document.getElementById('projects-grid-root')
     if (filtered.length === 0) {
         gridRoot.innerHTML = `
             <div class="no-results" style="grid-column: 1/-1;">
-                <p>No projects match your search.</p>
-                <button class="clear-filter-btn" id="clear-filter">Clear Filter</button>
+                <p>${labels.noResults}</p>
+                <button class="clear-filter-btn" id="clear-filter">${labels.clearFilter}</button>
             </div>
         `;
         const clearBtn = gridRoot.querySelector('#clear-filter');
@@ -265,7 +440,7 @@ function renderProjects(gridRoot = document.getElementById('projects-grid-root')
                 activeCategory = 'All';
                 searchQuery = '';
                 // Update UI inputs
-                const input = document.querySelector('.search-input');
+                const input = document.getElementById('project-search-input');
                 if (input) input.value = '';
                 const catWrapper = document.querySelector('.categories-wrapper');
                 if (catWrapper) updateCategoryButtons(catWrapper);
@@ -288,8 +463,17 @@ function renderProjects(gridRoot = document.getElementById('projects-grid-root')
 function createProjectCard(project, index) {
     const el = document.createElement('div');
     el.className = 'project-card';
-    // Accessibility
     el.setAttribute('role', 'article');
+
+    // Labels
+    const labels = I18N_LABELS[currentLang] || I18N_LABELS.fr;
+
+    // Localized values
+    const title = getLoc(project.title);
+    const role = getLoc(project.role);
+    const problem = getLoc(project.problem);
+    const solution = getLoc(project.solution);
+    const impact = getLoc(project.impact);
 
     // Helper to extract metrics for highlighting
     const formatImpact = (text) => {
@@ -306,10 +490,10 @@ function createProjectCard(project, index) {
         <div class="card-glow"></div>
         <div class="card-content">
             <div class="card-header-row">
-                <h3 class="card-title">${project.title}</h3>
+                <h3 class="card-title">${title}</h3>
                 <span class="card-date">${project.date}</span>
             </div>
-            <div class="card-role">${project.role}</div>
+            <div class="card-role">${role}</div>
             ${project.location ? `<div class="card-location">${project.location}</div>` : ''}
             
             <div class="card-tags">
@@ -320,17 +504,17 @@ function createProjectCard(project, index) {
                 <!-- Problem -->
                 <div class="section-item">
                     <div class="section-label" style="color: #ef4444;">
-                         ${icons.alert.replace('class="text-red-500"', 'style="color: #ef4444;"')} Problem
+                         ${icons.alert.replace('class="text-red-500"', 'style="color: #ef4444;"')} ${labels.problem}
                     </div>
-                    <p class="section-text">${project.problem}</p>
+                    <p class="section-text">${problem}</p>
                 </div>
                 
                 <!-- Solution -->
                 <div class="section-item">
                     <div class="section-label" style="color: #3b82f6;">
-                        ${icons.check.replace('class="text-blue-500"', 'style="color: #3b82f6;"')} Solution & Technologies
+                        ${icons.check.replace('class="text-blue-500"', 'style="color: #3b82f6;"')} ${labels.solution}
                     </div>
-                    <p class="section-text">${project.solution}</p>
+                    <p class="section-text">${solution}</p>
                     <div class="tech-list">
                         ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
                     </div>
@@ -339,22 +523,22 @@ function createProjectCard(project, index) {
                 <!-- Impact -->
                 <div class="section-item">
                     <div class="section-label" style="color: #22c55e;">
-                        ${icons.trending.replace('class="text-green-500"', 'style="color: #22c55e;"')} Impact / Results
+                        ${icons.trending.replace('class="text-green-500"', 'style="color: #22c55e;"')} ${labels.impact}
                     </div>
-                    <p class="section-text">${formatImpact(project.impact)}</p>
+                    <p class="section-text">${formatImpact(impact)}</p>
                 </div>
                 
                 <!-- Architecture -->
                 <div class="arch-section">
                     <div class="arch-header">
                         <div class="section-label" style="color: #a855f7;">
-                            ${icons.layers.replace('class="text-purple-500"', 'style="color: #a855f7;"')} Architecture
+                            ${icons.layers.replace('class="text-purple-500"', 'style="color: #a855f7;"')} ${labels.architecture}
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
                          <p class="arch-text" title="${project.architecture}">${project.architecture}</p>
                          <button class="view-diagram-btn" data-id="${project.id}">
-                            ${icons.external} View Diagram
+                            ${icons.external} ${labels.viewDiagram}
                          </button>
                     </div>
                 </div>
@@ -380,16 +564,17 @@ function createModal() {
     modal.className = 'modal-overlay';
     modal.id = 'project-modal';
 
+    // Ensure toolbar is visible with high contrast
     modal.innerHTML = `
         <div class="modal-controls">
-            <button class="control-icon-btn" id="modal-zoom-out" title="Zoom Out">${icons.zoomOut}</button>
-            <button class="control-icon-btn" id="modal-zoom-in" title="Zoom In">${icons.zoomIn}</button>
-            <button class="control-icon-btn" id="modal-download" title="Download">${icons.download}</button>
-            <button class="control-icon-btn close-btn" id="modal-close" title="Close">${icons.close}</button>
+            <button class="control-icon-btn" id="modal-zoom-out" title="Zoom Out" aria-label="Zoom Out">${icons.zoomOut}</button>
+            <button class="control-icon-btn" id="modal-zoom-in" title="Zoom In" aria-label="Zoom In">${icons.zoomIn}</button>
+            <button class="control-icon-btn" id="modal-download" title="Download Diagram" aria-label="Download Diagram">${icons.download}</button>
+            <button class="control-icon-btn close-btn" id="modal-close" title="Close Modal" aria-label="Close Modal">${icons.close}</button>
         </div>
         <div class="modal-content">
-            <div class="modal-image-container">
-                <img src="" alt="Architecture" class="modal-image" id="modal-img">
+            <div class="modal-image-container" id="modal-img-container">
+                <img src="" alt="Architecture Diagram" class="modal-image" id="modal-img">
             </div>
             <div class="modal-caption" id="modal-title"></div>
         </div>
@@ -399,22 +584,27 @@ function createModal() {
 
     // Listeners
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
+        // Close if clicking the overlay (and not the controls or image)
+        if (e.target === modal || e.target.classList.contains('modal-content') || e.target.classList.contains('modal-image-container')) {
+            closeModal();
+        }
     });
 
-    document.getElementById('modal-close').addEventListener('click', closeModal);
-    document.getElementById('modal-zoom-in').addEventListener('click', () => updateScale(0.5));
-    document.getElementById('modal-zoom-out').addEventListener('click', () => updateScale(-0.5));
-    document.getElementById('modal-download').addEventListener('click', downloadImage);
+    document.getElementById('modal-close').addEventListener('click', (e) => { e.stopPropagation(); closeModal(); });
+    document.getElementById('modal-zoom-in').addEventListener('click', (e) => { e.stopPropagation(); updateScale(0.5); });
+    document.getElementById('modal-zoom-out').addEventListener('click', (e) => { e.stopPropagation(); updateScale(-0.5); });
+    document.getElementById('modal-download').addEventListener('click', (e) => { e.stopPropagation(); downloadImage(); });
 
     // Pan Logic
     const img = document.getElementById('modal-img');
+    const container = document.getElementById('modal-img-container');
 
-    img.addEventListener('mousedown', (e) => {
+    container.addEventListener('mousedown', (e) => {
+        // Only drag if scaled > 1 or if image is larger than container
         isDragging = true;
         startX = e.clientX - translateX;
         startY = e.clientY - translateY;
-        img.style.cursor = 'grabbing';
+        container.style.cursor = 'grabbing';
         e.preventDefault();
     });
 
@@ -428,7 +618,7 @@ function createModal() {
 
     window.addEventListener('mouseup', () => {
         isDragging = false;
-        if (img) img.style.cursor = 'grab';
+        container.style.cursor = 'grab';
     });
 
     // Keyboard support
@@ -452,7 +642,8 @@ function openModal(project) {
     if (modal && img && title) {
         // Use architectureImage if available, else a placeholder or fallback
         img.src = project.architectureImage || '/assets/images/placeholder-arch.png';
-        title.textContent = `${project.title} - Architecture Visualization`;
+        const projectTitle = getLoc(project.title);
+        title.textContent = `${projectTitle}`;
 
         updateImageTransform();
         modal.classList.add('open');
@@ -470,8 +661,11 @@ function closeModal() {
 }
 
 function updateScale(delta) {
-    currentScale = Math.max(0.5, Math.min(3, currentScale + delta));
-    updateImageTransform();
+    const newScale = currentScale + delta;
+    if (newScale >= 0.5 && newScale <= 5) { // Limit zoom range
+        currentScale = newScale;
+        updateImageTransform();
+    }
 }
 
 function updateImageTransform() {
@@ -486,7 +680,8 @@ function downloadImage() {
 
     const link = document.createElement('a');
     link.href = currentModalProject.architectureImage;
-    link.download = `${currentModalProject.title.replace(/\s+/g, '-').toLowerCase()}-architecture.png`;
+    const title = getLoc(currentModalProject.title);
+    link.download = `${title.replace(/\s+/g, '-').toLowerCase()}-architecture.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

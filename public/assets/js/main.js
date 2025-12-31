@@ -527,8 +527,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Re-render education
     renderEducation(lang);
-    // Re-render projects with selected language so descriptions/titles update
-    // renderProjects(PROJECTS, lang); // Disabled in favor of React Widget
+    // Re-render projects with selected language
+    if (typeof window.updateProjectsLanguage === 'function') {
+      window.updateProjectsLanguage(lang);
+    }
     // Update any 'More/Less' toggles to use the current language labels
     try {
       const moreLabel = (map.more) ? map.more : 'More';
