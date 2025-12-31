@@ -168,22 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   // --- Render Projects ---
+  // --- Render Projects (Legacy check disabled) ---
   const grid = document.getElementById('projectsGrid');
-  if (!grid) {
-    try {
-      const projectsSection = document.getElementById('projects');
-      if (projectsSection) {
-        const err = document.createElement('div');
-        err.style.padding = '12px';
-        err.style.background = '#fff3cd';
-        err.style.color = '#664d03';
-        err.style.border = '1px solid #ffeeba';
-        err.style.borderRadius = '6px';
-        err.textContent = 'projectsGrid not found: projects will not render. Check DOM id `projectsGrid`.';
-        projectsSection.insertBefore(err, projectsSection.firstChild);
-      }
-    } catch (e) { }
-  }
+  // if (!grid) ... Error logic removed for new Projects integration
   const searchInput = document.getElementById('projectSearch');
   const searchClear = document.getElementById('searchClear');
 
@@ -348,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const inTech = (p.tech || []).some(t => t.toLowerCase().includes(q));
       return inTitle || inDesc || inTech;
     });
-    renderProjects(filtered);
+    // renderProjects(filtered);
   }
 
 
@@ -541,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Re-render education
     renderEducation(lang);
     // Re-render projects with selected language so descriptions/titles update
-    renderProjects(PROJECTS, lang);
+    // renderProjects(PROJECTS, lang); // Disabled in favor of React Widget
     // Update any 'More/Less' toggles to use the current language labels
     try {
       const moreLabel = (map.more) ? map.more : 'More';

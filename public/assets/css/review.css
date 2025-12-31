@@ -1,0 +1,192 @@
+/* --- Engineering Review Enhancements: Tier 1 & Tier 2 --- */
+
+.brief-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Resilience Badge */
+.resilience-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: help;
+}
+
+[data-theme="dark"] .resilience-badge {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.resilience-badge svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Credibility Labels (Impact) */
+.impact-credibility {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 6px;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+}
+
+.kpi-mode li {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Key Decisions Section */
+.brief-decisions-section {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.brief-sublabel {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.brief-content-list.dense li {
+    font-size: 12px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+/* Architecture Meta Panel */
+.btn-archi-meta {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-archi-meta:hover {
+    background: var(--surface-hover);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.btn-archi-meta svg {
+    width: 14px;
+    height: 14px;
+}
+
+.archi-meta-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(var(--bg-color-rgb, 255, 255, 255), 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 20;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+[data-theme="dark"] .archi-meta-panel {
+    background: rgba(15, 15, 15, 0.95);
+}
+
+.archi-meta-panel.active {
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.meta-row {
+    font-size: 13px;
+    color: var(--text-primary);
+    display: flex;
+    gap: 8px;
+}
+
+.meta-row strong {
+    color: var(--accent-primary);
+    min-width: 90px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Footer & Versioning */
+.brief-footer {
+    padding: 10px 20px;
+    background: var(--surface-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.version-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-family: monospace;
+}
+
+/* Toolbar Legend spacing */
+.toolbar-btn .btn-text {
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+    text-transform: uppercase;
+}
+
+/* KPI Tooltips (Simple native title for now, or styled if needed) */
+.metric-info-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: help;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+}
+
+.metric-info-btn:hover {
+    color: var(--accent-primary);
+}
+
+.metric-info-btn svg {
+    width: 12px;
+    height: 12px;
+}
