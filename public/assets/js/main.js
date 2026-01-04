@@ -170,7 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Render Projects ---
   // --- Render Projects (Legacy check disabled) ---
   const grid = document.getElementById('projectsGrid');
-  // if (!grid) ... Error logic removed for new Projects integration
+  // Note: some pages use other project containers (e.g. projects.js) and won't
+  // have `#projectsGrid`. Do not exit early here, otherwise global features
+  // like theme + language controls won't initialize.
   const searchInput = document.getElementById('projectSearch');
   const searchClear = document.getElementById('searchClear');
 
@@ -815,7 +817,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function debounce(fn, ms = 200) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
   if (searchInput) {
-    searchInput.addEventListener('input', debounce(() => applyFilters(), 180));
+    if (searchInput) {
+      searchInput.addEventListener('input', debounce(() => applyFilters(), 180));
+    }
   }
   if (searchClear) {
     searchClear.addEventListener('click', () => { if (searchInput) searchInput.value = ''; applyFilters(); });

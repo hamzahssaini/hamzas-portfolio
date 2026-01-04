@@ -143,18 +143,11 @@
         <div class="section-header reveal">
           <h2 class="section-title" data-i18n="projects_title">Project Highlights</h2>
         </div>
-        <div class="projects-search reveal">
-          <div class="search-input">
-            <input id="projectSearch" type="search" placeholder="Search by keywords" aria-label="Search projects">
-            <button id="searchClear" aria-label="Clear search" title="Clear">✕</button>
-          </div>
-        </div>
-        <div id="projectsGrid" class="cards-grid reveal">
-          <!-- Projects rendered by main.js -->
-        </div>
-        <div class="projects-footer reveal">
-          <a href="#projects" class="btn-see-all" data-i18n="btn_see_all">See all projects</a>
-        </div>
+
+        <!-- Projects Section (Vanilla JS Widget) -->
+        <link rel="stylesheet" href="assets/css/projects.css">
+        <div id="projects-container" class="reveal" style="min-height: 400px; width: 100%;"></div>
+        <script src="assets/js/projects.js" defer></script>
       </div>
     </section>
 
