@@ -101,7 +101,7 @@
 .projects-toolbar {
     display: flex;
     align-items: stretch;
-    justify-content: flex-start;
+    justify-content: center;
     margin-top: 1.25rem;
 }
 
@@ -112,6 +112,9 @@
 
 .projects-toolbar-surface {
     width: 100%;
+    max-width: 1040px;
+    margin-left: auto;
+    margin-right: auto;
     background: var(--proj-card-bg-light);
     border-radius: 1.05rem;
     padding: 1rem 1.05rem;
@@ -200,10 +203,18 @@
 
 .projects-filters {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
     align-items: center;
     justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.projects-filters::-webkit-scrollbar {
+    display: none;
 }
 
 .projects-filters::before {
@@ -243,9 +254,9 @@
     border: 0;
     background: transparent;
     color: var(--proj-text-secondary-light);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     font-weight: 650;
-    padding: 0.42rem 0.68rem;
+    padding: 0.38rem 0.58rem;
     border-radius: 9999px;
     cursor: pointer;
     transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
@@ -318,6 +329,7 @@
     min-height: 0;
     box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06), 0 1px 0 rgba(15, 23, 42, 0.04), 0 16px 40px rgba(15, 23, 42, 0.075);
     transition: transform 0.16s ease, box-shadow 0.16s ease;
+    animation: eliteFadeUp 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .elite-card:hover {
@@ -332,6 +344,29 @@
 
 [data-theme="dark"] .elite-card:hover {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 1px 0 rgba(0, 0, 0, 0.22), 0 26px 70px rgba(0, 0, 0, 0.55);
+}
+
+@keyframes eliteFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .elite-card {
+        animation: none;
+        transition: none;
+    }
+    .filter-pill,
+    .elite-cta,
+    .projects-search {
+        transition: none;
+    }
 }
 
 .elite-title {
@@ -374,6 +409,7 @@
 
 .elite-section {
     margin-bottom: 0.85rem;
+    text-align: left;
 }
 
 .elite-label {
@@ -398,6 +434,11 @@
     gap: 0.35rem;
 }
 
+.elite-impact-list {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+}
+
 .elite-list li {
     font-size: 0.92rem;
     color: var(--proj-text-primary-light);
@@ -411,10 +452,11 @@
 /* Impact emphasized: subtle surface + stronger border */
 .elite-impact {
     margin-top: 0.2rem;
-    padding: 0.95rem 1rem;
+    padding: 0.9rem 0.95rem;
     border-radius: 0.75rem;
     border: 0;
     background-color: rgba(15, 23, 42, 0.03);
+    text-align: left;
 }
 
 [data-theme="dark"] .elite-impact {
@@ -422,13 +464,20 @@
 }
 
 .elite-impact-list li {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: baseline;
-    gap: 0.5rem;
-    font-size: 0.92rem;
-    line-height: 1.35;
+    display: block;
+    width: 100%;
+    font-size: 0.84rem;
+    line-height: 1.28;
     color: var(--proj-text-primary-light);
+    text-align: left;
+}
+
+.elite-impact-list li.no-metric {
+    display: block;
+}
+
+.elite-impact-list li.no-metric .metric {
+    display: none;
 }
 
 [data-theme="dark"] .elite-impact-list li {
@@ -436,9 +485,14 @@
 }
 
 .elite-impact-list .metric {
+    min-width: 0;
+    text-align: left;
     font-weight: 900;
-    color: var(--proj-primary);
+    font-size: 0.9rem;
     letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--proj-primary);
+    white-space: nowrap;
 }
 
 [data-theme="dark"] .elite-impact-list .metric {
@@ -447,6 +501,23 @@
 
 .elite-impact-list .metric-text {
     color: inherit;
+    padding-top: 0;
+    display: inline;
+    text-align: left;
+}
+
+.elite-impact-list li:not(.no-metric) .metric-text::before {
+    content: ' ';
+    margin-right: 0;
+    color: var(--proj-text-secondary-light);
+}
+
+.elite-impact-list li.no-metric .metric-text::before {
+    content: '';
+}
+
+[data-theme="dark"] .elite-impact-list li:not(.no-metric) .metric-text::before {
+    color: var(--proj-text-secondary-dark);
 }
 
 .elite-footer {
@@ -1080,6 +1151,7 @@
 }
 .clamp-2 {
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -1091,6 +1163,7 @@
     line-height: 1.35;
     color: var(--proj-text-secondary-light);
     display: -webkit-box;
+    line-clamp: 1;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;

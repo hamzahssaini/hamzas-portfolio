@@ -67,14 +67,14 @@
       },
       impact: {
         en: [
-          { metric: '2', text: 'delivery paths standardized (.NET + React)' },
-          { metric: '3', text: 'stage gated pipeline (build → test → deploy)' },
-          { metric: '1', text: 'production target (Azure Web App)' }
+          { metric: '2 paths', text: 'standardized for delivery (.NET + React)' },
+          { metric: '3 stages', text: 'in a gated pipeline (build → test → deploy)' },
+          { metric: '1 target', text: 'in production (Azure Web App)' }
         ],
         fr: [
-          { metric: '2', text: 'flux de livraison standardisés (.NET + React)' },
-          { metric: '3', text: 'étapes de pipeline (build → tests → déploiement)' },
-          { metric: '1', text: 'cible de production (Azure Web App)' }
+          { metric: '2 flux', text: 'standardisés (.NET + React)' },
+          { metric: '3 étapes', text: 'dans un pipeline gaté (build → tests → déploiement)' },
+          { metric: '1 cible', text: 'en production (Azure Web App)' }
         ]
       },
       technologies: ['GitLab CI', 'Azure Web App', '.NET', 'React'],
@@ -95,13 +95,13 @@
       impact: {
         en: [
           { metric: '50%', text: 'faster delivery via automated provisioning' },
-          { metric: '1', text: 'encrypted IPSec tunnel for hybrid traffic' },
-          { metric: '1', text: 'central hub for routing / inspection' }
+          { metric: '1 tunnel', text: 'for encrypted IPSec hybrid traffic' },
+          { metric: '1 hub', text: 'for central routing / inspection' }
         ],
         fr: [
           { metric: '50%', text: 'de livraison plus rapide via provisionnement automatisé' },
-          { metric: '1', text: 'tunnel IPSec chiffré pour le trafic hybride' },
-          { metric: '1', text: 'hub central pour routage / inspection' }
+          { metric: '1 tunnel', text: 'IPSec chiffré (trafic hybride)' },
+          { metric: '1 hub', text: 'central pour routage / inspection' }
         ]
       },
       technologies: ['Azure', 'Terraform', 'VPN Gateway', 'Azure Firewall'],
@@ -121,14 +121,14 @@
       },
       impact: {
         en: [
-          'Shipped **1** production PaaS target (Azure App Service)',
-          'Migrated **1** MySQL datastore to managed Azure MySQL',
-          'Prepared **1** cutover/rollback path for release'
+          { metric: '1 target', text: 'shipped to production (Azure App Service)' },
+          { metric: '1 datastore', text: 'migrated to managed Azure MySQL (MySQL)' },
+          { metric: '1 cutover path', text: 'prepared with rollback plan' }
         ],
         fr: [
-          'Livré **1** cible PaaS en production (Azure App Service)',
-          'Migration de **1** datastore MySQL vers Azure MySQL managé',
-          'Préparation de **1** plan cutover/rollback pour la release'
+          { metric: '1 cible', text: 'livrée en production (Azure App Service)' },
+          { metric: '1 datastore', text: 'migré vers Azure MySQL managé (MySQL)' },
+          { metric: '1 plan', text: 'cutover/rollback préparé pour la release' }
         ]
       },
       technologies: ['Azure App Service', 'GitHub Actions', 'Azure MySQL', 'Node.js'],
@@ -160,14 +160,14 @@
       },
       impact: {
         en: [
-          'Standardized **4** core services per host baseline',
-          'Encrypted secrets with **1** vault workflow',
-          'Reduced drift with **1** repeatable configuration run'
+          { metric: '4 services', text: 'standardized per host baseline' },
+          { metric: '1 workflow', text: 'for Vault-based secrets encryption' },
+          { metric: '1 run', text: 'for repeatable configuration (reduced drift)' }
         ],
         fr: [
-          'Standardisation de **4** services par baseline serveur',
-          'Secrets chiffrés via **1** workflow Vault',
-          'Réduction du drift via **1** exécution reproductible'
+          { metric: '4 services', text: 'standardisés par baseline serveur' },
+          { metric: '1 workflow', text: 'pour chiffrement des secrets (Vault)' },
+          { metric: '1 exécution', text: 'reproductible de configuration (drift réduit)' }
         ]
       },
       technologies: ['Ansible', 'AWS EC2', 'IAM', 'Linux', 'MySQL', 'Redis', 'Nginx'],
@@ -202,14 +202,14 @@
       },
       impact: {
         en: [
-          '**−40%** deployment time',
-          'Gated rollouts with **2** health checks (liveness + readiness)',
-          'Persisted state via **1** PVC-backed datastore'
+          { metric: '−40%', text: 'deployment time' },
+          { metric: '2 checks', text: 'for gated rollouts (liveness + readiness)' },
+          { metric: '1 datastore', text: 'persisted via PVC-backed storage' }
         ],
         fr: [
-          '**−40%** de temps de déploiement',
-          'Rollouts gatés via **2** sondes (liveness + readiness)',
-          'Persistance via **1** stockage PVC'
+          { metric: '−40%', text: 'de temps de déploiement' },
+          { metric: '2 sondes', text: 'pour rollouts gatés (liveness + readiness)' },
+          { metric: '1 stockage', text: 'persisté via PVC' }
         ]
       },
       technologies: ['Kubernetes', 'Docker', 'Node.js', 'MongoDB'],
@@ -229,14 +229,14 @@
       },
       impact: {
         en: [
-          'Indexed **2** formats (PDF + DOCX) into **1** vector index',
-          'Built a **4-step** ingestion path (blob → chunk → embed → index)',
-          'Delivered retrieval via **1** backend API surface'
+          { metric: '2 formats', text: 'indexed into 1 vector index (PDF + DOCX)' },
+          { metric: '4 steps', text: 'for ingestion (blob → chunk → embed → index)' },
+          { metric: '1 API', text: 'for retrieval surface' }
         ],
         fr: [
-          'Indexation de **2** formats (PDF + DOCX) dans **1** index vectoriel',
-          "Pipeline d'ingestion en **4 étapes** (blob → chunk → embed → index)",
-          'Retrieval exposé via **1** API backend'
+          { metric: '2 formats', text: 'indexés dans 1 index vectoriel (PDF + DOCX)' },
+          { metric: '4 étapes', text: "pour l’ingestion (blob → chunk → embed → index)" },
+          { metric: '1 API', text: 'backend pour le retrieval' }
         ]
       },
       technologies: ['Azure OpenAI', 'Azure AI Search', 'Node.js', 'Bootstrap'],
@@ -256,14 +256,14 @@
       },
       impact: {
         en: [
-          'Standardized **3** core services (AD + DNS + DHCP)',
-          'Hardened access with **2** controls (VPN + MFA)',
-          'Enforced **1** workstation baseline via GPO'
+          { metric: '3 services', text: 'standardized (AD + DNS + DHCP)' },
+          { metric: '2 controls', text: 'for hardened access (VPN + MFA)' },
+          { metric: '1 baseline', text: 'enforced via GPO (workstations)' }
         ],
         fr: [
-          'Standardisation de **3** services (AD + DNS + DHCP)',
-          'Accès renforcé via **2** contrôles (VPN + MFA)',
-          'Baseline poste appliquée via **1** GPO'
+          { metric: '3 services', text: 'standardisés (AD + DNS + DHCP)' },
+          { metric: '2 contrôles', text: 'pour accès renforcé (VPN + MFA)' },
+          { metric: '1 baseline', text: 'poste appliquée via GPO' }
         ]
       },
       technologies: ['Active Directory', 'DNS/DHCP', 'GPO', 'VPN', 'M365'],
@@ -286,14 +286,14 @@
       },
       impact: {
         en: [
-          'Delivered endpoints across **2** OS versions (Windows 10/11)',
-          'Implemented **2** network layers (switching + routing)',
-          'Reduced admin toil via **1** PowerShell toolkit'
+          { metric: '2 OS versions', text: 'endpoints delivered (Windows 10/11)' },
+          { metric: '2 layers', text: 'implemented (switching + routing)' },
+          { metric: '1 toolkit', text: 'reduced admin toil (PowerShell)' }
         ],
         fr: [
-          'Déploiement postes sur **2** OS (Windows 10/11)',
-          'Mise en place de **2** couches réseau (switching + routage)',
-          'Réduction du toil admin via **1** toolkit PowerShell'
+          { metric: '2 OS', text: 'postes déployés (Windows 10/11)' },
+          { metric: '2 couches', text: 'réseau mises en place (switching + routage)' },
+          { metric: '1 toolkit', text: 'PowerShell (toil admin réduit)' }
         ]
       },
       technologies: ['Windows 10/11', 'Networking', 'PowerShell', 'Support'],
@@ -686,13 +686,16 @@
         if (row && typeof row === 'object' && ('metric' in row || 'text' in row)) {
           const metric = row.metric ? String(row.metric) : '';
           const text = row.text ? String(row.text) : '';
+          if (!metric.trim()) {
+            return `<li class="no-metric"><span class="metric"></span><span class="metric-text">${escapeHtml(text)}</span></li>`;
+          }
           return `<li><span class="metric">${escapeHtml(metric)}</span><span class="metric-text">${escapeHtml(text)}</span></li>`;
         }
 
         const parsed = parseImpactItem(row);
         const safeMetric = escapeHtml(parsed.metric);
         const safeText = escapeHtml(parsed.text);
-        if (!safeMetric) return `<li><span class="metric-text">${safeText}</span></li>`;
+        if (!safeMetric) return `<li class="no-metric"><span class="metric"></span><span class="metric-text">${safeText}</span></li>`;
         return `<li><span class="metric">${safeMetric}</span><span class="metric-text">${safeText}</span></li>`;
       })
       .join('');
