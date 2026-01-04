@@ -637,6 +637,55 @@ body>.controls.fixed {
   transform: translateY(-2px);
 }
 
+/* CV dropdown (3 resume options) */
+.cv-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.cv-menu {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 12px);
+  right: auto;
+  min-width: 280px;
+  max-width: calc(100vw - 24px);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.14);
+  z-index: 50;
+}
+
+.cv-menu-item {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.cv-menu-item:hover,
+.cv-menu-item:focus-visible {
+  background: var(--surface-hover);
+  outline: none;
+}
+
+@media (max-width: 520px) {
+  .cv-menu {
+    top: calc(100% + 10px);
+    left: auto;
+    right: 0;
+    transform: none;
+    min-width: 260px;
+  }
+}
+
 /* Scroll Indicator */
 .hero-scroll {
   position: absolute;

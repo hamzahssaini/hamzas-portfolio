@@ -58,25 +58,32 @@
             <span class="btn-label" data-i18n="btn_contact">Get in touch</span>
           </a>
 
-          <a href="/CV_Hamza_Hssaini_Cloud_DevOps_Specialist.pdf" class="btn btn-cv"
-            download="CV_Hamza_Hssaini_Cloud_DevOps_Specialist.pdf">
-            <span class="btn-icon" aria-hidden="true">
-              <!-- PDF icon: red document with folded corner and 'PDF' label -->
-              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <defs>
-                  <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#E53935" />
-                    <stop offset="100%" stop-color="#D32F2F" />
-                  </linearGradient>
-                </defs>
-                <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="url(#g)" />
-                <path d="M13 2v5h5" fill="#fff" opacity="0.18" />
-                <text x="6" y="18.5" font-family="Inter, Arial, sans-serif" font-size="9" fill="#fff"
-                  font-weight="700">PDF</text>
-              </svg>
-            </span>
-            <span class="btn-label" data-i18n="btn_cv">Download CV</span>
-          </a>
+          <div class="cv-dropdown">
+            <button type="button" class="btn btn-cv" id="cvMenuButton" aria-haspopup="menu" aria-expanded="false">
+              <span class="btn-icon" aria-hidden="true">
+                <!-- PDF icon: red document with folded corner and 'PDF' label -->
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <defs>
+                    <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stop-color="#E53935" />
+                      <stop offset="100%" stop-color="#D32F2F" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="url(#g)" />
+                  <path d="M13 2v5h5" fill="#fff" opacity="0.18" />
+                  <text x="6" y="18.5" font-family="Inter, Arial, sans-serif" font-size="9" fill="#fff"
+                    font-weight="700">PDF</text>
+                </svg>
+              </span>
+              <span class="btn-label" data-i18n="btn_cv">Download CV</span>
+            </button>
+
+            <div class="cv-menu" id="cvMenu" role="menu" aria-label="CV" hidden>
+              <a class="cv-menu-item" role="menuitem" href="/CV_Hamza_Hssaini_Cloud_DevOps_Specialist.pdf" download="CV_Hamza_Hssaini_Cloud_DevOps_Specialist.pdf" data-i18n="cv_cloud">Cloud/DevOps Resume</a>
+              <a class="cv-menu-item" role="menuitem" href="/CV_Hamza_Hssaini_DATA.pdf" download="CV_Hamza_Hssaini_DATA.pdf" data-i18n="cv_data">Data/Analytics Resume</a>
+              <a class="cv-menu-item" role="menuitem" href="/CV_Technicien_IT_Hamza_Hssaini.pdf" download="CV_Technicien_IT_Hamza_Hssaini.pdf" data-i18n="cv_support">IT Support & Systems Resume</a>
+            </div>
+          </div>
         </div>
 
         <div class="hero-scroll reveal">

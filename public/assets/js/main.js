@@ -409,6 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
       hero_role: 'Cloud & DevOps Specialist',
       btn_contact: 'Get in touch',
       btn_cv: 'Download CV',
+      cv_cloud: 'Cloud/DevOps Resume',
+      cv_data: 'Data/Analytics Resume',
+      cv_support: 'IT Support & Systems Resume',
       btn_github: 'View Source Code',
       about_title: 'About Myself',
       projects_title: 'Project Highlights',
@@ -461,6 +464,9 @@ document.addEventListener('DOMContentLoaded', () => {
       hero_role: "Cloud & DevOps Spécialiste",
       btn_contact: 'Me contacter',
       btn_cv: 'Télécharger CV',
+      cv_cloud: 'CV Cloud/DevOps',
+      cv_data: 'CV Data/Analytics',
+      cv_support: 'CV Support IT & Systèmes',
       btn_github: 'Voir Code Source',
       about_title: 'À propos de moi',
       projects_title: 'Projets en vedette',
@@ -506,6 +512,50 @@ document.addEventListener('DOMContentLoaded', () => {
       email_copied: 'Copié !'
     }
   };
+
+  // --- CV Dropdown (3 resume versions) ---
+  (function bindCvDropdown() {
+    const button = document.getElementById('cvMenuButton');
+    const menu = document.getElementById('cvMenu');
+    if (!button || !menu) return;
+
+    function closeMenu() {
+      menu.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+    }
+
+    function openMenu() {
+      menu.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+    }
+
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isOpen = menu.hidden === false;
+      if (isOpen) closeMenu();
+      else openMenu();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (menu.hidden) return;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (button.contains(target) || menu.contains(target)) return;
+      closeMenu();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (menu.hidden) return;
+      closeMenu();
+      button.focus();
+    });
+
+    // Close after selecting an option
+    menu.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('click', () => closeMenu());
+    });
+  })();
 
   function applyLanguage(lang) {
     const map = I18N[lang] || I18N.fr;
