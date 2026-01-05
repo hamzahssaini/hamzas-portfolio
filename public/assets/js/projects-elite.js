@@ -5,7 +5,7 @@
     en: {
       searchPlaceholder: 'Search projects by skill, tech, or outcome (e.g. Azure, CI/CD, Security)',
       filterAll: 'All',
-      projectsIntro: 'DevOps & cloud projects focused on reliability, automation, and secure delivery — from CI/CD to infrastructure and RAG pipelines.',
+      projectsIntro: 'Selected Cloud/DevOps work: CI/CD, IaC, Kubernetes, and secure delivery.',
       featuredTitle: 'Featured projects',
       moreTitle: 'More projects',
       filterDevOps: 'DevOps',
@@ -29,7 +29,7 @@
     fr: {
       searchPlaceholder: 'Rechercher par compétence, techno, ou résultat (ex : Azure, CI/CD, Sécurité)',
       filterAll: 'Tous',
-      projectsIntro: "Projets DevOps & cloud axés fiabilité, automatisation et livraison sécurisée — du CI/CD à l’infrastructure et aux pipelines RAG.",
+      projectsIntro: 'Sélection Cloud/DevOps : CI/CD, IaC, Kubernetes et delivery sécurisé.',
       featuredTitle: 'Projets phares',
       moreTitle: 'Autres projets',
       filterDevOps: 'DevOps',
@@ -56,25 +56,35 @@
     {
       id: 'mission-devops',
       domains: ['devops', 'cicd', 'cloudAzure'],
-      title: { en: 'Gated Microservice Releases', fr: 'Releases microservices gatées' },
+      title: { en: 'Azure Microservices CI/CD', fr: 'CI/CD microservices Azure' },
       context: {
-        en: 'Repeatable CI/CD with deploy gates on Azure.',
-        fr: 'CI/CD reproductible avec gates de déploiement sur Azure.'
+        en: 'CI/CD automation for a microservices application deployed on Azure.',
+        fr: 'Automatisation CI/CD pour une application microservices déployée sur Azure.'
       },
       capabilities: {
-        en: ['Release automation', 'Deployment gates', 'Repeatable builds'],
-        fr: ['Automatisation des releases', 'Gates de déploiement', 'Builds reproductibles']
+        en: [
+          'GitLab CI pipelines for backend (.NET) and frontend (React)',
+          'Automated build, test, and deploy to Azure Web App',
+          'Environment separation (dev/test/prod)',
+          'Repeatable release flow to reduce manual errors'
+        ],
+        fr: [
+          'Pipelines GitLab CI backend (.NET) et frontend (React)',
+          'Build, tests et déploiement automatisés vers Azure Web App',
+          'Séparation des environnements (dev/test/prod)',
+          'Flux de release reproductible pour réduire les erreurs manuelles'
+        ]
       },
       impact: {
         en: [
-          { metric: '2 paths', text: 'standardized for delivery (.NET + React)' },
-          { metric: '3 stages', text: 'in a gated pipeline (build → test → deploy)' },
-          { metric: '1 target', text: 'in production (Azure Web App)' }
+          { metric: '2', text: 'CI/CD pipelines delivered (backend + frontend)' },
+          { metric: '3', text: 'environments separated for safer releases' },
+          { metric: '1', text: 'production deployment target (Azure Web App)' }
         ],
         fr: [
-          { metric: '2 flux', text: 'standardisés (.NET + React)' },
-          { metric: '3 étapes', text: 'dans un pipeline gaté (build → tests → déploiement)' },
-          { metric: '1 cible', text: 'en production (Azure Web App)' }
+          { metric: '2', text: 'pipelines CI/CD livrés (backend + frontend)' },
+          { metric: '3', text: 'environnements séparés pour releases plus sûres' },
+          { metric: '1', text: 'cible de déploiement production (Azure Web App)' }
         ]
       },
       technologies: ['GitLab CI', 'Azure Web App', '.NET', 'React'],
@@ -83,220 +93,269 @@
     {
       id: 'azure-hub-spoke',
       domains: ['cloudAzure', 'infrastructure'],
-      title: { en: 'Secure Hybrid Connectivity', fr: 'Connectivité hybride sécurisée' },
+      title: { en: 'Azure Hub-Spoke Hybrid Network', fr: 'Réseau hybride Azure hub-spoke' },
       context: {
-        en: 'Hub-and-spoke segmentation with encrypted site-to-site VPN.',
-        fr: 'Segmentation hub-and-spoke avec VPN site-à-site chiffré.'
+        en: 'Secure hybrid Azure architecture delivered using Infrastructure as Code.',
+        fr: 'Architecture hybride Azure sécurisée livrée via Infrastructure as Code.'
       },
       capabilities: {
-        en: ['Network segmentation', 'Encrypted hybrid VPN', 'Infrastructure as Code'],
-        fr: ['Segmentation réseau', 'VPN hybride chiffré', 'Infrastructure as Code']
+        en: [
+          'Hub & spoke network design with segmentation',
+          'IPSec site-to-site VPN for on-prem ↔ cloud connectivity',
+          'Terraform-based IaC with repeatable deployments',
+          'CI/CD pipeline for infrastructure delivery'
+        ],
+        fr: [
+          'Conception réseau hub & spoke avec segmentation',
+          'VPN IPSec site-à-site pour connectivité on-prem ↔ cloud',
+          'IaC Terraform avec déploiements reproductibles',
+          'Pipeline CI/CD pour delivery infrastructure'
+        ]
       },
       impact: {
         en: [
-          { metric: '50%', text: 'faster delivery via automated provisioning' },
-          { metric: '1 tunnel', text: 'for encrypted IPSec hybrid traffic' },
-          { metric: '1 hub', text: 'for central routing / inspection' }
+          { metric: '50%', text: 'faster infrastructure delivery' },
+          { metric: '1', text: 'standardized hub-spoke architecture' },
+          { metric: '1', text: 'IPSec tunnel enabling hybrid connectivity' }
         ],
         fr: [
-          { metric: '50%', text: 'de livraison plus rapide via provisionnement automatisé' },
-          { metric: '1 tunnel', text: 'IPSec chiffré (trafic hybride)' },
-          { metric: '1 hub', text: 'central pour routage / inspection' }
+          { metric: '50%', text: 'delivery infrastructure plus rapide' },
+          { metric: '1', text: 'architecture hub-spoke standardisée' },
+          { metric: '1', text: 'tunnel IPSec pour connectivité hybride' }
         ]
       },
-      technologies: ['Azure', 'Terraform', 'VPN Gateway', 'Azure Firewall'],
+      technologies: ['Azure', 'Terraform', 'Azure DevOps', 'Active Directory', 'Network Security'],
       architectureImage: '/images/hub-spoke-arch.png'
     },
     {
       id: 'migration-azure',
       domains: ['cloudAzure', 'cicd', 'infrastructure'],
-      title: { en: 'App Migration to Azure PaaS', fr: 'Migration application vers Azure PaaS' },
+      title: { en: 'Azure App Service Migration', fr: 'Migration Azure App Service' },
       context: {
-        en: 'GitHub Actions → Azure App Service + Azure Database for MySQL.',
-        fr: 'GitHub Actions → Azure App Service + Azure Database for MySQL.'
+        en: 'Application migration and optimization on Azure App Service.',
+        fr: 'Migration et optimisation applicative sur Azure App Service.'
       },
       capabilities: {
-        en: ['PaaS deployment', 'CI/CD cutover planning', 'Managed database migration'],
-        fr: ['Déploiement PaaS', 'Plan de cutover CI/CD', 'Migration base managée']
+        en: [
+          'Rehost & refactor migration strategy',
+          'CI/CD pipelines with GitHub Actions',
+          'Managed database deployment (Azure Database for MySQL)',
+          'Monitoring and performance optimization'
+        ],
+        fr: [
+          'Stratégie de migration rehost & refactor',
+          'Pipelines CI/CD avec GitHub Actions',
+          'Déploiement base managée (Azure Database for MySQL)',
+          'Monitoring et optimisation des performances'
+        ]
       },
       impact: {
         en: [
-          { metric: '1 target', text: 'shipped to production (Azure App Service)' },
-          { metric: '1 datastore', text: 'migrated to managed Azure MySQL (MySQL)' },
-          { metric: '1 cutover path', text: 'prepared with rollback plan' }
+          { metric: '+30%', text: 'application performance' },
+          { metric: '−20%', text: 'infrastructure costs' },
+          { metric: '1', text: 'automated deployment pipeline' }
         ],
         fr: [
-          { metric: '1 cible', text: 'livrée en production (Azure App Service)' },
-          { metric: '1 datastore', text: 'migré vers Azure MySQL managé (MySQL)' },
-          { metric: '1 plan', text: 'cutover/rollback préparé pour la release' }
+          { metric: '+30%', text: 'performance applicative' },
+          { metric: '−20%', text: 'coûts d’infrastructure' },
+          { metric: '1', text: 'pipeline de déploiement automatisé' }
         ]
       },
-      technologies: ['Azure App Service', 'GitHub Actions', 'Azure MySQL', 'Node.js'],
+      technologies: ['Azure App Service', 'GitHub Actions', 'Azure Database for MySQL', 'Node.js', 'Azure Monitor'],
       architectureImage: '/images/migration-arch.png'
     },
     {
       id: 'ansible-project',
       domains: ['devops', 'cloudAws', 'infrastructure'],
-      title: { en: 'Repeatable Server Baselines on AWS', fr: 'Baselines serveurs reproductibles sur AWS' },
+      title: { en: 'AWS Baseline Automation (Ansible)', fr: 'Automatisation baselines AWS (Ansible)' },
       context: {
-        en: 'Ansible automation with dynamic inventory + secrets encryption.',
-        fr: "Automatisation Ansible (inventaire dynamique) + chiffrement des secrets."
+        en: 'Infrastructure automation and service hardening on AWS using Ansible.',
+        fr: 'Automatisation infrastructure et durcissement de services sur AWS via Ansible.'
       },
       capabilities: {
         en: [
-          'Configuration standardization',
-          'Secrets management',
-          'OS hardening',
-          'Repeatable provisioning',
-          'Fleet consistency'
+          'Dynamic AWS EC2 inventory with aws_ec2',
+          'Automated deployment of Nginx, Docker, MySQL, Redis',
+          'Secrets management using Ansible Vault',
+          'Idempotent runs to reduce configuration drift'
         ],
         fr: [
-          'Standardisation de configuration',
-          'Gestion des secrets',
-          'Durcissement OS',
-          'Provisionnement reproductible',
-          'Cohérence de flotte'
+          'Inventaire dynamique AWS EC2 via aws_ec2',
+          'Déploiement automatisé de Nginx, Docker, MySQL, Redis',
+          'Gestion des secrets via Ansible Vault',
+          'Exécutions idempotentes pour réduire le drift'
         ]
       },
       impact: {
         en: [
-          { metric: '4 services', text: 'standardized per host baseline' },
-          { metric: '1 workflow', text: 'for Vault-based secrets encryption' },
-          { metric: '1 run', text: 'for repeatable configuration (reduced drift)' }
+          { metric: '4', text: 'services automated (Nginx, Docker, MySQL, Redis)' },
+          { metric: '1', text: 'encrypted secrets workflow (Ansible Vault)' },
+          { metric: '1', text: 'dynamic inventory source (aws_ec2)' }
         ],
         fr: [
-          { metric: '4 services', text: 'standardisés par baseline serveur' },
-          { metric: '1 workflow', text: 'pour chiffrement des secrets (Vault)' },
-          { metric: '1 exécution', text: 'reproductible de configuration (drift réduit)' }
+          { metric: '4', text: 'services automatisés (Nginx, Docker, MySQL, Redis)' },
+          { metric: '1', text: 'workflow de secrets chiffrés (Ansible Vault)' },
+          { metric: '1', text: 'source d’inventaire dynamique (aws_ec2)' }
         ]
       },
-      technologies: ['Ansible', 'AWS EC2', 'IAM', 'Linux', 'MySQL', 'Redis', 'Nginx'],
+      technologies: ['Ansible', 'AWS EC2', 'IAM', 'Linux', 'Nginx', 'Docker', 'MySQL', 'Redis'],
       architectureImage: '/images/ansible-project-arch.png'
     },
     {
       id: 'pfe-bairoutech',
       domains: ['kubernetes', 'devops', 'infrastructure'],
       title: {
-        en: 'Container Orchestration for Reliable Deployments',
-        fr: 'Orchestration conteneurs pour déploiements fiables'
+        en: 'Kubernetes Platform Blueprint',
+        fr: 'Plateforme Kubernetes (Blueprint)'
       },
       context: {
-        en: 'Kubernetes: ingress routing + probes + persistent storage.',
-        fr: 'Kubernetes : ingress + sondes + stockage persistant.'
+        en: 'Containerized and orchestrated a production-ready web application.',
+        fr: 'Containerisation et orchestration d’une application web prête production.'
       },
       capabilities: {
         en: [
-          'Health-based availability',
-          'Rolling deployments',
-          'Ingress routing',
-          'Stateful persistence',
-          'Operational resilience'
+          'Dockerization of Node.js & MongoDB',
+          'Kubernetes deployment with Ingress, PVC, health probes',
+          'High availability and deployment standardization',
+          'Security-minded rollout patterns (health-gated)'
         ],
         fr: [
-          'Disponibilité via health checks',
-          'Déploiements progressifs',
-          'Routage Ingress',
-          'Persistance stateful',
-          'Résilience opérationnelle'
+          'Dockerisation de Node.js & MongoDB',
+          'Déploiement Kubernetes avec Ingress, PVC et sondes santé',
+          'Haute disponibilité et standardisation des déploiements',
+          'Rollouts plus sûrs via gates santé (probes)'
         ]
       },
       impact: {
         en: [
-          { metric: '−40%', text: 'deployment time' },
-          { metric: '2 checks', text: 'for gated rollouts (liveness + readiness)' },
-          { metric: '1 datastore', text: 'persisted via PVC-backed storage' }
+          { metric: '40%', text: 'faster deployment cycles' },
+          { metric: '2', text: 'health probes configured (liveness + readiness)' },
+          { metric: '1', text: 'stateful persistence via PVC' }
         ],
         fr: [
-          { metric: '−40%', text: 'de temps de déploiement' },
-          { metric: '2 sondes', text: 'pour rollouts gatés (liveness + readiness)' },
-          { metric: '1 stockage', text: 'persisté via PVC' }
+          { metric: '40%', text: 'cycles de déploiement plus rapides' },
+          { metric: '2', text: 'sondes santé (liveness + readiness)' },
+          { metric: '1', text: 'persistance stateful via PVC' }
         ]
       },
-      technologies: ['Kubernetes', 'Docker', 'Node.js', 'MongoDB'],
+      technologies: ['Kubernetes', 'Docker', 'Node.js', 'MongoDB', 'Linux', 'NGINX Ingress'],
       architectureImage: '/images/k8s-arch.png'
     },
     {
       id: 'rag-chatbot',
       domains: ['aiRag', 'cloudAzure'],
-      title: { en: 'Searchable Knowledge via RAG Pipeline', fr: 'Connaissance searchable via pipeline RAG' },
+      title: { en: 'Azure RAG Chatbot (AI Search)', fr: 'Chatbot RAG Azure (AI Search)' },
       context: {
-        en: 'Blob ingestion → chunking/embeddings → vector index.',
-        fr: 'Ingestion Blob → chunking/embeddings → index vectoriel.'
+        en: 'Enterprise RAG chatbot delivering document-grounded answers on Azure.',
+        fr: 'Chatbot RAG délivrant des réponses fondées sur documents sur Azure.'
       },
       capabilities: {
-        en: ['Document ingestion', 'Vector retrieval', 'Data extraction', 'API orchestration', 'Knowledge centralization'],
-        fr: ['Ingestion documentaire', 'Recherche vectorielle', 'Extraction de données', 'Orchestration API', 'Centralisation de connaissance']
+        en: [
+          'End-to-end RAG pipeline (ingestion → embeddings → vector search)',
+          'Hybrid search (Top-K) with Azure AI Search',
+          'Secure backend orchestration with Node.js/Express',
+          'Modular architecture for scalability'
+        ],
+        fr: [
+          'Pipeline RAG bout-en-bout (ingestion → embeddings → recherche vectorielle)',
+          'Recherche hybride (Top-K) avec Azure AI Search',
+          'Orchestration backend sécurisée en Node.js/Express',
+          'Architecture modulaire et scalable'
+        ]
       },
       impact: {
         en: [
-          { metric: '2 formats', text: 'indexed into 1 vector index (PDF + DOCX)' },
-          { metric: '4 steps', text: 'for ingestion (blob → chunk → embed → index)' },
-          { metric: '1 API', text: 'for retrieval surface' }
+          { metric: '3', text: 'pipeline stages (ingest → embed → retrieve)' },
+          { metric: '1', text: 'vector search layer (Azure AI Search)' },
+          { metric: '1', text: 'retrieval API for orchestration' }
         ],
         fr: [
-          { metric: '2 formats', text: 'indexés dans 1 index vectoriel (PDF + DOCX)' },
-          { metric: '4 étapes', text: "pour l’ingestion (blob → chunk → embed → index)" },
-          { metric: '1 API', text: 'backend pour le retrieval' }
+          { metric: '3', text: 'étapes (ingest → embed → retrieve)' },
+          { metric: '1', text: 'couche de recherche vectorielle (Azure AI Search)' },
+          { metric: '1', text: 'API de retrieval pour orchestration' }
         ]
       },
-      technologies: ['Azure OpenAI', 'Azure AI Search', 'Node.js', 'Bootstrap'],
+      technologies: ['Azure OpenAI', 'Azure AI Search', 'Blob Storage', 'Node.js', 'Express', 'Bootstrap'],
       architectureImage: '/images/rag-arch.png'
     },
     {
       id: 'bairoutech-admin',
       domains: ['systems', 'infrastructure'],
       title: {
-        en: 'Enterprise Identity & Endpoint Operations',
-        fr: 'Opérations identité & postes en entreprise'
+        en: 'Windows Identity & M365 Operations',
+        fr: 'Identité Windows & opérations M365'
       },
-      context: { en: 'AD/GPO + DNS/DHCP + VPN + MFA.', fr: 'AD/GPO + DNS/DHCP + VPN + MFA.' },
+      context: {
+        en: 'Enterprise Windows Server and Microsoft 365 administration.',
+        fr: 'Administration Windows Server et Microsoft 365 en entreprise.'
+      },
       capabilities: {
-        en: ['Identity administration', 'Policy enforcement', 'Secure remote access', 'Operational support', 'Incident reduction'],
-        fr: ['Administration identité', 'Application des politiques', 'Accès distant sécurisé', 'Support opérationnel', "Réduction d'incidents"]
+        en: [
+          'Active Directory, DNS, DHCP, GPO administration',
+          'Site-to-site VPN for secure remote access',
+          'Microsoft 365 tenant operations (MFA, licensing)',
+          'Policy enforcement for standardized workstations'
+        ],
+        fr: [
+          'Administration Active Directory, DNS, DHCP et GPO',
+          'VPN site-à-site pour accès distant sécurisé',
+          'Opérations tenant Microsoft 365 (MFA, licences)',
+          'Application des politiques pour standardiser les postes'
+        ]
       },
       impact: {
         en: [
-          { metric: '3 services', text: 'standardized (AD + DNS + DHCP)' },
-          { metric: '2 controls', text: 'for hardened access (VPN + MFA)' },
-          { metric: '1 baseline', text: 'enforced via GPO (workstations)' }
+          { metric: '4', text: 'core services administered (AD, DNS, DHCP, GPO)' },
+          { metric: '2', text: 'security controls operated (VPN + MFA)' },
+          { metric: '1', text: 'tenant administered (Microsoft 365)' }
         ],
         fr: [
-          { metric: '3 services', text: 'standardisés (AD + DNS + DHCP)' },
-          { metric: '2 contrôles', text: 'pour accès renforcé (VPN + MFA)' },
-          { metric: '1 baseline', text: 'poste appliquée via GPO' }
+          { metric: '4', text: 'services administrés (AD, DNS, DHCP, GPO)' },
+          { metric: '2', text: 'contrôles sécurité (VPN + MFA)' },
+          { metric: '1', text: 'tenant administré (Microsoft 365)' }
         ]
       },
-      technologies: ['Active Directory', 'DNS/DHCP', 'GPO', 'VPN', 'M365'],
+      technologies: ['Windows Server', 'Active Directory', 'GPO', 'VPN', 'Microsoft 365', 'MFA'],
       architectureImage: '/images/admin-arch.png'
     },
     {
       id: 'ifmotica-network',
       domains: ['systems', 'infrastructure'],
       title: {
-        en: 'Office Network & Workstation Readiness',
-        fr: 'Réseau bureau & préparation des postes'
+        en: 'Network Deployment & Support Automation',
+        fr: 'Déploiement réseau & automatisation support'
       },
       context: {
-        en: 'Switching/routing + Windows domain tooling.',
-        fr: 'Switching/routage + outillage domaine Windows.'
+        en: 'IT infrastructure deployment and support automation for office environments.',
+        fr: 'Déploiement d’infrastructure IT et automatisation du support en environnement bureau.'
       },
       capabilities: {
-        en: ['Network deployment', 'Endpoint readiness', 'Admin automation', 'Operational setup', 'User onboarding'],
-        fr: ['Déploiement réseau', 'Préparation des postes', 'Automatisation admin', 'Mise en place opérationnelle', 'Onboarding utilisateurs']
+        en: [
+          'Network equipment configuration (routers, switches)',
+          'Windows 10/11 deployment and workstation imaging',
+          'PowerShell GUI tool for Active Directory automation',
+          'N1/N2 support workflows for incident handling'
+        ],
+        fr: [
+          'Configuration équipements réseau (routeurs, switchs)',
+          'Déploiement Windows 10/11 et imaging des postes',
+          'Outil PowerShell GUI pour automatisation Active Directory',
+          'Process support N1/N2 pour gestion d’incidents'
+        ]
       },
       impact: {
         en: [
-          { metric: '2 OS versions', text: 'endpoints delivered (Windows 10/11)' },
-          { metric: '2 layers', text: 'implemented (switching + routing)' },
-          { metric: '1 toolkit', text: 'reduced admin toil (PowerShell)' }
+          { metric: '1', text: 'PowerShell GUI tool delivered for AD tasks' },
+          { metric: '2', text: 'support tiers covered (N1/N2)' },
+          { metric: '2', text: 'OS versions deployed (Windows 10/11)' }
         ],
         fr: [
-          { metric: '2 OS', text: 'postes déployés (Windows 10/11)' },
-          { metric: '2 couches', text: 'réseau mises en place (switching + routage)' },
-          { metric: '1 toolkit', text: 'PowerShell (toil admin réduit)' }
+          { metric: '1', text: 'outil PowerShell GUI livré pour tâches AD' },
+          { metric: '2', text: 'niveaux de support couverts (N1/N2)' },
+          { metric: '2', text: 'versions Windows déployées (10/11)' }
         ]
       },
-      technologies: ['Windows 10/11', 'Networking', 'PowerShell', 'Support'],
+      technologies: ['PowerShell', 'Active Directory', 'Windows', 'Networking', 'IT Support'],
       architectureImage: '/images/network-arch.png'
     }
   ];
@@ -671,12 +730,11 @@
     card.className = 'elite-card';
 
     const context = p.context && p.context[l] ? p.context[l] : '';
-    const meta = projectMetaLine(p, l);
     const cap = p.capabilities && p.capabilities[l] ? p.capabilities[l] : [];
     const impact = p.impact && p.impact[l] ? p.impact[l] : [];
 
     const capItems = cap
-      .slice(0, 3)
+      .slice(0, 4)
       .map((li) => `<li>${escapeHtml(li)}</li>`)
       .join('');
 
@@ -700,14 +758,12 @@
       })
       .join('');
 
-    const tech = Array.isArray(p.technologies) ? p.technologies.slice(0, 4) : [];
-    tech.sort((a, b) => String(a).localeCompare(String(b)));
+    const tech = Array.isArray(p.technologies) ? p.technologies.slice(0, 8) : [];
     const techTags = tech.map((t) => `<span class="elite-tag">${escapeHtml(t)}</span>`).join('');
 
     card.innerHTML = `
       <div class="elite-header">
         <h3 class="elite-title">${escapeHtml(p.title[l] || '')}</h3>
-        ${meta ? `<div class="elite-meta">${escapeHtml(meta)}</div>` : ''}
       </div>
       ${context ? `<p class="elite-context">${escapeHtml(context)}</p>` : ''}
 

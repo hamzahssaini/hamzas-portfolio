@@ -38,6 +38,11 @@
    - Impact visually dominant
    ========================================================== */
 
+/* Projects section needs a wider canvas so the fixed-width grid can stay centered */
+#projects .container {
+    max-width: 100%;
+}
+
 .elite-projects {
     width: 100%;
     margin-top: 1.25rem;
@@ -45,7 +50,7 @@
 
 .projects-shell {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1060px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -112,7 +117,7 @@
 
 .projects-toolbar-surface {
     width: 100%;
-    max-width: 1040px;
+    max-width: 1060px;
     margin-left: auto;
     margin-right: auto;
     background: var(--proj-card-bg-light);
@@ -209,6 +214,7 @@
     justify-content: flex-start;
     overflow-x: auto;
     white-space: nowrap;
+    padding-left: 0.4rem;
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
@@ -305,17 +311,18 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    justify-content: center;
 }
 
 @media (min-width: 768px) {
     .elite-projects-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 320px);
     }
 }
 
 @media (min-width: 1024px) {
     .elite-projects-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 320px);
     }
 }
 
@@ -401,6 +408,9 @@
     font-size: 0.9rem;
     line-height: 1.4;
     color: var(--proj-text-secondary-light);
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
 }
 
 [data-theme="dark"] .elite-context {
@@ -466,6 +476,7 @@
 .elite-impact-list li {
     display: block;
     width: 100%;
+    min-width: 0;
     font-size: 0.84rem;
     line-height: 1.28;
     color: var(--proj-text-primary-light);
@@ -488,11 +499,13 @@
     min-width: 0;
     text-align: left;
     font-weight: 900;
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     letter-spacing: 0.01em;
     font-variant-numeric: tabular-nums;
     color: var(--proj-primary);
     white-space: nowrap;
+    display: block;
+    line-height: 1.0;
 }
 
 [data-theme="dark"] .elite-impact-list .metric {
@@ -502,14 +515,23 @@
 .elite-impact-list .metric-text {
     color: inherit;
     padding-top: 0;
-    display: inline;
+    display: block;
     text-align: left;
+    font-size: 0.72rem;
+    line-height: 1.15;
+    color: var(--proj-text-secondary-light);
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+}
+
+[data-theme="dark"] .elite-impact-list .metric-text {
+    color: var(--proj-text-secondary-dark);
 }
 
 .elite-impact-list li:not(.no-metric) .metric-text::before {
-    content: ' ';
-    margin-right: 0;
-    color: var(--proj-text-secondary-light);
+    content: '';
 }
 
 .elite-impact-list li.no-metric .metric-text::before {
@@ -562,20 +584,25 @@
 .elite-cta {
     flex: 0 0 auto;
     border: 0;
-    background-color: var(--proj-primary);
-    color: #ffffff;
+    background: transparent;
+    color: var(--proj-text-primary-light);
     font-weight: 700;
     font-size: 0.82rem;
-    padding: 0.58rem 0.9rem;
+    padding: 0.56rem 0.9rem;
     border-radius: 0.7rem;
     cursor: pointer;
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.16);
-    transition: background-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.10);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+[data-theme="dark"] .elite-cta {
+    color: var(--proj-text-primary-dark);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
 .elite-cta:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25), 0 12px 26px rgba(37, 99, 235, 0.20);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.20), inset 0 0 0 1px rgba(37, 99, 235, 0.25);
 }
 
 .elite-cta:active {
@@ -583,9 +610,14 @@
 }
 
 .elite-cta:hover {
-    background-color: var(--proj-primary-hover);
+    background-color: rgba(15, 23, 42, 0.03);
     transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.20);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.14);
+}
+
+[data-theme="dark"] .elite-cta:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 @media (max-width: 420px) {
