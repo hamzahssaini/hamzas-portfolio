@@ -532,56 +532,41 @@
     overlay.id = 'archModalOverlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', 'Architecture');
+    overlay.setAttribute('aria-label', 'Gallery');
 
     overlay.innerHTML = `
-      <div class="modal-controls" role="toolbar" aria-label="Architecture controls">
-        <button type="button" class="control-icon-btn" data-action="zoomOut" aria-label="Zoom out" title="Zoom out">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
-        </button>
-        <button type="button" class="control-icon-btn" data-action="zoomIn" aria-label="Zoom in" title="Zoom in">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-        </button>
-        <a class="control-icon-btn" data-action="download" aria-label="Download" title="Download" href="#" download>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-        </a>
-        <button type="button" class="control-icon-btn close-btn" data-action="close" aria-label="Close" title="Close">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <div class="modal-content">
-        <div class="modal-image-container">
-          <img class="modal-image" id="archModalImage" alt="" />
+      <div class="gallery-modal" role="document" aria-label="Gallery window">
+        <div class="gallery-modal-header">
+          <div class="gallery-modal-title">
+            <span class="gallery-modal-title-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M8 13l2.5-2.5L15 15l2-2 4 4" />
+                <circle cx="9" cy="10" r="1" />
+              </svg>
+            </span>
+            <span class="gallery-modal-title-text" id="galleryModalTitle"></span>
+          </div>
+          <button type="button" class="gallery-modal-close" data-action="close" aria-label="Close" title="Close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+          </button>
         </div>
-        <div class="modal-caption" id="archModalCaption"></div>
+
+        <div class="gallery-modal-body">
+          <figure class="gallery-modal-figure">
+            <img class="gallery-modal-image" id="galleryModalImage" alt="" />
+            <figcaption class="gallery-modal-caption" id="galleryModalCaption"></figcaption>
+          </figure>
+
+          <div class="gallery-modal-pagination" id="galleryModalPagination" aria-label="Gallery pagination"></div>
+        </div>
       </div>
     `;
 
     document.body.appendChild(overlay);
 
-    const img = overlay.querySelector('#archModalImage');
-    let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-
-    function applyTransform() {
-      if (!img) return;
-      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    }
-
-    function resetView() {
-      scale = 1;
-      translateX = 0;
-      translateY = 0;
-      applyTransform();
-    }
-
     function setOpen(open) {
       overlay.classList.toggle('open', !!open);
-      if (!open) resetView();
     }
 
     function close() {
@@ -593,93 +578,124 @@
     });
 
     overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {
+        close();
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        try { window.__galleryPrev && window.__galleryPrev(); } catch (err) { }
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        try { window.__galleryNext && window.__galleryNext(); } catch (err) { }
+      }
     });
 
-    overlay.querySelectorAll('[data-action]').forEach((el) => {
-      el.addEventListener('click', () => {
-        const action = el.getAttribute('data-action');
-        if (!action) return;
-        if (action === 'close') {
-          close();
-          return;
-        }
-        if (action === 'zoomIn') {
-          scale = Math.min(4, +(scale + 0.2).toFixed(2));
-          applyTransform();
-          return;
-        }
-        if (action === 'zoomOut') {
-          scale = Math.max(1, +(scale - 0.2).toFixed(2));
-          applyTransform();
-        }
-      });
-    });
+    const closeBtn = overlay.querySelector('[data-action="close"]');
+    if (closeBtn) closeBtn.addEventListener('click', () => close());
 
-    if (img) {
-      img.addEventListener('mousedown', (e) => {
-        if (scale <= 1) return;
-        isDragging = true;
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-        img.style.cursor = 'grabbing';
-        e.preventDefault();
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        applyTransform();
-      });
-
-      window.addEventListener('mouseup', () => {
-        isDragging = false;
-        if (img) img.style.cursor = scale > 1 ? 'grab' : 'default';
-      });
+    function getCaptionText(item, l) {
+      if (!item) return '';
+      const cap = item.caption;
+      if (!cap) return '';
+      if (typeof cap === 'string') return cap;
+      if (typeof cap === 'object') return String(cap[l] || cap.en || cap.fr || '');
+      return '';
     }
 
-    window.__openArchitectureModal = (src, caption, lang) => {
-      const l = lang === 'en' ? 'en' : 'fr';
-      const strings = UI[l];
+    let galleryItems = [];
+    let galleryIndex = 0;
+    let galleryLang = 'fr';
+    let galleryTitle = '';
 
-      const zoomOutBtn = overlay.querySelector('[data-action="zoomOut"]');
-      const zoomInBtn = overlay.querySelector('[data-action="zoomIn"]');
-      const downloadBtn = overlay.querySelector('[data-action="download"]');
-      const closeBtn = overlay.querySelector('[data-action="close"]');
-      if (zoomOutBtn) {
-        zoomOutBtn.setAttribute('aria-label', strings.modalZoomOut);
-        zoomOutBtn.title = strings.modalZoomOut;
-      }
-      if (zoomInBtn) {
-        zoomInBtn.setAttribute('aria-label', strings.modalZoomIn);
-        zoomInBtn.title = strings.modalZoomIn;
-      }
-      if (downloadBtn) {
-        downloadBtn.setAttribute('aria-label', strings.modalDownload);
-        downloadBtn.title = strings.modalDownload;
-      }
-      if (closeBtn) {
-        closeBtn.setAttribute('aria-label', strings.modalClose);
-        closeBtn.title = strings.modalClose;
+    function renderPagination() {
+      const el = overlay.querySelector('#galleryModalPagination');
+      if (!el) return;
+      const total = galleryItems.length;
+      if (total <= 1) {
+        el.innerHTML = '';
+        return;
       }
 
-      const captionEl = overlay.querySelector('#archModalCaption');
-      const imgEl = overlay.querySelector('#archModalImage');
+      const prevDisabled = galleryIndex <= 0;
+      const nextDisabled = galleryIndex >= total - 1;
+
+      const pages = Array.from({ length: total }).map((_, i) => {
+        const active = i === galleryIndex;
+        return `<button type="button" class="gallery-page-btn${active ? ' is-active' : ''}" data-page="${i}" aria-label="Page ${i + 1}">${i + 1}</button>`;
+      }).join('');
+
+      el.innerHTML = `
+        <button type="button" class="gallery-arrow-btn" data-nav="prev" ${prevDisabled ? 'disabled' : ''} aria-label="Previous">‹</button>
+        <div class="gallery-pages">${pages}</div>
+        <button type="button" class="gallery-arrow-btn" data-nav="next" ${nextDisabled ? 'disabled' : ''} aria-label="Next">›</button>
+      `;
+
+      el.querySelectorAll('[data-page]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const raw = btn.getAttribute('data-page');
+          const idx = raw ? parseInt(raw, 10) : 0;
+          if (Number.isFinite(idx)) {
+            galleryIndex = Math.max(0, Math.min(total - 1, idx));
+            renderSlide();
+          }
+        });
+      });
+
+      const prevBtn = el.querySelector('[data-nav="prev"]');
+      const nextBtn = el.querySelector('[data-nav="next"]');
+      if (prevBtn) prevBtn.addEventListener('click', () => { if (!prevDisabled) { galleryIndex -= 1; renderSlide(); } });
+      if (nextBtn) nextBtn.addEventListener('click', () => { if (!nextDisabled) { galleryIndex += 1; renderSlide(); } });
+    }
+
+    function renderSlide() {
+      const titleEl = overlay.querySelector('#galleryModalTitle');
+      if (titleEl) titleEl.textContent = galleryTitle || '';
+
+      const imgEl = overlay.querySelector('#galleryModalImage');
+      const capEl = overlay.querySelector('#galleryModalCaption');
+      const item = galleryItems[galleryIndex];
+
+      const src = item && item.src ? String(item.src) : '';
+      const caption = getCaptionText(item, galleryLang);
       if (imgEl) {
         imgEl.src = src;
-        imgEl.alt = strings.modalAlt;
-        imgEl.style.cursor = 'default';
+        imgEl.alt = galleryTitle || 'Image';
       }
-      if (downloadBtn && src) {
-        downloadBtn.setAttribute('href', src);
-        downloadBtn.setAttribute('download', (caption || 'architecture') + '.png');
-      }
-      if (captionEl) captionEl.textContent = caption || '';
+      if (capEl) capEl.textContent = caption || '';
 
+      renderPagination();
+    }
+
+    window.__galleryPrev = () => {
+      if (galleryIndex <= 0) return;
+      galleryIndex -= 1;
+      renderSlide();
+    };
+
+    window.__galleryNext = () => {
+      if (galleryIndex >= galleryItems.length - 1) return;
+      galleryIndex += 1;
+      renderSlide();
+    };
+
+    window.__openGalleryModal = (items, title, lang, startIndex) => {
+      galleryLang = (lang || '').toLowerCase() === 'en' ? 'en' : 'fr';
+      galleryTitle = String(title || '');
+      galleryItems = Array.isArray(items) ? items.filter(x => x && x.src) : [];
+      if (!galleryItems.length) return;
+      galleryIndex = Number.isFinite(startIndex) ? Math.max(0, Math.min(galleryItems.length - 1, startIndex)) : 0;
+      renderSlide();
       setOpen(true);
       overlay.tabIndex = -1;
       overlay.focus();
+    };
+
+    // Backward-compatible hook: single image opens as a 1-item gallery.
+    window.__openArchitectureModal = (src, caption, lang) => {
+      const l = (lang || '').toLowerCase() === 'en' ? 'en' : 'fr';
+      const items = [{ src: src, caption: caption ? { en: String(caption), fr: String(caption) } : '' }];
+      window.__openGalleryModal(items, String(caption || ''), l, 0);
     };
   }
 
@@ -803,6 +819,10 @@
     const archSrc = p && typeof p === 'object' ? String(p.architectureImage || '') : '';
     const hasArch = !!(archSrc && archSrc.trim() !== '');
 
+    const gallery = (p && typeof p === 'object' && Array.isArray(p.gallery)) ? p.gallery : [];
+    const hasGallery = !!(gallery && Array.isArray(gallery) && gallery.length > 0);
+    const hasMedia = hasGallery || hasArch;
+
     const dateRaw = (p && typeof p === 'object') ? (p.date ?? p.period ?? '') : '';
     const dateText = (() => {
       if (!dateRaw) return '2025 - present';
@@ -869,7 +889,7 @@
     `;
 
     const archIcon = `
-      <button type="button" class="elite-icon-btn elite-icon-btn--arch primary${hasArch ? '' : ' is-disabled'}" aria-label="Open architecture" title="${hasArch ? (strings.viewArchitecture || 'Open architecture') : 'Add architecture image'}" ${hasArch ? '' : 'disabled'} data-arch="${escapeHtml(archSrc)}" data-caption="${escapeHtml(p.title[l] || '')}">
+      <button type="button" class="elite-icon-btn elite-icon-btn--arch primary${hasMedia ? '' : ' is-disabled'}" aria-label="Open images" title="${hasMedia ? (strings.viewArchitecture || 'Open images') : 'Add images'}" ${hasMedia ? '' : 'disabled'} data-project-id="${escapeHtml(p.id || '')}" data-arch="${escapeHtml(archSrc)}" data-caption="${escapeHtml(p.title[l] || '')}">
         <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="5" width="18" height="14" rx="2" />
           <path d="M8 13l2.5-2.5L15 15l2-2 4 4" />
@@ -912,10 +932,25 @@
   function bindCtas(container, l) {
     container.querySelectorAll('.elite-icon-btn--arch').forEach((btn) => {
       btn.addEventListener('click', () => {
+        const projectId = btn.getAttribute('data-project-id') || '';
         const src = btn.getAttribute('data-arch') || '';
         const caption = btn.getAttribute('data-caption') || '';
-        if (!src) return;
+
+        const project = PROJECTS.find(p => p && String(p.id || '') === String(projectId || ''));
+        const gallery = (project && Array.isArray(project.gallery)) ? project.gallery : [];
+
+        const items = (gallery && gallery.length)
+          ? gallery
+          : (src ? [{ src: src, caption: { en: caption, fr: caption } }] : []);
+
+        if (!items.length) return;
         ensureModal();
+        if (typeof window.__openGalleryModal === 'function') {
+          const title = project && project.title ? (project.title[l] || project.title.en || project.title.fr || caption) : caption;
+          window.__openGalleryModal(items, title, l, 0);
+          return;
+        }
+
         if (typeof window.__openArchitectureModal === 'function') {
           window.__openArchitectureModal(src, caption, l);
         }
