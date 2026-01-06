@@ -2537,11 +2537,11 @@ body>.controls.fixed {
 }
 
 .ref-ribbon.personal {
-  background: #10b981;
+  background: #ef4444;
 }
 
 .ref-ribbon.personal::after {
-  border-top-color: #064e3b;
+  border-top-color: #991b1b;
 }
 
 
@@ -2601,9 +2601,26 @@ body>.controls.fixed {
   transition: background 0.2s, transform 0.2s;
 }
 
+.ref-icon-btn:disabled,
+.ref-icon-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ref-icon-btn:disabled:hover,
+.ref-icon-btn.is-disabled:hover {
+  background: inherit;
+  transform: none;
+}
+
 .ref-icon-btn:hover {
   background: var(--accent-primary);
   transform: scale(1.1);
+}
+
+.ref-icon-btn.primary {
+  background: var(--accent-primary);
 }
 
 [data-theme="dark"] .ref-tag {
@@ -2614,6 +2631,10 @@ body>.controls.fixed {
 
 [data-theme="dark"] .ref-icon-btn {
   background: #4b5563;
+}
+
+[data-theme="dark"] .ref-icon-btn.primary {
+  background: var(--accent-primary);
 }
 
 /* -- Redesigned Education Section (Multinational/Professional) -- */

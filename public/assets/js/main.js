@@ -217,11 +217,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const shortDesc = truncate(fullDesc, 220);
     const shortLongDesc = p.longDesc ? truncate(p.longDesc, 150) : '';
 
-    const linkIcon = hasRepo
-      ? `<button class="ref-icon-btn link-trigger" aria-label="View Project" title="View Project">
-           <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-         </button>`
-      : '';
+    const linkIcon = `
+      <button class="ref-icon-btn link-trigger${hasRepo ? '' : ' is-disabled'}" aria-label="Open GitHub repo" title="${hasRepo ? 'Open GitHub repo' : 'Add GitHub repo URL'}" ${hasRepo ? '' : 'disabled'}>
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
+    `;
+
+    const imageIcon = `
+      <button class="ref-icon-btn primary image-trigger${hasImage ? '' : ' is-disabled'}" aria-label="Open image preview" title="${hasImage ? 'Open image preview' : 'Add image / gallery'}" ${hasImage ? '' : 'disabled'}>
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="M8 13l2.5-2.5L15 15l2-2 4 4" />
+          <circle cx="9" cy="10" r="1" />
+        </svg>
+      </button>
+    `;
 
 
     const isWork = p.type && p.type.toLowerCase() === 'work';
@@ -239,9 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
              <div class="${ribbonClass}">${ribbonText}</div>
           </div>
         </div>
-        <div class="ref-icons">
-          ${linkIcon}
-        </div>
+        <div class="ref-icons">${linkIcon}${imageIcon}</div>
       </div>
 
       <div class="ref-body">
@@ -264,9 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Repo link click: open GitHub (or repo URL) in a new tab
-    if (hasRepo) {
+    {
       const lbtn = card.querySelector('.link-trigger');
-      if (lbtn) {
+      if (lbtn && hasRepo) {
         lbtn.addEventListener('click', (ev) => {
           ev.stopPropagation();
           try {
@@ -275,6 +283,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // fallback: set location
             window.location.href = p.repo;
           }
+        });
+      }
+    }
+
+    // Image click: open lightbox directly (without opening the brief modal)
+    {
+      const ibtn = card.querySelector('.image-trigger');
+      if (ibtn && hasImage) {
+        ibtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          openLightbox(imgSrc, rawTitle);
         });
       }
     }
@@ -454,7 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
       less: 'Less',
       form_name: 'Full Name',
       contact_mail_label: 'Mail me',
-      email_copied: 'Copied!'
+      email_copied: 'Copied!',
+      phone_copied: 'Copied!'
     },
     fr: {
       nav_about: 'À propos',
@@ -509,7 +529,8 @@ document.addEventListener('DOMContentLoaded', () => {
       less: 'Réduire',
       form_name: 'Nom Complet',
       contact_mail_label: 'M\'envoyer un mail',
-      email_copied: 'Copié !'
+      email_copied: 'Copié !',
+      phone_copied: 'Copié !'
     }
   };
 
@@ -559,6 +580,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyLanguage(lang) {
     const map = I18N[lang] || I18N.fr;
+
+    // Keep the document language in sync for accessibility/SEO.
+    try {
+      document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'fr');
+    } catch (e) { }
+
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (!map[key]) return;
@@ -859,6 +886,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(err => {
           console.error('Failed to copy: ', err);
         });
+      });
+    }
+
+    // Phone Copy Logic
+    const phoneCard = document.getElementById('phoneCard');
+    if (phoneCard) {
+      phoneCard.addEventListener('click', async () => {
+        const valueEl = phoneCard.querySelector('.detail-value');
+        const feedbackEl = phoneCard.querySelector('.copy-feedback');
+        const phone = valueEl ? String(valueEl.textContent || '').trim() : '';
+        if (!phone) return;
+
+        try {
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            await navigator.clipboard.writeText(phone);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = phone;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.top = '-1000px';
+            ta.style.left = '-1000px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+
+          if (feedbackEl && valueEl) {
+            valueEl.style.display = 'none';
+            feedbackEl.style.display = 'inline';
+            setTimeout(() => {
+              feedbackEl.style.display = 'none';
+              valueEl.style.display = 'inline';
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Failed to copy phone: ', err);
+        }
       });
     }
   }

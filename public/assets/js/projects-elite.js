@@ -16,6 +16,8 @@
       filterInfrastructure: 'Infrastructure',
       filterSystems: 'Systems & Support',
       filterAiRag: 'AI / RAG',
+      showMore: 'More projects',
+      hideMore: 'Hide projects',
       capabilities: 'Capabilities',
       impact: 'Impact',
       technologies: 'Technologies',
@@ -40,6 +42,8 @@
       filterInfrastructure: 'Infrastructure',
       filterSystems: 'Systèmes & Support',
       filterAiRag: 'IA / RAG',
+      showMore: 'Plus de projets',
+      hideMore: 'Masquer',
       capabilities: 'Capacités',
       impact: 'Impact',
       technologies: 'Technologies',
@@ -57,6 +61,9 @@
       id: 'mission-devops',
       domains: ['devops', 'cicd', 'cloudAzure'],
       title: { en: 'Azure Microservices CI/CD', fr: 'CI/CD microservices Azure' },
+      date: 'dec 2025 - present',
+      type: 'Work',
+      repo: '',
       context: {
         en: 'CI/CD automation for a microservices application deployed on Azure.',
         fr: 'Automatisation CI/CD pour une application microservices déployée sur Azure.'
@@ -94,6 +101,9 @@
       id: 'azure-hub-spoke',
       domains: ['cloudAzure', 'infrastructure'],
       title: { en: 'Azure Hub-Spoke Hybrid Network', fr: 'Réseau hybride Azure hub-spoke' },
+      date: 'Oct 2025 – Nov 2025',
+      type: 'Personal',
+      repo: 'https://github.com/hamzahssaini/Project-Azure-Hybrid-Infra',
       context: {
         en: 'Secure hybrid Azure architecture delivered using Infrastructure as Code.',
         fr: 'Architecture hybride Azure sécurisée livrée via Infrastructure as Code.'
@@ -131,6 +141,9 @@
       id: 'migration-azure',
       domains: ['cloudAzure', 'cicd', 'infrastructure'],
       title: { en: 'Azure App Service Migration', fr: 'Migration Azure App Service' },
+      date: 'Août 2025 – Oct 2025',
+      type: 'Personal',
+      repo: 'https://github.com/hamzahssaini/mig-to-azure-via-Terraform',
       context: {
         en: 'Application migration and optimization on Azure App Service.',
         fr: 'Migration et optimisation applicative sur Azure App Service.'
@@ -168,6 +181,9 @@
       id: 'ansible-project',
       domains: ['devops', 'cloudAws', 'infrastructure'],
       title: { en: 'AWS Baseline Automation (Ansible)', fr: 'Automatisation baselines AWS (Ansible)' },
+      date: 'Déc 2025',
+      type: 'Personal',
+      repo: 'https://github.com/hamzahssaini/ansible-aws-devops',
       context: {
         en: 'Infrastructure automation and service hardening on AWS using Ansible.',
         fr: 'Automatisation infrastructure et durcissement de services sur AWS via Ansible.'
@@ -208,6 +224,9 @@
         en: 'Kubernetes Platform Blueprint',
         fr: 'Plateforme Kubernetes (Blueprint)'
       },
+      date: 'Févr 2025 – Juin 2025',
+      type: 'Work',
+      repo: 'https://github.com/hamzahssaini/kubernetes-K8s-nodejs-mongodb-ci-cd',
       context: {
         en: 'Containerized and orchestrated a production-ready web application.',
         fr: 'Containerisation et orchestration d’une application web prête production.'
@@ -245,6 +264,9 @@
       id: 'rag-chatbot',
       domains: ['aiRag', 'cloudAzure'],
       title: { en: 'Azure RAG Chatbot (AI Search)', fr: 'Chatbot RAG Azure (AI Search)' },
+      date: 'Déc 2025',
+      type: 'Personal',
+      repo: 'https://github.com/hamzahssaini/Chatbot-Project',
       context: {
         en: 'Enterprise RAG chatbot delivering document-grounded answers on Azure.',
         fr: 'Chatbot RAG délivrant des réponses fondées sur documents sur Azure.'
@@ -285,6 +307,9 @@
         en: 'Windows Identity & M365 Operations',
         fr: 'Identité Windows & opérations M365'
       },
+      date: 'Févr 2025 – Juin 2025',
+      type: 'Work',
+      repo: '',
       context: {
         en: 'Enterprise Windows Server and Microsoft 365 administration.',
         fr: 'Administration Windows Server et Microsoft 365 en entreprise.'
@@ -325,6 +350,9 @@
         en: 'Network Deployment & Support Automation',
         fr: 'Déploiement réseau & automatisation support'
       },
+      date: 'dec 2024 - Mai 2025',
+      type: 'Work',
+      repo: '',
       context: {
         en: 'IT infrastructure deployment and support automation for office environments.',
         fr: 'Déploiement d’infrastructure IT et automatisation du support en environnement bureau.'
@@ -389,7 +417,8 @@
   const state = {
     query: '',
     activeFilter: 'all',
-    lang: getLang()
+    lang: getLang(),
+    showMore: false
   };
 
   const FEATURED_IDS = new Set([
@@ -684,12 +713,12 @@
               <h3 class="projects-section-title" id="projectsFeaturedTitle"></h3>
             </div>
             <div class="elite-projects-grid" id="projectsFeaturedGrid"></div>
+            <div class="projects-more-row" id="projectsMoreRow">
+              <button type="button" class="projects-more-toggle" id="projectsMoreToggle"></button>
+            </div>
           </section>
 
           <section class="projects-section" data-section="more">
-            <div class="projects-section-header">
-              <h3 class="projects-section-title" id="projectsMoreTitle"></h3>
-            </div>
             <div class="elite-projects-grid" id="projectsMoreGrid"></div>
           </section>
         </div>
@@ -729,6 +758,69 @@
     const card = document.createElement('article');
     card.className = 'elite-card';
 
+    function localizeDateString(input, lang) {
+      const raw = String(input || '');
+      if (!raw.trim()) return raw;
+
+      // Localize common month abbreviations used in this portfolio.
+      // Keeps the rest of the date string intact (years, separators, etc.).
+      const frToEn = [
+        [/\bjanv\.?\b/gi, 'Jan'],
+        [/\bf[ée]vr\.?\b/gi, 'Feb'],
+        [/\bmars\b/gi, 'Mar'],
+        [/\bavr\.?\b/gi, 'Apr'],
+        [/\bmai\b/gi, 'May'],
+        [/\bjuin\b/gi, 'Jun'],
+        [/\bjuil\.?\b/gi, 'Jul'],
+        [/\bao[ûu]t\b/gi, 'Aug'],
+        [/\bsept\.?\b/gi, 'Sep'],
+        [/\boct\.?\b/gi, 'Oct'],
+        [/\bnov\.?\b/gi, 'Nov'],
+        [/\bd[ée]c\.?\b/gi, 'Dec']
+      ];
+
+      const enToFr = [
+        [/\bjan\b/gi, 'Janv'],
+        [/\bfeb\b/gi, 'Févr'],
+        [/\bmar\b/gi, 'Mars'],
+        [/\bapr\b/gi, 'Avr'],
+        [/\bmay\b/gi, 'Mai'],
+        [/\bjun\b/gi, 'Juin'],
+        [/\bjul\b/gi, 'Juil'],
+        [/\baug\b/gi, 'Août'],
+        [/\bsep\b/gi, 'Sept'],
+        [/\boct\b/gi, 'Oct'],
+        [/\bnov\b/gi, 'Nov'],
+        [/\bdec\b/gi, 'Déc']
+      ];
+
+      const rules = (lang === 'en') ? frToEn : enToFr;
+      return rules.reduce((acc, [re, rep]) => acc.replace(re, rep), raw);
+    }
+
+    const repo = p && typeof p === 'object' ? String(p.repo || '') : '';
+    const hasRepo = !!(repo && repo.trim() !== '' && repo !== '#' && /^https?:\/\//i.test(repo));
+    const archSrc = p && typeof p === 'object' ? String(p.architectureImage || '') : '';
+    const hasArch = !!(archSrc && archSrc.trim() !== '');
+
+    const dateRaw = (p && typeof p === 'object') ? (p.date ?? p.period ?? '') : '';
+    const dateText = (() => {
+      if (!dateRaw) return '2025 - present';
+      if (typeof dateRaw === 'string') return localizeDateString(dateRaw, l);
+      if (typeof dateRaw === 'object' && dateRaw) {
+        const picked = String(dateRaw[l] || dateRaw.en || dateRaw.fr || '2025 - present');
+        return localizeDateString(picked, l);
+      }
+      return '2025 - present';
+    })();
+
+    const typeRaw = (p && typeof p === 'object') ? String(p.type || '') : '';
+    const typeNorm = typeRaw.trim().toLowerCase();
+    const isWork = typeNorm === 'work' || typeNorm === 'experience';
+    const isPersonal = typeNorm === 'personal' || typeNorm === 'perso' || typeNorm === 'side';
+    const ribbonText = typeRaw.trim() || 'Work';
+    const ribbonClass = isPersonal ? 'personal' : 'work';
+
     const context = p.context && p.context[l] ? p.context[l] : '';
     const cap = p.capabilities && p.capabilities[l] ? p.capabilities[l] : [];
     const impact = p.impact && p.impact[l] ? p.impact[l] : [];
@@ -761,9 +853,41 @@
     const tech = Array.isArray(p.technologies) ? p.technologies.slice(0, 8) : [];
     const techTags = tech.map((t) => `<span class="elite-tag">${escapeHtml(t)}</span>`).join('');
 
+    const hideRepoIcon = !!(
+      p &&
+      !hasRepo &&
+      (p.id === 'mission-devops' || p.id === 'bairoutech-admin' || p.id === 'ifmotica-network')
+    );
+
+    const repoIcon = hideRepoIcon ? '' : `
+      <button type="button" class="elite-icon-btn elite-icon-btn--repo${hasRepo ? '' : ' is-disabled'}" aria-label="Open GitHub repo" title="${hasRepo ? 'Open GitHub repo' : 'Add GitHub repo URL'}" ${hasRepo ? '' : 'disabled'} data-repo="${escapeHtml(repo)}">
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+    `;
+
+    const archIcon = `
+      <button type="button" class="elite-icon-btn elite-icon-btn--arch primary${hasArch ? '' : ' is-disabled'}" aria-label="Open architecture" title="${hasArch ? (strings.viewArchitecture || 'Open architecture') : 'Add architecture image'}" ${hasArch ? '' : 'disabled'} data-arch="${escapeHtml(archSrc)}" data-caption="${escapeHtml(p.title[l] || '')}">
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="M8 13l2.5-2.5L15 15l2-2 4 4" />
+          <circle cx="9" cy="10" r="1" />
+        </svg>
+      </button>
+    `;
+
     card.innerHTML = `
       <div class="elite-header">
-        <h3 class="elite-title">${escapeHtml(p.title[l] || '')}</h3>
+        <div class="elite-header-content">
+          <h3 class="elite-title">${escapeHtml(p.title[l] || '')}</h3>
+          <div class="elite-date">${escapeHtml(dateText)}</div>
+          <div class="elite-ribbon-container">
+            <div class="elite-ribbon ${ribbonClass}">${escapeHtml(ribbonText)}</div>
+          </div>
+        </div>
+        <div class="elite-header-actions">${repoIcon}${archIcon}</div>
       </div>
       ${context ? `<p class="elite-context">${escapeHtml(context)}</p>` : ''}
 
@@ -779,11 +903,6 @@
 
       <div class="elite-footer">
         <div class="elite-tech" aria-label="${escapeHtml(strings.technologies)}">${techTags}</div>
-        <div class="elite-actions">
-          <button type="button" class="elite-cta" data-arch="${escapeHtml(p.architectureImage || '')}" data-caption="${escapeHtml(p.title[l] || '')}">
-            ${escapeHtml(strings.viewArchitecture)}
-          </button>
-        </div>
       </div>
     `;
 
@@ -791,7 +910,7 @@
   }
 
   function bindCtas(container, l) {
-    container.querySelectorAll('.elite-cta').forEach((btn) => {
+    container.querySelectorAll('.elite-icon-btn--arch').forEach((btn) => {
       btn.addEventListener('click', () => {
         const src = btn.getAttribute('data-arch') || '';
         const caption = btn.getAttribute('data-caption') || '';
@@ -799,6 +918,18 @@
         ensureModal();
         if (typeof window.__openArchitectureModal === 'function') {
           window.__openArchitectureModal(src, caption, l);
+        }
+      });
+    });
+
+    container.querySelectorAll('.elite-icon-btn--repo').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const repo = btn.getAttribute('data-repo') || '';
+        if (!repo) return;
+        try {
+          window.open(repo, '_blank', 'noopener');
+        } catch (e) {
+          window.location.href = repo;
         }
       });
     });
@@ -819,8 +950,10 @@
     const strings = UI[l];
     const list = filteredProjects();
 
-    const featured = list.filter(p => FEATURED_IDS.has(p.id));
-    const more = list.filter(p => !FEATURED_IDS.has(p.id));
+    const featuredAll = list.filter(p => FEATURED_IDS.has(p.id));
+    const featured = featuredAll.slice(0, 3);
+    const overflowFeatured = featuredAll.slice(3);
+    const more = [...overflowFeatured, ...list.filter(p => !FEATURED_IDS.has(p.id))];
 
     featured.forEach((p) => featuredGrid.appendChild(createCard(p, l, strings)));
     more.forEach((p) => moreGrid.appendChild(createCard(p, l, strings)));
@@ -828,10 +961,21 @@
     const featuredSection = root.querySelector('[data-section="featured"]');
     const moreSection = root.querySelector('[data-section="more"]');
     if (featuredSection) featuredSection.style.display = featured.length ? '' : 'none';
-    if (moreSection) moreSection.style.display = more.length ? '' : 'none';
+    if (moreSection) moreSection.style.display = (state.showMore && more.length) ? '' : 'none';
+
+    const moreToggle = root.querySelector('#projectsMoreToggle');
+    const moreRow = root.querySelector('#projectsMoreRow');
+    if (moreToggle && moreRow) {
+      const hasMore = more.length > 0;
+      moreRow.style.display = (featured.length && hasMore) ? '' : 'none';
+      moreToggle.style.display = hasMore ? '' : 'none';
+      moreToggle.textContent = state.showMore ? strings.hideMore : strings.showMore;
+      moreToggle.setAttribute('aria-expanded', state.showMore ? 'true' : 'false');
+      moreToggle.setAttribute('aria-controls', 'projectsMoreGrid');
+    }
 
     bindCtas(featuredGrid, l);
-    bindCtas(moreGrid, l);
+    if (state.showMore) bindCtas(moreGrid, l);
   }
 
   function render(lang) {
@@ -851,6 +995,15 @@
 
     const moreTitle = root.querySelector('#projectsMoreTitle');
     if (moreTitle) moreTitle.textContent = strings.moreTitle;
+
+    const moreToggle = root.querySelector('#projectsMoreToggle');
+    if (moreToggle && !moreToggle.__bound) {
+      moreToggle.__bound = true;
+      moreToggle.addEventListener('click', () => {
+        state.showMore = !state.showMore;
+        renderGrid();
+      });
+    }
 
     const input = root.querySelector('#projectsSearchInput');
     if (input) {
