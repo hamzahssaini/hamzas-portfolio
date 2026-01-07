@@ -589,16 +589,16 @@
         <div class="gallery-modal-header">
           <div class="gallery-modal-title">
             <span class="gallery-modal-title-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="M8 13l2.5-2.5L15 15l2-2 4 4" />
-                <circle cx="9" cy="10" r="1" />
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V5h14v14z" />
+                <path d="M8.5 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+                <path d="M6 18h12l-4.2-5.6a1 1 0 0 0-1.6 0l-2.2 2.9-1.3-1.7a1 1 0 0 0-1.6 0L6 18z" />
               </svg>
             </span>
             <span class="gallery-modal-title-text" id="galleryModalTitle"></span>
           </div>
           <button type="button" class="gallery-modal-close" data-action="close" aria-label="Close" title="Close">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
           </button>
         </div>
 
@@ -946,10 +946,10 @@
 
     const archIcon = `
       <button type="button" class="elite-icon-btn elite-icon-btn--arch primary${hasMedia ? '' : ' is-disabled'}" aria-label="Open images" title="${hasMedia ? (strings.viewArchitecture || 'Open images') : 'Add images'}" ${hasMedia ? '' : 'disabled'} data-project-id="${escapeHtml(p.id || '')}" data-arch="${escapeHtml(archSrc)}" data-caption="${escapeHtml(p.title[l] || '')}">
-        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="5" width="18" height="14" rx="2" />
-          <path d="M8 13l2.5-2.5L15 15l2-2 4 4" />
-          <circle cx="9" cy="10" r="1" />
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false">
+          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V5h14v14z" />
+          <path d="M8.5 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+          <path d="M6 18h12l-4.2-5.6a1 1 0 0 0-1.6 0l-2.2 2.9-1.3-1.7a1 1 0 0 0-1.6 0L6 18z" />
         </svg>
       </button>
     `;

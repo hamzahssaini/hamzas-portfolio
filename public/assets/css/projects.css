@@ -1353,11 +1353,11 @@
 }
 
 .gallery-modal-header {
-    height: 64px;
+    height: 54px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 18px;
+    padding: 0 14px;
     background: #ffffff;
     border-bottom: 1px solid rgba(15, 23, 42, 0.10);
 }
@@ -1365,26 +1365,42 @@
 .gallery-modal-title {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
     color: var(--proj-text-primary-light, #0f172a);
 }
 
+.gallery-modal-title-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--proj-primary);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.gallery-modal-title-icon svg {
+    display: block;
+}
+
 .gallery-modal-title-text {
-    font-weight: 800;
-    font-size: 1.25rem;
+    font-weight: 750;
+    font-size: 0.98rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .gallery-modal-close {
-    width: 42px;
-    height: 42px;
+    width: 30px;
+    height: 30px;
     border: 1px solid rgba(15, 23, 42, 0.14);
     background: #ffffff;
     color: var(--proj-text-primary-light, #0f172a);
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
