@@ -95,7 +95,12 @@
         ]
       },
       technologies: ['GitLab CI', 'Azure Web App', '.NET', 'React'],
-      architectureImage: '/images/mission-devops-arch.png'
+      architectureImage: '/images/mission-devops-arch.png',
+      gallery: [
+        { src: '/images/projects/mission-devops/01.png' },
+        { src: '/images/projects/mission-devops/02.png' },
+        { src: '/images/projects/mission-devops/03.png' }
+      ]
     },
     {
       id: 'azure-hub-spoke',
@@ -135,7 +140,12 @@
         ]
       },
       technologies: ['Azure', 'Terraform', 'Azure DevOps', 'Active Directory', 'Network Security'],
-      architectureImage: '/images/hub-spoke-arch.png'
+      architectureImage: '/images/hub-spoke-arch.png',
+      gallery: [
+        { src: '/images/projects/azure-hub-spoke/01.png' },
+        { src: '/images/projects/azure-hub-spoke/02.png' },
+        { src: '/images/projects/azure-hub-spoke/03.png' }
+      ]
     },
     {
       id: 'migration-azure',
@@ -175,7 +185,12 @@
         ]
       },
       technologies: ['Azure App Service', 'GitHub Actions', 'Azure Database for MySQL', 'Node.js', 'Azure Monitor'],
-      architectureImage: '/images/migration-arch.png'
+      architectureImage: '/images/migration-arch.png',
+      gallery: [
+        { src: '/images/projects/migration-azure/01.png' },
+        { src: '/images/projects/migration-azure/02.png' },
+        { src: '/images/projects/migration-azure/03.png' }
+      ]
     },
     {
       id: 'ansible-project',
@@ -215,7 +230,12 @@
         ]
       },
       technologies: ['Ansible', 'AWS EC2', 'IAM', 'Linux', 'Nginx', 'Docker', 'MySQL', 'Redis'],
-      architectureImage: '/images/ansible-project-arch.png'
+      architectureImage: '/images/ansible-project-arch.png',
+      gallery: [
+        { src: '/images/projects/ansible-project/01.png' },
+        { src: '/images/projects/ansible-project/02.png' },
+        { src: '/images/projects/ansible-project/03.png' }
+      ]
     },
     {
       id: 'pfe-bairoutech',
@@ -258,7 +278,12 @@
         ]
       },
       technologies: ['Kubernetes', 'Docker', 'Node.js', 'MongoDB', 'Linux', 'NGINX Ingress'],
-      architectureImage: '/images/k8s-arch.png'
+      architectureImage: '/images/k8s-arch.png',
+      gallery: [
+        { src: '/images/projects/pfe-bairoutech/01.png' },
+        { src: '/images/projects/pfe-bairoutech/02.png' },
+        { src: '/images/projects/pfe-bairoutech/03.png' }
+      ]
     },
     {
       id: 'rag-chatbot',
@@ -298,7 +323,12 @@
         ]
       },
       technologies: ['Azure OpenAI', 'Azure AI Search', 'Blob Storage', 'Node.js', 'Express', 'Bootstrap'],
-      architectureImage: '/images/rag-arch.png'
+      architectureImage: '/images/rag-arch.png',
+      gallery: [
+        { src: '/images/projects/rag-chatbot/01.png' },
+        { src: '/images/projects/rag-chatbot/02.png' },
+        { src: '/images/projects/rag-chatbot/03.png' }
+      ]
     },
     {
       id: 'bairoutech-admin',
@@ -341,7 +371,12 @@
         ]
       },
       technologies: ['Windows Server', 'Active Directory', 'GPO', 'VPN', 'Microsoft 365', 'MFA'],
-      architectureImage: '/images/admin-arch.png'
+      architectureImage: '/images/admin-arch.png',
+      gallery: [
+        { src: '/images/projects/bairoutech-admin/01.png' },
+        { src: '/images/projects/bairoutech-admin/02.png' },
+        { src: '/images/projects/bairoutech-admin/03.png' }
+      ]
     },
     {
       id: 'ifmotica-network',
@@ -384,7 +419,12 @@
         ]
       },
       technologies: ['PowerShell', 'Active Directory', 'Windows', 'Networking', 'IT Support'],
-      architectureImage: '/images/network-arch.png'
+      architectureImage: '/images/network-arch.png',
+      gallery: [
+        { src: '/images/projects/ifmotica-network/01.png' },
+        { src: '/images/projects/ifmotica-network/02.png' },
+        { src: '/images/projects/ifmotica-network/03.png' }
+      ]
     }
   ];
 
@@ -659,6 +699,12 @@
       const src = item && item.src ? String(item.src) : '';
       const caption = getCaptionText(item, galleryLang);
       if (imgEl) {
+        // If the user hasn't added images yet (404), fall back to a known placeholder.
+        imgEl.onerror = () => {
+          const fallback = '/images/placeholder-arch.png';
+          if (imgEl.getAttribute('src') === fallback) return;
+          imgEl.src = fallback;
+        };
         imgEl.src = src;
         imgEl.alt = galleryTitle || 'Image';
       }
