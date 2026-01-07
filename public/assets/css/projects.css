@@ -1439,11 +1439,11 @@
 }
 
 .gallery-modal-pagination {
-    height: 74px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     border-top: 1px solid rgba(15, 23, 42, 0.10);
     background: #ffffff;
     padding: 0 12px;
@@ -1452,20 +1452,22 @@
 .gallery-pages {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 .gallery-arrow-btn,
 .gallery-page-btn {
-    height: 36px;
-    min-width: 36px;
-    padding: 0 12px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0 7px;
     border-radius: 2px;
     border: 1px solid rgba(15, 23, 42, 0.18);
     background: #ffffff;
     color: var(--proj-text-primary-light, #0f172a);
     cursor: pointer;
-    font-weight: 650;
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: 1;
     transition: background-color 0.14s ease, transform 0.12s ease;
 }
 

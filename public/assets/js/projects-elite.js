@@ -99,7 +99,9 @@
       gallery: [
         { src: '/images/projects/mission-devops/01.png' },
         { src: '/images/projects/mission-devops/02.png' },
-        { src: '/images/projects/mission-devops/03.png' }
+        { src: '/images/projects/mission-devops/03.png' },
+        { src: '/images/projects/mission-devops/04.png' },
+        { src: '/images/projects/mission-devops/05.png' }
       ]
     },
     {
@@ -144,7 +146,8 @@
       gallery: [
         { src: '/images/projects/azure-hub-spoke/01.png' },
         { src: '/images/projects/azure-hub-spoke/02.png' },
-        { src: '/images/projects/azure-hub-spoke/03.png' }
+        { src: '/images/projects/azure-hub-spoke/03.png' },
+        { src: '/images/projects/azure-hub-spoke/04.png' }
       ]
     },
     {
@@ -189,7 +192,8 @@
       gallery: [
         { src: '/images/projects/migration-azure/01.png' },
         { src: '/images/projects/migration-azure/02.png' },
-        { src: '/images/projects/migration-azure/03.png' }
+        { src: '/images/projects/migration-azure/03.png' },
+        { src: '/images/projects/migration-azure/04.png' }
       ]
     },
     {
@@ -234,7 +238,8 @@
       gallery: [
         { src: '/images/projects/ansible-project/01.png' },
         { src: '/images/projects/ansible-project/02.png' },
-        { src: '/images/projects/ansible-project/03.png' }
+        { src: '/images/projects/ansible-project/03.png' },
+        { src: '/images/projects/ansible-project/04.png' }
       ]
     },
     {
@@ -282,7 +287,9 @@
       gallery: [
         { src: '/images/projects/pfe-bairoutech/01.png' },
         { src: '/images/projects/pfe-bairoutech/02.png' },
-        { src: '/images/projects/pfe-bairoutech/03.png' }
+        { src: '/images/projects/pfe-bairoutech/03.png' },
+        { src: '/images/projects/pfe-bairoutech/04.png' },
+        { src: '/images/projects/pfe-bairoutech/05.png' }
       ]
     },
     {
@@ -327,7 +334,8 @@
       gallery: [
         { src: '/images/projects/rag-chatbot/01.png' },
         { src: '/images/projects/rag-chatbot/02.png' },
-        { src: '/images/projects/rag-chatbot/03.png' }
+        { src: '/images/projects/rag-chatbot/03.png' },
+        { src: '/images/projects/rag-chatbot/04.png' }
       ]
     },
     {
@@ -375,7 +383,8 @@
       gallery: [
         { src: '/images/projects/bairoutech-admin/01.png' },
         { src: '/images/projects/bairoutech-admin/02.png' },
-        { src: '/images/projects/bairoutech-admin/03.png' }
+        { src: '/images/projects/bairoutech-admin/03.png' },
+        { src: '/images/projects/bairoutech-admin/04.png' }
       ]
     },
     {
@@ -423,7 +432,8 @@
       gallery: [
         { src: '/images/projects/ifmotica-network/01.png' },
         { src: '/images/projects/ifmotica-network/02.png' },
-        { src: '/images/projects/ifmotica-network/03.png' }
+        { src: '/images/projects/ifmotica-network/03.png' },
+        { src: '/images/projects/ifmotica-network/04.png' }
       ]
     }
   ];
