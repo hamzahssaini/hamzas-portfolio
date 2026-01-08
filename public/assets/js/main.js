@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
       icon: '🎓'
     },
     {
-      period: { fr: 'Sept 2025 – En cours', en: 'Sept 2025 – Present' },
+      period: { fr: 'Sept 2025 – Jan 2026', en: 'Sept 2025 – Jan 2026' },
       degree: { fr: 'Formation Cloud Azure', en: 'Azure Cloud Training' },
       school: 'Université Internationale Averroès | Casablanca',
       icon: '☁️'

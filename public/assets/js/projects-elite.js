@@ -97,11 +97,11 @@
       technologies: ['GitLab CI', 'Azure Web App', '.NET', 'React'],
       architectureImage: '/images/mission-devops-arch.png',
       gallery: [
-        { src: '/images/projects/mission-devops/01.png' },
-        { src: '/images/projects/mission-devops/02.png' },
-        { src: '/images/projects/mission-devops/03.png' },
-        { src: '/images/projects/mission-devops/04.png' },
-        { src: '/images/projects/mission-devops/05.png' }
+        { src: '/images/projects/mission-devops/01.png', caption: { en: 'Streamlined the “Std_portal” repo with organized migrations/portals and a refreshed CI pipeline, ready for deployment.', fr: 'Rationalisé le dépôt “Std_portal” avec des migrations/portails organisés et une CI actualisée, prête pour le déploiement.'} },
+        { src: '/images/projects/mission-devops/02.png', caption: { en: 'Ran a three-stage GitLab CI (restore → build → deploy) on main, completing end-to-end in under 18 minutes.', fr: 'Exécuté une CI GitLab en trois étapes (restore → build → deploy) sur main, terminée en moins de 18 minutes.' } },
+        { src: '/images/projects/mission-devops/03.png', caption: { en: 'Kept all pipeline jobs (restore, build, deploy) green on main using .NET/Windows runners for repeatable releases.', fr: 'Maintenu tous les jobs du pipeline (restore, build, deploy) au vert sur main avec des runners .NET/Windows pour des releases fiables.' } },
+        { src: '/images/projects/mission-devops/04.png', caption: { en: 'Finished the build job with artifact uploads and cleanup on .NET/Windows runners, ensuring CI hygiene and traceability.', fr: "Terminé le job de build avec upload d’artifacts et nettoyage sur des runners .NET/Windows, garantissant hygiène CI et traçabilité."} },
+        { src: '/images/projects/mission-devops/05.png', caption: { en: 'Restored and built the multi-project .NET solution on GitLab Runner (Windows), shipping artifacts cleanly on main.', fr: 'Restauré et construit la solution multi-projet .NET sur GitLab Runner (Windows), livrant les artifacts proprement sur main.' } }
       ]
     },
     {
@@ -144,10 +144,10 @@
       technologies: ['Azure', 'Terraform', 'Azure DevOps', 'Active Directory', 'Network Security'],
       architectureImage: '/images/hub-spoke-arch.png',
       gallery: [
-        { src: '/images/projects/azure-hub-spoke/01.png' },
-        { src: '/images/projects/azure-hub-spoke/02.png' },
-        { src: '/images/projects/azure-hub-spoke/03.png' },
-        { src: '/images/projects/azure-hub-spoke/04.png' }
+        { src: '/images/projects/azure-hub-spoke/01.png', caption: { en: 'Designed a hub‑and‑spoke Azure hybrid network with site‑to‑site VPN, firewall, monitoring, and Terraform-driven IaC.', fr: 'Conçu un réseau hybride Azure en hub‑and‑spoke avec VPN site‑à‑site, pare-feu, monitoring et IaC pilotée par Terraform.' } },
+        { src: '/images/projects/azure-hub-spoke/02.png', caption: { en: 'Structured the Azure DevOps repo with Terraform modules (main/variables/providers/outputs) for reusable hybrid infra.', fr: 'Structuré le dépôt Azure DevOps avec des modules Terraform (main/variables/providers/outputs) pour une infra hybride réutilisable.' } },
+        { src: '/images/projects/azure-hub-spoke/03.png', caption: { en: 'Ran the Azure DevOps pipeline to plan and apply Terraform, provisioning 28 Azure resources with zero drift.', fr: 'Exécuté le pipeline Azure DevOps pour planifier et appliquer Terraform, provisionnant 28 ressources Azure sans dérive.' } },
+        { src: '/images/projects/azure-hub-spoke/04.png', caption: { en: 'Verified the deployed hub resource group in Azure (bastion, firewall, vnets, VPN, logs) all live in UK South.', fr: 'Vérifié le groupe de ressources hub déployé dans Azure (bastion, pare-feu, vnets, VPN, logs), tous actifs en UK South.' } }
       ]
     },
     {
@@ -190,10 +190,10 @@
       technologies: ['Azure App Service', 'GitHub Actions', 'Azure Database for MySQL', 'Node.js', 'Azure Monitor'],
       architectureImage: '/images/migration-arch.png',
       gallery: [
-        { src: '/images/projects/migration-azure/01.png' },
-        { src: '/images/projects/migration-azure/02.png' },
-        { src: '/images/projects/migration-azure/03.png' },
-        { src: '/images/projects/migration-azure/04.png' }
+        { src: '/images/projects/migration-azure/01.png', caption: { en: 'GitHub Actions build-and-deploy workflow ran cleanly with Azure login and post-job cleanup.', fr: 'Workflow GitHub Actions build-and-deploy exécuté sans erreur avec connexion Azure et nettoyage post-job.' } },
+        { src: '/images/projects/migration-azure/02.png', caption: { en: 'Azure resource group “test-app-rg” provisioned (App Service, MySQL, App Insights, alerting) in France Central.', fr: 'Groupe de ressources Azure “test-app-rg” provisionné (App Service, MySQL, App Insights, alertes) en France Central.' } },
+        { src: '/images/projects/migration-azure/03.png', caption: { en: 'Deployed frontend live on Azure App Service via CI/CD, serving the registration page.', fr: 'Frontend déployé en production sur Azure App Service via CI/CD, affichant la page d’inscription.' } },
+        { src: '/images/projects/migration-azure/04.png', caption: { en: 'Confirmed user registration succeeds on the live Azure App Service endpoint.', fr: 'Confirmation de l’inscription utilisateur réussie sur l’endpoint Azure App Service en production.' } }
       ]
     },
     {
@@ -236,10 +236,10 @@
       technologies: ['Ansible', 'AWS EC2', 'IAM', 'Linux', 'Nginx', 'Docker', 'MySQL', 'Redis'],
       architectureImage: '/images/ansible-project-arch.png',
       gallery: [
-        { src: '/images/projects/ansible-project/01.png' },
-        { src: '/images/projects/ansible-project/02.png' },
-        { src: '/images/projects/ansible-project/03.png' },
-        { src: '/images/projects/ansible-project/04.png' }
+        { src: '/images/projects/ansible-project/01.png', caption: { en: 'Operated a three-node AWS EC2 lab (mgmt + web pair) in eu-west-3, all t3.micro instances healthy.', fr: 'Exploité un labo AWS EC2 de trois nœuds (mgmt + duo web) en eu-west-3, toutes les t3.micro opérationnelles.' } },
+        { src: '/images/projects/ansible-project/02.png', caption: { en: 'Used Ansible dynamic inventory to reach every EC2 host via SSH keys, confirming all nodes respond.', fr: 'Utilisé l’inventaire dynamique Ansible pour joindre chaque hôte EC2 via clés SSH, confirmant la réponse de tous les nœuds.' } },
+        { src: '/images/projects/ansible-project/03.png', caption: { en: 'Targeted the web group with Ansible and verified connectivity (ping module) for both web servers.', fr: 'Ciblé le groupe web avec Ansible et vérifié la connectivité (module ping) des deux serveurs web.' } },
+        { src: '/images/projects/ansible-project/04.png', caption: { en: 'Validated Nginx installed and running under systemd on the web server.', fr: 'Validé Nginx installé et actif sous systemd sur le serveur web.' } }
       ]
     },
     {
@@ -285,11 +285,11 @@
       technologies: ['Kubernetes', 'Docker', 'Node.js', 'MongoDB', 'Linux', 'NGINX Ingress'],
       architectureImage: '/images/k8s-arch.png',
       gallery: [
-        { src: '/images/projects/pfe-bairoutech/01.png' },
-        { src: '/images/projects/pfe-bairoutech/02.png' },
-        { src: '/images/projects/pfe-bairoutech/03.png' },
-        { src: '/images/projects/pfe-bairoutech/04.png' },
-        { src: '/images/projects/pfe-bairoutech/05.png' }
+        { src: '/images/projects/pfe-bairoutech/01.png', caption: { en: 'Node.js app live on Kubernetes with a user registration front page.', fr: 'App Node.js en production sur Kubernetes avec page d’inscription utilisateur.' } },
+        { src: '/images/projects/pfe-bairoutech/02.png', caption: { en: 'Kubernetes Deployment for hamza-app using a custom image, two replicas, config/secret-driven env vars.', fr: 'Déploiement Kubernetes de hamza-app avec image custom, deux réplicas, variables d’env via config/secret.' } },
+        { src: '/images/projects/pfe-bairoutech/03.png', caption: { en: 'Minikube cluster started (Docker driver), ingress enabled, kubectl configured for the environment.', fr: 'Cluster Minikube démarré (driver Docker), ingress activé, kubectl configuré pour l’environnement.' } },
+        { src: '/images/projects/pfe-bairoutech/04.png', caption: { en: 'Namespace “hamza-project” running hamza-app pods and services (app on 80/TCP, Mongo on 27017/TCP).', fr: 'Namespace “hamza-project” avec pods hamza-app et services (app sur 80/TCP, Mongo sur 27017/TCP).' } },
+        { src: '/images/projects/pfe-bairoutech/05.png', caption: { en: 'Repo structured with Node.js app code plus MongoDB and Kubernetes manifests (config, deployment, ingress, services) for containerized deployment.', fr: 'Dépôt structuré avec code Node.js et manifestes MongoDB/Kubernetes (config, déploiement, ingress, services) pour un déploiement conteneurisé.' } }
       ]
     },
     {
@@ -332,10 +332,10 @@
       technologies: ['Azure OpenAI', 'Azure AI Search', 'Blob Storage', 'Node.js', 'Express', 'Bootstrap'],
       architectureImage: '/images/rag-arch.png',
       gallery: [
-        { src: '/images/projects/rag-chatbot/01.png' },
-        { src: '/images/projects/rag-chatbot/02.png' },
-        { src: '/images/projects/rag-chatbot/03.png' },
-        { src: '/images/projects/rag-chatbot/04.png' }
+        { src: '/images/projects/rag-chatbot/01.png', caption: { en: 'Designed a two-phase RAG flow (ingestion + query) with Node.js, Azure Blob, AI Search, and OpenAI for PDF/DOCX Q&A.', fr: 'Conçu un flux RAG en deux phases (ingestion + requête) avec Node.js, Azure Blob, AI Search et OpenAI pour le Q/R sur PDF/DOCX.' } },
+        { src: '/images/projects/rag-chatbot/02.png', caption: { en: 'Azure AI Search indexer (rag-indexer) running successfully across recent runs, processing docs without errors.', fr: 'Indexeur Azure AI Search (rag-indexer) exécuté avec succès sur les dernières itérations, traitant les documents sans erreurs.' } },
+        { src: '/images/projects/rag-chatbot/03.png', caption: { en: 'HamzaCloud chat UI answering résumé-based questions, powered by the RAG backend.', fr: 'Interface chat HamzaCloud répondant aux questions basées sur le CV, alimentée par le backend RAG.' } },
+        { src: '/images/projects/rag-chatbot/04.png', caption: { en: 'HamzaCloud bot generating tailored cloud-career recommendations from the RAG pipeline.', fr: 'Bot HamzaCloud fournissant des recommandations de carrière cloud personnalisées via le pipeline RAG.' } }
       ]
     },
     {
@@ -381,10 +381,10 @@
       technologies: ['Windows Server', 'Active Directory', 'GPO', 'VPN', 'Microsoft 365', 'MFA'],
       architectureImage: '/images/admin-arch.png',
       gallery: [
-        { src: '/images/projects/bairoutech-admin/01.png' },
-        { src: '/images/projects/bairoutech-admin/02.png' },
-        { src: '/images/projects/bairoutech-admin/03.png' },
-        { src: '/images/projects/bairoutech-admin/04.png' }
+        { src: '/images/projects/bairoutech-admin/01.png', caption: { en: 'Built a Windows lab with DC/DNS, DHCP, and a domain-joined client for Active Directory testing.', fr: 'Construit un labo Windows avec DC/DNS, DHCP et un client joint au domaine pour tester Active Directory.' } },
+        { src: '/images/projects/bairoutech-admin/02.png', caption: { en: 'Configured DHCP scopes and exclusions on the DHCP server for controlled IP distribution.', fr: 'Configuré les étendues DHCP et exclusions sur le serveur DHCP pour une distribution IP maîtrisée.' } },
+        { src: '/images/projects/bairoutech-admin/03.png', caption: { en: 'Verified DHCP-assigned IP, gateway, and DNS on the domain client, confirming automatic network provisioning.', fr: 'Vérifié l’IP, la passerelle et le DNS attribués par DHCP sur le client du domaine, confirmant le provisioning réseau automatique.' } },
+        { src: '/images/projects/bairoutech-admin/04.png', caption: { en: 'Managed AD users and security groups in the domain (Users OU) for role-based access control.', fr: 'Géré les utilisateurs et groupes de sécurité AD dans le domaine (OU Users) pour un contrôle d’accès par rôles.' } }
       ]
     },
     {
@@ -430,10 +430,10 @@
       technologies: ['PowerShell', 'Active Directory', 'Windows', 'Networking', 'IT Support'],
       architectureImage: '/images/network-arch.png',
       gallery: [
-        { src: '/images/projects/ifmotica-network/01.png' },
-        { src: '/images/projects/ifmotica-network/02.png' },
-        { src: '/images/projects/ifmotica-network/03.png' },
-        { src: '/images/projects/ifmotica-network/04.png' }
+        { src: '/images/projects/ifmotica-network/01.png', caption: { en: 'Built an AD User Provisioning Tool with create/delete/import/export flows from CSV.', fr: 'Créé un outil de provisioning AD avec création/suppression/import/export depuis CSV.' } },
+        { src: '/images/projects/ifmotica-network/02.png', caption: { en: 'Automated AD user creation into a chosen OU with group assignment and email capture.', fr: 'Automatisation de la création d’utilisateurs AD dans une OU choisie avec attribution de groupe et email.' } },
+        { src: '/images/projects/ifmotica-network/03.png', caption: { en: 'Managed and searched AD users via the tool, confirming accounts in the IT OU.', fr: 'Géré et recherché les utilisateurs AD via l’outil, avec comptes confirmés dans l’OU IT.' } },
+        { src: '/images/projects/ifmotica-network/04.png', caption: { en: 'Exported Active Directory users to CSV for audit and reporting.', fr: 'Export des utilisateurs Active Directory en CSV pour audit et reporting.' } }
       ]
     }
   ];
@@ -708,6 +708,14 @@
 
       const src = item && item.src ? String(item.src) : '';
       const caption = getCaptionText(item, galleryLang);
+      const fallbackCaption = (() => {
+        const total = galleryItems.length;
+        if (total <= 1) return '';
+        const n = galleryIndex + 1;
+        return (galleryLang === 'en')
+          ? `Image ${n} of ${total}`
+          : `Image ${n} sur ${total}`;
+      })();
       if (imgEl) {
         // If the user hasn't added images yet (404), fall back to a known placeholder.
         imgEl.onerror = () => {
@@ -718,7 +726,11 @@
         imgEl.src = src;
         imgEl.alt = galleryTitle || 'Image';
       }
-      if (capEl) capEl.textContent = caption || '';
+      if (capEl) {
+        const text = caption || fallbackCaption || '';
+        capEl.textContent = text;
+        capEl.style.display = text ? '' : 'none';
+      }
 
       renderPagination();
     }

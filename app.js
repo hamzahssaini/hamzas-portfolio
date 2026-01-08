@@ -35,20 +35,6 @@ console.log(`  DORA_API_KEY set: ${DORA_API_KEY ? 'yes' : 'no'}`);
 
 // Middleware (body + logging)
 app.use(morgan('dev'));
-// Debug raw body for POST /api/contact if needed
-app.use((req, res, next) => {
-  if (req.method === 'POST') {
-    let data = '';
-    req.on('data', chunk => { data += chunk; });
-    req.on('end', () => {
-      req.rawBody = data;
-      // We don't want to interfere with body-parser, so we need to be careful.
-      // Actually, body-parser will not work if the stream is already consumed.
-      // So we must NOT consume the stream here if we want express.json() to work.
-    });
-  }
-  next();
-});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
