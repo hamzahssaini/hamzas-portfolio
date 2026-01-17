@@ -426,6 +426,11 @@ document.addEventListener('DOMContentLoaded', () => {
       nav_education: 'Education',
       nav_contact: 'Contact',
       hero_role: 'Cloud & DevOps Specialist',
+      hero_title: 'Cloud & DevOps Specialist | Azure & AWS',
+      hero_value: 'I design and automate scalable, production-ready cloud infrastructures using Azure, AWS, Kubernetes, and CI/CD pipelines.',
+      btn_projects: 'View Projects',
+      btn_github_short: 'GitHub',
+      btn_download_cv: 'Download CV',
       btn_contact: 'Get in touch',
       btn_cv: 'Download CV',
       cv_cloud: 'Cloud/DevOps Resume',
@@ -474,7 +479,21 @@ document.addEventListener('DOMContentLoaded', () => {
       form_name: 'Full Name',
       contact_mail_label: 'Mail me',
       email_copied: 'Copied!',
-      phone_copied: 'Copied!'
+      phone_copied: 'Copied!',
+
+      // Section 2 — Proof of Engineering
+      mindset_title: 'How I Work: DevOps Operating Model',
+      mindset_subtitle: 'Production-grade delivery with clear standards and measurable outcomes.',
+      mindset_pillar_1_title: 'Infrastructure as Code',
+      mindset_pillar_1_desc: 'Terraform & Ansible for reproducible, versioned environments',
+      mindset_pillar_2_title: 'CI/CD First Approach',
+      mindset_pillar_2_desc: 'Automated build, test, and deploy with GitHub Actions / GitLab CI',
+      mindset_pillar_3_title: 'Secure by Design',
+      mindset_pillar_3_desc: 'IAM, network segmentation, VPNs, and least-privilege access',
+      mindset_pillar_4_title: 'Cost & Performance Optimization',
+      mindset_pillar_4_desc: 'Right-sizing, monitoring, and cloud cost awareness',
+      mindset_pillar_5_title: 'Production-Ready Documentation',
+      mindset_pillar_5_desc: 'Clear READMEs, diagrams, and operational notes'
     },
     fr: {
       nav_about: 'À propos',
@@ -482,6 +501,11 @@ document.addEventListener('DOMContentLoaded', () => {
       nav_education: 'Formation',
       nav_contact: 'Contact',
       hero_role: "Cloud & DevOps Spécialiste",
+      hero_title: 'Spécialiste Cloud & DevOps | Azure & AWS',
+      hero_value: 'Je conçois et j’automatise des infrastructures cloud évolutives, prêtes pour la production, avec Azure, AWS, Kubernetes et des pipelines CI/CD.',
+      btn_projects: 'Voir les projets',
+      btn_github_short: 'GitHub',
+      btn_download_cv: 'Télécharger CV',
       btn_contact: 'Me contacter',
       btn_cv: 'Télécharger CV',
       cv_cloud: 'CV Cloud/DevOps',
@@ -530,7 +554,21 @@ document.addEventListener('DOMContentLoaded', () => {
       form_name: 'Nom Complet',
       contact_mail_label: 'M\'envoyer un mail',
       email_copied: 'Copié !',
-      phone_copied: 'Copié !'
+      phone_copied: 'Copié !',
+
+      // Section 2 — Proof of Engineering
+      mindset_title: 'Ma façon de travailler : mode opératoire DevOps',
+      mindset_subtitle: 'Livraison de niveau production, avec des standards clairs et des résultats mesurables.',
+      mindset_pillar_1_title: 'Infrastructure as Code',
+      mindset_pillar_1_desc: 'Terraform & Ansible pour des environnements reproductibles et versionnés',
+      mindset_pillar_2_title: 'Approche CI/CD d’abord',
+      mindset_pillar_2_desc: 'Build, tests et déploiements automatisés avec GitHub Actions / GitLab CI',
+      mindset_pillar_3_title: 'Sécurité par conception',
+      mindset_pillar_3_desc: 'IAM, segmentation réseau, VPN et accès au moindre privilège',
+      mindset_pillar_4_title: 'Optimisation coûts & performance',
+      mindset_pillar_4_desc: 'Right-sizing, monitoring et maîtrise des coûts cloud',
+      mindset_pillar_5_title: 'Documentation prête pour la production',
+      mindset_pillar_5_desc: 'READMEs clairs, schémas et notes opérationnelles'
     }
   };
 
@@ -548,6 +586,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function openMenu() {
       menu.hidden = false;
       button.setAttribute('aria-expanded', 'true');
+
+      // Smart positioning: keep the menu visible in the viewport.
+      // Default CSS opens to the right; if it would overflow, flip to the left.
+      try {
+        menu.classList.remove('is-left');
+        if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) return;
+        const rect = menu.getBoundingClientRect();
+        const padding = 12;
+        if (rect.right > (window.innerWidth - padding)) {
+          menu.classList.add('is-left');
+        }
+      } catch (e) { }
     }
 
     button.addEventListener('click', (e) => {
@@ -580,6 +630,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyLanguage(lang) {
     const map = I18N[lang] || I18N.fr;
+
+    // Also support lightweight bilingual blocks (data-en/data-fr) used in the new Projects + Gallery.
+    function applyBilingualBlocks(code) {
+      const normalized = code === 'en' ? 'en' : 'fr';
+      const attr = normalized === 'en' ? 'data-en' : 'data-fr';
+      document.querySelectorAll('[' + attr + ']').forEach(el => {
+        const val = el.getAttribute(attr);
+        if (val == null) return;
+        // Only set textContent (captions/titles are plain text).
+        el.textContent = val;
+      });
+    }
 
     // Keep the document language in sync for accessibility/SEO.
     try {
@@ -621,6 +683,138 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.setAttribute('aria-label', isExpanded ? lessLabel : moreLabel);
       });
     } catch (e) { }
+
+    // Apply bilingual (data-en/data-fr) blocks after normal i18n.
+    try { applyBilingualBlocks(lang); } catch (e) { }
+
+    // If a screenshot viewer is open, refresh its caption.
+    try {
+      if (typeof window.updateRwViewerCaption === 'function') {
+        window.updateRwViewerCaption();
+      }
+    } catch (e) { }
+
+  }
+
+  // One-time micro "spark" on first interaction with proof buttons (per session).
+  // Keeps it subtle and disables automatically for reduced-motion.
+  function initProjectsProofSpark() {
+    try {
+      if (!document.querySelector('#projects .rw-btn')) return;
+
+      const reduceMotion = (() => {
+        try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+        catch (e) { return false; }
+      })();
+      if (reduceMotion) return;
+
+      const key = 'rwProofSparkSeen';
+      try {
+        if (sessionStorage.getItem(key) === '1') return;
+      } catch (e) { /* ignore */ }
+
+      let done = false;
+      document.addEventListener('pointerover', (ev) => {
+        if (done) return;
+        const target = ev.target;
+        if (!(target instanceof Element)) return;
+        const btn = target.closest('#projects .rw-btn');
+        if (!btn) return;
+
+        done = true;
+        try { sessionStorage.setItem(key, '1'); } catch (e) { }
+
+        btn.classList.add('rw-btn--spark');
+        window.setTimeout(() => {
+          try { btn.classList.remove('rw-btn--spark'); } catch (e) { }
+        }, 950);
+      }, { passive: true });
+    } catch (e) { /* silent */ }
+  }
+
+  // Projects galleries: open screenshots inside the same window (no new tab)
+  // with a dedicated viewer overlay that shows full image + caption.
+  function initRwGalleryViewer() {
+    try {
+      const viewer = document.getElementById('rw-viewer');
+      if (!viewer) return;
+
+      const surface = viewer.querySelector('.rw-viewer-surface');
+      const img = viewer.querySelector('.rw-viewer-img');
+      const cap = viewer.querySelector('.rw-viewer-cap');
+      const closeBtn = viewer.querySelector('.rw-viewer-close');
+      if (!surface || !img || !cap || !closeBtn) return;
+
+      let lastCaptionEl = null;
+
+      function isOpen() {
+        return viewer.classList.contains('is-open');
+      }
+
+      function setCaptionFromEl(captionEl) {
+        lastCaptionEl = captionEl;
+        const txt = captionEl ? (captionEl.textContent || '') : '';
+        cap.textContent = txt;
+      }
+
+      function openViewer(fullSrc, captionEl) {
+        if (fullSrc) img.src = fullSrc;
+        img.alt = '';
+        setCaptionFromEl(captionEl);
+        viewer.classList.add('is-open');
+        viewer.setAttribute('aria-hidden', 'false');
+        closeBtn.focus();
+      }
+
+      function closeViewer() {
+        viewer.classList.remove('is-open');
+        viewer.setAttribute('aria-hidden', 'true');
+        try { img.removeAttribute('src'); } catch (e) { }
+        lastCaptionEl = null;
+      }
+
+      // Expose a hook so language switching can refresh caption text
+      window.updateRwViewerCaption = function () {
+        try {
+          if (!isOpen()) return;
+          if (!lastCaptionEl) return;
+          cap.textContent = lastCaptionEl.textContent || '';
+        } catch (e) { }
+      };
+
+      // Close interactions
+      closeBtn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        closeViewer();
+      });
+      viewer.addEventListener('click', (ev) => {
+        // click outside surface closes
+        const target = ev.target;
+        if (!(target instanceof Node)) return;
+        if (surface.contains(target)) return;
+        closeViewer();
+      });
+      document.addEventListener('keydown', (ev) => {
+        if (!isOpen()) return;
+        if (ev.key === 'Escape') closeViewer();
+      });
+
+      // Intercept gallery screenshot clicks
+      document.addEventListener('click', (ev) => {
+        const target = ev.target;
+        if (!(target instanceof Element)) return;
+        const link = target.closest('a.rw-shot-link');
+        if (!link) return;
+        ev.preventDefault();
+
+        const figure = link.closest('figure.rw-shot');
+        const captionEl = figure ? figure.querySelector('.rw-cap') : null;
+        const fullSrc = link.getAttribute('href') || '';
+        openViewer(fullSrc, captionEl);
+      });
+    } catch (e) {
+      // silent
+    }
   }
 
   function createControls() {
@@ -1303,5 +1497,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial render & Localization
   const initialLang = localStorage.getItem('lang') || 'fr';
   applyLanguage(initialLang);
+
+  // Enhance Projects proof links after language is applied.
+  initProjectsProofSpark();
+
+  // Enable in-page screenshot viewer for Projects galleries.
+  initRwGalleryViewer();
 
 });
