@@ -89,93 +89,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Section 2 — Proof of Engineering
-         Purpose: communicate senior DevOps standards (reliability/security/scale) fast.
-         Uses existing .reveal scroll animation for subtle fade-in + upward motion. -->
-    <section id="mindset" class="section mindset-section" aria-labelledby="mindset-title">
-      <div class="container transition-order">
-        <div class="section-header reveal">
-          <h2 class="section-title mindset-title" id="mindset-title" data-i18n="mindset_title">How I Work: DevOps Operating Model</h2>
-        </div>
-        <p class="mindset-subtitle reveal" data-i18n="mindset_subtitle">Production-grade delivery with clear standards and measurable outcomes.</p>
-
-        <div class="mindset-grid" role="list" aria-label="Engineering pillars">
-          <article class="mindset-card reveal" role="listitem">
-            <div class="mindset-card-head">
-              <div class="mindset-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M8 18L3 12l5-6" />
-                  <path d="M16 6l5 6-5 6" />
-                  <path d="M14 4l-4 16" />
-                </svg>
-              </div>
-              <h3 class="mindset-title-3" data-i18n="mindset_pillar_1_title">Infrastructure as Code</h3>
-            </div>
-            <p class="mindset-desc" data-i18n="mindset_pillar_1_desc">Terraform &amp; Ansible for reproducible, versioned environments</p>
-          </article>
-
-          <article class="mindset-card reveal" role="listitem">
-            <div class="mindset-card-head">
-              <div class="mindset-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 6h10" />
-                  <path d="M4 12h16" />
-                  <path d="M4 18h12" />
-                  <path d="M14 6l3 3-3 3" />
-                </svg>
-              </div>
-              <h3 class="mindset-title-3" data-i18n="mindset_pillar_2_title">CI/CD First Approach</h3>
-            </div>
-            <p class="mindset-desc" data-i18n="mindset_pillar_2_desc">Automated build, test, and deploy with GitHub Actions / GitLab CI</p>
-          </article>
-
-          <article class="mindset-card reveal" role="listitem">
-            <div class="mindset-card-head">
-              <div class="mindset-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2l8 4v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4z" />
-                  <path d="M9 12l2 2 4-4" />
-                </svg>
-              </div>
-              <h3 class="mindset-title-3" data-i18n="mindset_pillar_3_title">Secure by Design</h3>
-            </div>
-            <p class="mindset-desc" data-i18n="mindset_pillar_3_desc">IAM, network segmentation, VPNs, and least-privilege access</p>
-          </article>
-
-          <article class="mindset-card reveal" role="listitem">
-            <div class="mindset-card-head">
-              <div class="mindset-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 18V6" />
-                  <path d="M4 18h16" />
-                  <path d="M8 14v4" />
-                  <path d="M12 10v8" />
-                  <path d="M16 7v11" />
-                </svg>
-              </div>
-              <h3 class="mindset-title-3" data-i18n="mindset_pillar_4_title">Cost &amp; Performance Optimization</h3>
-            </div>
-            <p class="mindset-desc" data-i18n="mindset_pillar_4_desc">Right-sizing, monitoring, and cloud cost awareness</p>
-          </article>
-
-          <article class="mindset-card reveal" role="listitem">
-            <div class="mindset-card-head">
-              <div class="mindset-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 3h8l2 2v16H7z" />
-                  <path d="M9 9h6" />
-                  <path d="M9 13h6" />
-                  <path d="M9 17h4" />
-                </svg>
-              </div>
-              <h3 class="mindset-title-3" data-i18n="mindset_pillar_5_title">Production-Ready Documentation</h3>
-            </div>
-            <p class="mindset-desc" data-i18n="mindset_pillar_5_desc">Clear READMEs, diagrams, and operational notes</p>
-          </article>
-        </div>
-      </div>
-    </section>
     <!-- Projects Section (Dynamic Populated via JS or Static if preferred - Plan says dynamic but content is static in resume. I'll put placeholders here and let JS populate or just hardcode it since it's cleaner) -->
     <!-- Let's use the JS to render projects as per plan "Populate content from Resume" but since I am writing HTML, I can just write them here directly for better SEO and reliability, keeping JS for "extra" behavior. 
          Wait, the plan said "Implement JS interactivity (Dynamic project rendering)". 
@@ -915,118 +828,253 @@
       </div>
     </section>
 
+    <!-- How I Work: DevOps Operating Model -->
+    <section id="mindset" class="section mindset-section" aria-labelledby="mindset-title">
+      <div class="container transition-order">
+        <div class="section-header reveal">
+          <h2 class="section-title mindset-title" id="mindset-title" data-i18n="mindset_title">How I Work: DevOps Operating Model</h2>
+        </div>
+        <p class="mindset-subtitle reveal" data-i18n="mindset_subtitle">Production-grade delivery with clear standards and measurable outcomes.</p>
+
+        <div class="mindset-grid" role="list" aria-label="Engineering pillars">
+          <article class="mindset-card reveal" role="listitem">
+            <div class="mindset-card-head">
+              <div class="mindset-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 18L3 12l5-6" />
+                  <path d="M16 6l5 6-5 6" />
+                  <path d="M14 4l-4 16" />
+                </svg>
+              </div>
+              <h3 class="mindset-title-3" data-i18n="mindset_pillar_1_title">Infrastructure as Code</h3>
+            </div>
+            <p class="mindset-desc" data-i18n="mindset_pillar_1_desc">Terraform &amp; Ansible for reproducible, versioned environments</p>
+          </article>
+
+          <article class="mindset-card reveal" role="listitem">
+            <div class="mindset-card-head">
+              <div class="mindset-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 6h10" />
+                  <path d="M4 12h16" />
+                  <path d="M4 18h12" />
+                  <path d="M14 6l3 3-3 3" />
+                </svg>
+              </div>
+              <h3 class="mindset-title-3" data-i18n="mindset_pillar_2_title">CI/CD First Approach</h3>
+            </div>
+            <p class="mindset-desc" data-i18n="mindset_pillar_2_desc">Automated build, test, and deploy with GitHub Actions / GitLab CI</p>
+          </article>
+
+          <article class="mindset-card reveal" role="listitem">
+            <div class="mindset-card-head">
+              <div class="mindset-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2l8 4v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+              <h3 class="mindset-title-3" data-i18n="mindset_pillar_3_title">Secure by Design</h3>
+            </div>
+            <p class="mindset-desc" data-i18n="mindset_pillar_3_desc">IAM, network segmentation, VPNs, and least-privilege access</p>
+          </article>
+
+          <article class="mindset-card reveal" role="listitem">
+            <div class="mindset-card-head">
+              <div class="mindset-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 18V6" />
+                  <path d="M4 18h16" />
+                  <path d="M8 14v4" />
+                  <path d="M12 10v8" />
+                  <path d="M16 7v11" />
+                </svg>
+              </div>
+              <h3 class="mindset-title-3" data-i18n="mindset_pillar_4_title">Cost &amp; Performance Optimization</h3>
+            </div>
+            <p class="mindset-desc" data-i18n="mindset_pillar_4_desc">Right-sizing, monitoring, and cloud cost awareness</p>
+          </article>
+
+          <article class="mindset-card reveal" role="listitem">
+            <div class="mindset-card-head">
+              <div class="mindset-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 3h8l2 2v16H7z" />
+                  <path d="M9 9h6" />
+                  <path d="M9 13h6" />
+                  <path d="M9 17h4" />
+                </svg>
+              </div>
+              <h3 class="mindset-title-3" data-i18n="mindset_pillar_5_title">Production-Ready Documentation</h3>
+            </div>
+            <p class="mindset-desc" data-i18n="mindset_pillar_5_desc">Clear READMEs, diagrams, and operational notes</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certifications & Professional Training -->
+    <section id="certifications" class="section certifications-section" aria-labelledby="certifications-title">
+      <div class="container transition-order">
+        <div class="section-header reveal">
+          <h2 class="section-title" id="certifications-title" data-en="Certifications & Professional Training" data-fr="Certifications & Professional Training">Certifications &amp; Professional Training</h2>
+        </div>
+
+        <p class="certifications-subtitle reveal"
+          data-en="Selected certifications and hands-on training aligned with Cloud & DevOps delivery in production environments."
+          data-fr="Certifications et formations pratiques alignées avec le delivery Cloud & DevOps en environnement de production.">
+          Selected certifications and hands-on training aligned with Cloud &amp; DevOps delivery in production environments.
+        </p>
+
+        <div class="certs-grid" role="list" aria-label="Certifications and professional training">
+          <article class="cert-card reveal" role="listitem">
+            <div class="cert-meta">
+              <span class="cert-date" data-en="Dec 10–12, 2025" data-fr="Dec 10–12, 2025">Dec 10–12, 2025</span>
+            </div>
+            <h4 class="cert-title" data-en="Ansible Essentials — Automation & Configuration Management" data-fr="Ansible Essentials — Automation & Configuration Management">Ansible Essentials — Automation &amp; Configuration Management</h4>
+            <p class="cert-org" data-en="Orange Digital Center Club – Sidi Maârouf" data-fr="Orange Digital Center Club – Sidi Maârouf">Orange Digital Center Club – Sidi Maârouf</p>
+            <p class="cert-desc" data-en="Hands-on training focused on infrastructure automation, configuration management, and DevOps best practices using Ansible." data-fr="Hands-on training focused on infrastructure automation, configuration management, and DevOps best practices using Ansible.">Hands-on training focused on infrastructure automation, configuration management, and DevOps best practices using Ansible.</p>
+
+            <div class="cert-actions" aria-label="Credential link">
+              <a class="cert-link" href="/assets/certificates/ansible-essentials-orange-digital-center.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open Ansible Essentials certificate PDF">
+                <span data-en="View certificate (PDF)" data-fr="View certificate (PDF)">View certificate (PDF)</span>
+                <span class="cert-link-meta" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="cert-card reveal" role="listitem">
+            <div class="cert-meta">
+              <span class="cert-track" data-en="Cybersecurity & Cloud Foundations" data-fr="Cybersecurity & Cloud Foundations">Cybersecurity &amp; Cloud Foundations</span>
+            </div>
+            <h4 class="cert-title" data-en="Foundations of Cybersecurity" data-fr="Foundations of Cybersecurity">Foundations of Cybersecurity</h4>
+            <p class="cert-org" data-en="Google · Coursera" data-fr="Google · Coursera">Google · Coursera</p>
+            <p class="cert-date" data-en="July 2024" data-fr="July 2024">July 2024</p>
+            <p class="cert-desc" data-en="Core cybersecurity principles: threats, risk management, security frameworks, and best practices." data-fr="Core cybersecurity principles: threats, risk management, security frameworks, and best practices.">Core cybersecurity principles: threats, risk management, security frameworks, and best practices.</p>
+
+            <div class="cert-actions" aria-label="Credential link">
+              <a class="cert-link" href="https://coursera.org/share/d8b8398808693f455a8d8d104ead31b9" target="_blank" rel="noopener noreferrer" aria-label="Open Coursera credential: Foundations of Cybersecurity">
+                <span data-en="View credential" data-fr="View credential">View credential</span>
+                <span class="cert-link-meta" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="cert-card reveal" role="listitem">
+            <div class="cert-meta">
+              <span class="cert-track" data-en="Cybersecurity & Cloud Foundations" data-fr="Cybersecurity & Cloud Foundations">Cybersecurity &amp; Cloud Foundations</span>
+            </div>
+            <h4 class="cert-title" data-en="Play It Safe: Manage Security Risks" data-fr="Play It Safe: Manage Security Risks">Play It Safe: Manage Security Risks</h4>
+            <p class="cert-org" data-en="Google · Coursera" data-fr="Google · Coursera">Google · Coursera</p>
+            <p class="cert-date" data-en="August 2024" data-fr="August 2024">August 2024</p>
+            <p class="cert-desc" data-en="Practical approaches to identifying, assessing, and mitigating security risks in modern IT environments." data-fr="Practical approaches to identifying, assessing, and mitigating security risks in modern IT environments.">Practical approaches to identifying, assessing, and mitigating security risks in modern IT environments.</p>
+
+            <div class="cert-actions" aria-label="Credential link">
+              <a class="cert-link" href="https://coursera.org/share/7d30bc47873bd183b4a2b2b4aaf1212a" target="_blank" rel="noopener noreferrer" aria-label="Open Coursera credential: Play It Safe: Manage Security Risks">
+                <span data-en="View credential" data-fr="View credential">View credential</span>
+                <span class="cert-link-meta" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- Education Section -->
     <section id="education" class="section">
       <div class="container transition-order">
         <div class="section-header reveal">
           <h2 class="section-title" data-i18n="nav_education">Education</h2>
         </div>
+
+        <p class="education-subtitle reveal"
+          data-en="Academic background supporting cloud delivery, automation, and secure operations."
+          data-fr="Formation académique orientée delivery cloud, automatisation et opérations sécurisées.">
+          Academic background supporting cloud delivery, automation, and secure operations.
+        </p>
+
         <div class="timeline reveal">
           <!-- Populated by JS -->
         </div>
       </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section contact-section">
+    <!-- Final CTA Section -->
+    <section id="contact" class="section final-cta-section" aria-labelledby="final-cta-title">
       <div class="container transition-order">
-        <div class="contact-layout reveal">
-          <!-- Left Column: Information -->
-          <div class="contact-info-col">
-            <h2 class="contact-title" data-i18n="contact_title">Let's start a project together</h2>
-            <p class="contact-text" data-i18n="contact_sub">
-              Interested in working together? We should queue up a time to chat. I’ll buy the coffee.
-            </p>
+        <div class="section-header reveal">
+          <h2 class="section-title" id="final-cta-title"
+            data-en="Let’s Build Reliable Cloud Infrastructure"
+            data-fr="Let’s Build Reliable Cloud Infrastructure">Let’s Build Reliable Cloud Infrastructure</h2>
+        </div>
 
-            <div class="contact-cards-list">
-              <!-- Email -->
-              <div class="contact-detail-card email-card" id="emailCard" style="cursor: pointer;">
-                <div class="detail-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect width="20" height="16" x="2" y="4" rx="2" />
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  </svg>
-                </div>
-                <div class="detail-content">
-                  <span class="detail-label" data-i18n="contact_mail_label">Mail me</span>
-                  <span class="detail-value">hamzahssaini0@gmail.com</span>
-                  <span class="copy-feedback" data-i18n="email_copied"
-                    style="display: none; color: var(--accent-blue); font-size: 0.8rem; font-weight: 600;">Copied!</span>
-                </div>
-              </div>
+        <div class="final-cta-card reveal">
+          <p class="final-cta-intro"
+            data-en="Cloud & DevOps collaboration with a production-first mindset. Open to roles, consulting, and technical discussions."
+            data-fr="Collaboration Cloud & DevOps avec un mindset production. Ouvert aux opportunités, au consulting et aux échanges techniques.">
+            Cloud &amp; DevOps collaboration with a production-first mindset. Open to roles, consulting, and technical discussions.
+          </p>
 
-              <!-- Phone -->
-              <div class="contact-detail-card" id="phoneCard" style="cursor: pointer;">
-                <div class="detail-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                      d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                </div>
-                <div class="detail-content">
-                  <span class="detail-label">Call me</span>
-                  <span class="detail-value">+212 7 66 99 15 41</span>
-                  <span class="copy-feedback" data-i18n="phone_copied"
-                    style="display: none; color: var(--accent-blue); font-size: 0.8rem; font-weight: 600;">Copied!</span>
-                </div>
-              </div>
+          <div class="final-cta-actions" aria-label="Primary links">
+            <a class="final-cta-icon-btn" href="https://linkedin.com/in/hamza-hssaini" target="_blank" rel="noopener noreferrer" aria-label="Open LinkedIn profile">
+              <span class="final-cta-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                </svg>
+              </span>
+              <span class="final-cta-icon-label" data-en="LinkedIn" data-fr="LinkedIn">LinkedIn</span>
+            </a>
 
-              <!-- Socials Minimal -->
-              <div class="contact-socials-row">
-                <a href="https://linkedin.com/in/hamza-hssaini" target="_blank" class="social-mini-btn"
-                  aria-label="LinkedIn">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20"
-                    height="20">
-                    <path
-                      d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                  </svg>
-                </a>
-                <a href="https://github.com/hamzahssaini" target="_blank" class="social-mini-btn" aria-label="GitHub">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20"
-                    height="20">
-                    <path
-                      d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
+            <a class="final-cta-icon-btn" href="https://github.com/hamzahssaini" target="_blank" rel="noopener noreferrer" aria-label="Open GitHub profile">
+              <span class="final-cta-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+              </span>
+              <span class="final-cta-icon-label" data-en="GitHub" data-fr="GitHub">GitHub</span>
+            </a>
+
+            <a class="final-cta-icon-btn" href="/CV_Hamza_Hssaini_Cloud_DevOps_Specialist.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open CV">
+              <span class="final-cta-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                  <path d="M12 3v10" />
+                  <path d="M8 11l4 4 4-4" />
+                  <path d="M4 21h16" />
+                </svg>
+              </span>
+              <span class="final-cta-icon-label" data-en="Download CV" data-fr="Download CV">Download CV</span>
+            </a>
           </div>
 
-          <!-- Right Column: Form -->
-          <div class="contact-form-col">
-            <form class="clean-form">
-              <div class="form-row">
-                <div class="form-group half">
-                  <label for="name" data-i18n="form_name">Name</label>
-                  <input type="text" id="name" name="name" placeholder="Full Name" required>
-                </div>
-                <div class="form-group half">
-                  <label for="email">Email</label>
-                  <input type="email" id="email" name="email" placeholder="Email" required>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="subject">Subject</label>
-                <input type="text" id="subject" name="subject" placeholder="Project subject" required>
-              </div>
-              <div class="form-group">
-                <label for="message">Message</label>
-                <textarea id="message" name="message" rows="5" placeholder="Tell me about your project..."
-                  required></textarea>
-              </div>
-
-              <button type="submit" class="btn btn-primary submit-btn">
-                <span>Send Message</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="feather feather-send">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          <div class="final-cta-contacts" aria-label="Direct contact">
+            <button type="button" class="final-cta-copy-row" id="ctaEmailCopy" aria-label="Copy email address">
+              <span class="final-cta-copy-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                 </svg>
-              </button>
-            </form>
+              </span>
+              <span class="final-cta-copy-content">
+                <span class="final-cta-copy-label" data-en="Mail me" data-fr="Mail">Mail me</span>
+                <span class="final-cta-copy-value" data-copy-value="hamzahssaini0@gmail.com">hamzahssaini0@gmail.com</span>
+              </span>
+              <span class="final-cta-copy-action" aria-hidden="true">Copy</span>
+              <span class="final-cta-copy-feedback" data-i18n="email_copied" aria-live="polite">Copied!</span>
+            </button>
+
+            <button type="button" class="final-cta-copy-row" id="ctaPhoneCopy" aria-label="Copy phone number">
+              <span class="final-cta-copy-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
+              <span class="final-cta-copy-content">
+                <span class="final-cta-copy-label" data-en="Call" data-fr="Téléphone">Call</span>
+                <span class="final-cta-copy-value" data-copy-value="+212766991541">+212766991541</span>
+              </span>
+              <span class="final-cta-copy-action" aria-hidden="true">Copy</span>
+              <span class="final-cta-copy-feedback" data-i18n="phone_copied" aria-live="polite">Copied!</span>
+            </button>
           </div>
         </div>
       </div>

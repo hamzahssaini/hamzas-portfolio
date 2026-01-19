@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
       nav_about: 'About',
       nav_projects: 'Projects',
       nav_education: 'Education',
-      nav_contact: 'Contact',
+      nav_contact: 'Let\'s Talk',
       hero_role: 'Cloud & DevOps Specialist',
       hero_title: 'Cloud & DevOps Specialist | Azure & AWS',
       hero_value: 'I design and automate scalable, production-ready cloud infrastructures using Azure, AWS, Kubernetes, and CI/CD pipelines.',
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cv_data: 'Data/Analytics Resume',
       cv_support: 'IT Support & Systems Resume',
       btn_github: 'View Source Code',
-      about_title: 'About Myself',
+      about_title: 'About Me',
       projects_title: 'Project Highlights',
       contact_title: 'Let\'s start a project together',
       brief_label_problem: 'PROBLEM',
@@ -1122,6 +1122,119 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // --- Final CTA: Copy email / phone ---
+  (function initFinalCtaCopy() {
+    const root = document.getElementById('contact');
+    if (!root) return;
+
+    const emailBtn = document.getElementById('ctaEmailCopy');
+    const phoneBtn = document.getElementById('ctaPhoneCopy');
+
+    async function copyText(text) {
+      const value = String(text || '').trim();
+      if (!value) return false;
+
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
+
+        const ta = document.createElement('textarea');
+        ta.value = value;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.left = '-1000px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (err) {
+        try { console.error('Copy failed:', err); } catch (e) { }
+        return false;
+      }
+    }
+
+    function flashCopied(el) {
+      if (!el) return;
+      el.classList.add('is-copied');
+      window.setTimeout(() => el.classList.remove('is-copied'), 1600);
+    }
+
+    function attachCopyAndLongPress(el, opts) {
+      if (!el) return;
+      const copySelector = opts.copySelector || '[data-copy-value]';
+      const longPressHref = opts.longPressHref || '';
+      const longPressMs = typeof opts.longPressMs === 'number' ? opts.longPressMs : 650;
+
+      let longPressTimer = null;
+      let didLongPress = false;
+
+      function clearTimer() {
+        if (longPressTimer) {
+          window.clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      }
+
+      function startLongPress(e) {
+        didLongPress = false;
+        clearTimer();
+
+        // Only enable long-press behavior on touch.
+        // Pointer Events: pointerType === 'touch'.
+        // Touch Events fallback: touchstart has no pointerType.
+        const isTouch = (e && e.pointerType === 'touch') || (e && e.type === 'touchstart');
+        if (!isTouch || !longPressHref) return;
+
+        longPressTimer = window.setTimeout(() => {
+          didLongPress = true;
+          try {
+            window.location.href = longPressHref;
+          } catch (err) {
+            // no-op
+          }
+        }, longPressMs);
+      }
+
+      function cancelLongPress() {
+        clearTimer();
+      }
+
+      el.addEventListener('pointerdown', startLongPress);
+      el.addEventListener('pointerup', cancelLongPress);
+      el.addEventListener('pointercancel', cancelLongPress);
+      el.addEventListener('pointerleave', cancelLongPress);
+      el.addEventListener('touchstart', startLongPress, { passive: true });
+      el.addEventListener('touchend', cancelLongPress);
+
+      el.addEventListener('click', async (e) => {
+        if (didLongPress) {
+          // Avoid copying after the long-press already opened the app.
+          didLongPress = false;
+          return;
+        }
+        const valueEl = el.querySelector(copySelector);
+        const ok = await copyText(valueEl ? valueEl.getAttribute('data-copy-value') : '');
+        if (ok) flashCopied(el);
+      });
+    }
+
+    attachCopyAndLongPress(emailBtn, {
+      longPressHref: 'mailto:hamzahssaini0@gmail.com',
+      copySelector: '[data-copy-value]',
+      longPressMs: 650,
+    });
+
+    attachCopyAndLongPress(phoneBtn, {
+      longPressHref: 'tel:+212766991541',
+      copySelector: '[data-copy-value]',
+      longPressMs: 650,
+    });
+  })();
 
   // debounce helper
   function debounce(fn, ms = 200) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
