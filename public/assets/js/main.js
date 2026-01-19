@@ -1455,6 +1455,91 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(el);
   });
 
+  // --- Metrics (Impact) Count-Up Animation ---
+  // Subtle: triggers once per metric when it enters viewport.
+  // If reduced motion is enabled, values stay static.
+  (function initImpactMetricsCountUp() {
+    try {
+      const section = document.getElementById('metrics-impact');
+      if (!section) return;
+
+      const numbers = Array.from(section.querySelectorAll('.impact-metric-number[data-target]'));
+      if (!numbers.length) return;
+
+      const reduceMotion = (() => {
+        try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+        catch (e) { return false; }
+      })();
+
+      function formatMetric(target, suffix, forcePlus) {
+        const n = Number(target);
+        const abs = Math.abs(Math.round(n));
+        const isNeg = n < 0;
+        const prefix = isNeg ? '−' : (forcePlus ? '+' : '');
+        return prefix + String(abs) + (suffix || '');
+      }
+
+      // Ensure default text is the real value (not placeholders).
+      numbers.forEach((el) => {
+        const target = Number(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        const forcePlus = el.getAttribute('data-plus') === '1';
+        const finalText = formatMetric(target, suffix, forcePlus);
+        el.setAttribute('data-final', finalText);
+        // Keep what's in HTML if already correct; otherwise enforce.
+        if (!el.textContent || el.textContent.trim() === '0%' || el.textContent.trim() === '0') {
+          el.textContent = finalText;
+        }
+      });
+
+      if (reduceMotion) return;
+
+      function animateToTarget(el) {
+        const target = Number(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        const forcePlus = el.getAttribute('data-plus') === '1';
+        const durationMs = 900;
+
+        const startValue = 0;
+        const endValue = target;
+
+        // Reset to 0 right before animation (element is visible now).
+        el.textContent = (forcePlus ? '+' : '') + '0' + suffix;
+
+        const start = performance.now();
+        function tick(now) {
+          const t = Math.min(1, (now - start) / durationMs);
+          // Ease-out (cubic)
+          const eased = 1 - Math.pow(1 - t, 3);
+          const current = startValue + (endValue - startValue) * eased;
+          const text = formatMetric(current, suffix, forcePlus);
+          el.textContent = text;
+          if (t < 1) requestAnimationFrame(tick);
+          else el.textContent = formatMetric(endValue, suffix, forcePlus);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      let ran = false;
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          if (ran) return;
+          ran = true;
+          sectionObserver.disconnect();
+          numbers.forEach(el => animateToTarget(el));
+        });
+      }, {
+        threshold: 0.22,
+        rootMargin: '0px 0px -10% 0px'
+      });
+
+      sectionObserver.observe(section);
+    } catch (e) {
+      // silent fail
+    }
+  })();
+
   // --- Header Scroll Effect ---
   const header = document.querySelector('.site-header');
   window.addEventListener('scroll', () => {
