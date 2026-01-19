@@ -751,6 +751,13 @@
   height: auto;
 }
 
+.rw-diagram img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
 /* Gallery grid inside modal */
 .rw-gallery {
   display: grid;
