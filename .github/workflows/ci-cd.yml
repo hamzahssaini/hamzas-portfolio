@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOCKERHUB_REPO: 'hamzas-portfolio' # Update this if your Docker Hub repo name is different
+  DOCKERHUB_REPO: 'hamzas-portfolio' #Update this if your Docker Hub repo name is different
 
 jobs: 
   test-and-lint:
