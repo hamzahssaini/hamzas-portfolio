@@ -817,6 +817,90 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Projects proof modals (Gallery / CI-CD / Architecture) are implemented as CSS :target.
+  // The close button currently points to #projects which causes an unwanted scroll jump.
+  // Fix: intercept close + Esc/backdrop and clear the hash via history.replaceState (no scroll).
+  function initRwTargetModals() {
+    try {
+      function getActiveRwModalFromHash() {
+        try {
+          const hash = String(window.location.hash || '');
+          if (!hash || hash.length < 2) return null;
+          const el = document.querySelector(hash);
+          if (!el || !(el instanceof Element)) return null;
+          if (!el.classList.contains('rw-modal')) return null;
+          return el;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function closeTargetModalKeepScroll() {
+        const y = window.scrollY || 0;
+        const x = window.scrollX || 0;
+
+        const activeModal = getActiveRwModalFromHash();
+        if (!activeModal) return;
+
+        try {
+          // 1) Change the hash so CSS :target updates and the modal closes.
+          // Use a non-existent id to avoid scrolling.
+          window.location.hash = 'rw-closed';
+        } catch (e) { /* ignore */ }
+
+        try {
+          // 2) Remove the hash from the URL (optional, keeps URL clean).
+          const base = String(window.location.href || '').split('#')[0];
+          if (window.history && typeof window.history.replaceState === 'function') {
+            window.history.replaceState(null, '', base);
+          }
+        } catch (e) { /* ignore */ }
+
+        // Extra safety: restore scroll position in case the browser tries to jump.
+        try {
+          window.requestAnimationFrame(() => {
+            try { window.scrollTo(x, y); } catch (e) { }
+          });
+        } catch (e) { }
+      }
+
+      document.addEventListener('click', (ev) => {
+        const rawTarget = ev.target;
+        const target = (rawTarget instanceof Element)
+          ? rawTarget
+          : (rawTarget && rawTarget.parentElement ? rawTarget.parentElement : null);
+        if (!target) return;
+
+        // Close button (X)
+        const closeLink = target.closest('a.rw-modal-close');
+        if (closeLink) {
+          ev.preventDefault();
+          closeTargetModalKeepScroll();
+          return;
+        }
+
+        // Backdrop click (click outside the modal surface)
+        const modal = target.closest('.rw-modal');
+        if (!modal) return;
+        if (typeof modal.matches === 'function' && !modal.matches(':target')) return;
+
+        const surface = modal.querySelector('.rw-modal-surface');
+        if (surface && surface.contains(target)) return;
+        ev.preventDefault();
+        closeTargetModalKeepScroll();
+      });
+
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Escape') return;
+        if (!getActiveRwModalFromHash()) return;
+        ev.preventDefault();
+        closeTargetModalKeepScroll();
+      });
+    } catch (e) {
+      // silent
+    }
+  }
+
   function createControls() {
     try { console.log('createControls: initializing'); } catch (e) { }
     if (document.getElementById('controlsRoot')) return;
@@ -1701,5 +1785,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Enable in-page screenshot viewer for Projects galleries.
   initRwGalleryViewer();
+
+  // Prevent "close" from scrolling to #projects.
+  initRwTargetModals();
 
 });
