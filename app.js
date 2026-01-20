@@ -24,7 +24,7 @@ const REPO = process.env.REPO;
 const BRANCH = process.env.BRANCH;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID;
-const WINDOW_DAYS = Number(process.env.WINDOW_DAYS);
+const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 365);
 const DORA_API_KEY = process.env.DORA_API_KEY;
 
 // Middleware (body + logging)
@@ -395,15 +395,13 @@ app.get('/api/summary', async (req, res) => {
       if (GITHUB_TOKEN) {
         const contributorsResp = await gh(`/repos/${OWNER}/${REPO}/contributors`, { per_page: 100 });
         if (Array.isArray(contributorsResp)) {
-          // Exclude automated contributors/bots (dependabot, *[bot], etc.)
-          contributors_count = contributorsResp.filter(c => {
-            const login = String(c.login || '').toLowerCase();
-            if (!login) return false;
-            if (login.endsWith('[bot]')) return false;
-            if (login.includes('dependabot')) return false;
-            if (login.includes('bot') && !login.includes('bot-user')) return false;
-            return true;
-          }).length;
+          // Count only the configured OWNER (your portfolio) to avoid counting bots or other org members
+          const ownerLogin = String(OWNER || '').toLowerCase();
+          if (ownerLogin) {
+            contributors_count = contributorsResp.filter(c => String(c.login || '').toLowerCase() === ownerLogin).length;
+          } else {
+            contributors_count = contributorsResp.length || 0;
+          }
         } else {
           contributors_count = Number(contributorsResp.length || 0);
         }
