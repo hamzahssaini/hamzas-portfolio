@@ -38,6 +38,16 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// CORS for API (helps when opening dashboard.html from file:// or another origin)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '600');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // In-memory stores (simple demo)
 const users = [];
 const deployments = [];
@@ -157,7 +167,10 @@ async function gh(path, params = {}) {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`GitHub API ${res.status}: ${text}`);
+    const err = new Error(`GitHub API ${res.status}: ${text}`);
+    err.status = res.status;
+    err.responseText = text;
+    throw err;
   }
   return res.json();
 }
@@ -208,7 +221,20 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
   const since = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
   const until = new Date(now).toISOString();
 
-  const [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(since, until)]);
+  let runsResp;
+  let commits;
+  try {
+    [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(since, until)]);
+  } catch (e) {
+    if (e && (e.status === 401 || e.status === 403)) {
+      return {
+        daily: {},
+        meta: { successes: 0, failures: 0, commits: 0, window_days: days, total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] },
+        warning: 'GITHUB_TOKEN is invalid or lacks permissions; GitHub-backed metrics are disabled',
+      };
+    }
+    throw e;
+  }
   const runsAll = (runsResp.workflow_runs || []);
   const sinceDate = new Date(since);
   const allRuns = runsAll.filter(r => {
@@ -319,6 +345,9 @@ app.get('/api/runs', async (req, res) => {
     res.json({ runs });
   } catch (e) {
     console.error('GET /api/runs error:', e && (e.stack || e.message || e));
+    if (e && (e.status === 401 || e.status === 403)) {
+      return res.json({ runs: [], warning: 'GITHUB_TOKEN is invalid or lacks permissions; runs are unavailable' });
+    }
     res.status(500).json({ error: e.message || 'Failed to fetch runs' });
   }
 });
@@ -359,6 +388,7 @@ app.get('/api/summary', async (req, res) => {
       median_mttr_hours: medianMttr !== null ? Number(medianMttr.toFixed(2)) : null,
       p95_mttr_hours: p95Mttr !== null ? Number(p95Mttr.toFixed(2)) : null,
       contributors_count,
+      ...(data.warning ? { warning: data.warning } : {}),
     });
   } catch (e) {
     console.error('GET /api/summary error:', e && (e.stack || e.message || e));
@@ -378,6 +408,13 @@ app.get('/api/metrics/github', async (req, res) => {
     return res.json(data);
   } catch (err) {
     console.error('GET /api/metrics/github error', err && (err.stack || err.message || err));
+    if (err && (err.status === 401 || err.status === 403)) {
+      return res.json({
+        daily: {},
+        meta: { successes: 0, failures: 0, commits: 0, window_days: Number(req.query.days || WINDOW_DAYS), total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] },
+        warning: 'GITHUB_TOKEN is invalid or lacks permissions; GitHub-backed metrics are disabled',
+      });
+    }
     res.status(500).json({ error: err.message || 'Failed to compute GitHub metrics' });
   }
 });

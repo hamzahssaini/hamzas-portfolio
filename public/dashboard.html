@@ -46,6 +46,8 @@
       </div>
     </header>
 
+    <div id="banner" class="card" style="margin-top:14px; padding:12px; display:none" role="status" aria-live="polite"></div>
+
     <div style="margin-top:18px;display:flex;gap:12px;align-items:center">
       <div class="card" style="padding:12px">Deployments: <strong id="total-deploy">--</strong></div>
       <div class="card" style="padding:12px">Avg lead: <strong id="avg-lead">--</strong></div>
@@ -84,6 +86,27 @@
   </div>
 
   <script>
+    const banner = document.getElementById('banner');
+    function showBanner(message) {
+      banner.textContent = message;
+      banner.style.display = 'block';
+    }
+
+    // API base resolution:
+    // - Default: same origin (works when served from the Node app)
+    // - If opened via file://, default to local server http://localhost:3000
+    // - Optional override: ?apiBase=http://localhost:3000
+    const params = new URLSearchParams(window.location.search);
+    const apiBaseParam = (params.get('apiBase') || params.get('api') || '').trim();
+    const API_BASE = (apiBaseParam
+      ? apiBaseParam.replace(/\/+$/, '')
+      : (window.location.protocol === 'file:' ? 'http://localhost:3000' : '')
+    );
+
+    if (window.location.protocol === 'file:') {
+      showBanner('This dashboard is opened as a local file. Start the server with: npm start, then open http://localhost:3000/dashboard.html (recommended).');
+    }
+
     function toHours(ms) { return ms == null ? null : +(ms / 3600000).toFixed(2); }
     function formatTime(iso, tz) {
       if (!iso) return '—';
@@ -122,9 +145,26 @@
       });
     }
 
-    async function fetchMetrics(days) { const q = days ? `?days=${days}` : ''; const r = await fetch('/api/metrics/github' + q); return r.json(); }
-    async function fetchSummary(days) { const q = days ? `?days=${days}` : ''; const r = await fetch('/api/summary' + q); return r.json(); }
-    async function fetchRuns(per_page = 50) { const r = await fetch(`/api/runs?per_page=${per_page}`); return r.json(); }
+    async function fetchJson(url) {
+      const r = await fetch(url);
+      if (!r.ok) {
+        const text = await r.text();
+        throw new Error(`HTTP ${r.status}: ${text || r.statusText}`);
+      }
+      return r.json();
+    }
+
+    async function fetchMetrics(days) {
+      const q = days ? `?days=${days}` : '';
+      return fetchJson(`${API_BASE}/api/metrics/github${q}`);
+    }
+    async function fetchSummary(days) {
+      const q = days ? `?days=${days}` : '';
+      return fetchJson(`${API_BASE}/api/summary${q}`);
+    }
+    async function fetchRuns(per_page = 50) {
+      return fetchJson(`${API_BASE}/api/runs?per_page=${per_page}`);
+    }
 
     function renderRunsTable(runs, tz) {
       const tbody = document.querySelector('#runs-table tbody');
@@ -162,6 +202,10 @@
         const meta = metrics.meta || {};
         const s = summary || {};
 
+        if (metrics.warning) {
+          showBanner(metrics.warning + ' (Set GITHUB_TOKEN in your .env and restart the server)');
+        }
+
         document.getElementById('meta-line').textContent = `Window: ${meta.window_days || s.window_days || days} days · Successes: ${meta.successes ?? s.successes ?? '--'} · Failures: ${meta.failures ?? s.failures ?? '--'} · Commits: ${meta.commits ?? '--'}`;
 
         document.getElementById('total-deploy').textContent = s.total_deployments ?? (meta.successes + meta.failures) ?? '--';
@@ -184,7 +228,7 @@
 
       } catch (err) {
         console.error('Dashboard load error', err);
-        alert('Failed to load dashboard: ' + (err.message || err));
+        showBanner('Failed to load dashboard. If you opened this file directly, run `npm start` and open http://localhost:3000/dashboard.html. Error: ' + (err.message || err));
       }
     }
 
