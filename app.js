@@ -19,19 +19,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Config (env)
-const OWNER = process.env.OWNER || 'hamzahssaini';
-const REPO = process.env.REPO || 'dora-metrics';
-const BRANCH = process.env.BRANCH || 'main';
+const OWNER = process.env.OWNER;
+const REPO = process.env.REPO;
+const BRANCH = process.env.BRANCH;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || '';
-const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 60);
-const DORA_API_KEY = process.env.DORA_API_KEY || '';
-
-// Startup log (mask sensitive)
-console.log('Starting app with:');
-console.log(`  OWNER=${OWNER} REPO=${REPO} BRANCH=${BRANCH} PORT=${PORT} WINDOW_DAYS=${WINDOW_DAYS}`);
-console.log(`  GITHUB_TOKEN set: ${GITHUB_TOKEN ? 'yes' : 'no'}`);
-console.log(`  DORA_API_KEY set: ${DORA_API_KEY ? 'yes' : 'no'}`);
+const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID;
+const WINDOW_DAYS = Number(process.env.WINDOW_DAYS);
+const DORA_API_KEY = process.env.DORA_API_KEY;
 
 // Middleware (body + logging)
 app.use(morgan('dev'));
@@ -211,20 +205,39 @@ function percentile(arr, p) {
   return s[lo] + (s[hi] - s[lo]) * (idx - lo);
 }
 
-async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
+async function computeGithubMetrics({ days = WINDOW_DAYS, since, until } = {}) {
   // If no GitHub token, return an empty-but-valid structure (avoid throwing uncaught)
   if (!GITHUB_TOKEN) {
     return { daily: {}, meta: { successes: 0, failures: 0, commits: 0, window_days: days, total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] } };
   }
 
   const now = Date.now();
-  const since = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
-  const until = new Date(now).toISOString();
+  // If the caller provided explicit ISO since/until, prefer them. Otherwise compute from `days`.
+  let sinceIso = '';
+  let untilIso = '';
+  try {
+    if (since) {
+      sinceIso = new Date(since).toISOString();
+    } else {
+      sinceIso = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+    }
+  } catch (e) {
+    sinceIso = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+  }
+  try {
+    if (until) {
+      untilIso = new Date(until).toISOString();
+    } else {
+      untilIso = new Date(now).toISOString();
+    }
+  } catch (e) {
+    untilIso = new Date(now).toISOString();
+  }
 
   let runsResp;
   let commits;
   try {
-    [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(since, until)]);
+    [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(sinceIso, untilIso)]);
   } catch (e) {
     if (e && (e.status === 401 || e.status === 403)) {
       return {
@@ -236,7 +249,7 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     throw e;
   }
   const runsAll = (runsResp.workflow_runs || []);
-  const sinceDate = new Date(since);
+  const sinceDate = new Date(sinceIso);
   const allRuns = runsAll.filter(r => {
     const d = new Date(r.updated_at || r.run_started_at || r.created_at);
     return d >= sinceDate;
@@ -333,7 +346,17 @@ app.get('/api/runs', async (req, res) => {
     }
     const per_page = Number(req.query.per_page || 50);
     const resp = await getWorkflowRunsPage(per_page);
-    const runs = (resp.workflow_runs || []).map(r => ({
+    const since = req.query.since ? new Date(req.query.since) : null;
+    const until = req.query.until ? new Date(req.query.until) : null;
+    const runs = (resp.workflow_runs || [])
+      .filter(r => {
+        if (!since && !until) return true;
+        const d = new Date(r.updated_at || r.run_started_at || r.created_at);
+        if (since && d < since) return false;
+        if (until && d > until) return false;
+        return true;
+      })
+      .map(r => ({
       id: r.id,
       name: r.name,
       conclusion: r.conclusion,
@@ -355,7 +378,9 @@ app.get('/api/runs', async (req, res) => {
 app.get('/api/summary', async (req, res) => {
   try {
     const days = Number(req.query.days || WINDOW_DAYS);
-    const data = await computeGithubMetrics({ days });
+    const since = req.query.since || undefined;
+    const until = req.query.until || undefined;
+    const data = await computeGithubMetrics({ days, since, until });
     const meta = data.meta || {};
     const leadAll = meta.lead_times_ms_all || [];
     const mttrAll = meta.mttr_ms_all || [];
@@ -369,7 +394,19 @@ app.get('/api/summary', async (req, res) => {
     try {
       if (GITHUB_TOKEN) {
         const contributorsResp = await gh(`/repos/${OWNER}/${REPO}/contributors`, { per_page: 100 });
-        contributors_count = Array.isArray(contributorsResp) ? contributorsResp.length : (contributorsResp.length || 0);
+        if (Array.isArray(contributorsResp)) {
+          // Exclude automated contributors/bots (dependabot, *[bot], etc.)
+          contributors_count = contributorsResp.filter(c => {
+            const login = String(c.login || '').toLowerCase();
+            if (!login) return false;
+            if (login.endsWith('[bot]')) return false;
+            if (login.includes('dependabot')) return false;
+            if (login.includes('bot') && !login.includes('bot-user')) return false;
+            return true;
+          }).length;
+        } else {
+          contributors_count = Number(contributorsResp.length || 0);
+        }
       } else {
         contributors_count = 0;
       }
@@ -400,7 +437,9 @@ app.get('/api/summary', async (req, res) => {
 app.get('/api/metrics/github', async (req, res) => {
   try {
     const days = Number(req.query.days || WINDOW_DAYS);
-    const data = await computeGithubMetrics({ days });
+    const since = req.query.since || undefined;
+    const until = req.query.until || undefined;
+    const data = await computeGithubMetrics({ days, since, until });
     // If token missing, include a friendly warning so front-end can show it
     if (!GITHUB_TOKEN) {
       return res.json({ ...data, warning: 'GITHUB_TOKEN not set; GitHub-backed metrics are disabled' });

@@ -11,7 +11,8 @@
   <style>
     :root{--bg:#f5f8fb;--card:#fff;--muted:#6b7280;--accent:#2563eb;--radius:12px}
     body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;margin:0;background:var(--bg);color:#0f172a}
-    .container{max-width:1200px;margin:28px auto;padding:18px}
+    /* make the dashboard full-width rather than centered */
+    .container{width:100%;max-width:unset;margin:0;padding:18px 36px;box-sizing:border-box}
     header{display:flex;justify-content:space-between;align-items:center;gap:16px}
     h1{margin:0;font-size:26px}
     .meta-line{color:var(--muted);margin-top:6px;font-size:14px}
@@ -154,16 +155,35 @@
       return r.json();
     }
 
-    async function fetchMetrics(days) {
-      const q = days ? `?days=${days}` : '';
+    async function fetchMetrics(daysOrRange) {
+      let q = '';
+      if (daysOrRange && typeof daysOrRange === 'object' && daysOrRange.since) {
+        const since = encodeURIComponent(daysOrRange.since);
+        const until = daysOrRange.until ? `&until=${encodeURIComponent(daysOrRange.until)}` : '';
+        q = `?since=${since}${until}`;
+      } else if (daysOrRange) {
+        q = `?days=${daysOrRange}`;
+      }
       return fetchJson(`${API_BASE}/api/metrics/github${q}`);
     }
-    async function fetchSummary(days) {
-      const q = days ? `?days=${days}` : '';
+    async function fetchSummary(daysOrRange) {
+      let q = '';
+      if (daysOrRange && typeof daysOrRange === 'object' && daysOrRange.since) {
+        const since = encodeURIComponent(daysOrRange.since);
+        const until = daysOrRange.until ? `&until=${encodeURIComponent(daysOrRange.until)}` : '';
+        q = `?since=${since}${until}`;
+      } else if (daysOrRange) {
+        q = `?days=${daysOrRange}`;
+      }
       return fetchJson(`${API_BASE}/api/summary${q}`);
     }
-    async function fetchRuns(per_page = 50) {
-      return fetchJson(`${API_BASE}/api/runs?per_page=${per_page}`);
+    async function fetchRuns(per_page = 50, daysOrRange) {
+      let q = `?per_page=${per_page}`;
+      if (daysOrRange && typeof daysOrRange === 'object' && daysOrRange.since) {
+        q += `&since=${encodeURIComponent(daysOrRange.since)}`;
+        if (daysOrRange.until) q += `&until=${encodeURIComponent(daysOrRange.until)}`;
+      }
+      return fetchJson(`${API_BASE}/api/runs${q}`);
     }
 
     function renderRunsTable(runs, tz) {
@@ -194,10 +214,13 @@
       URL.revokeObjectURL(url);
     }
 
-    async function loadDashboard(selectedDays = null) {
+    let currentRange = null; // either a number (days) or { since, until }
+
+    async function loadDashboard(selected = null) {
       try {
-        const days = selectedDays || 60;
-        const [metrics, summary, runsResp] = await Promise.all([fetchMetrics(days), fetchSummary(days), fetchRuns(50)]);
+        const param = selected ?? currentRange ?? 60;
+        currentRange = param;
+        const [metrics, summary, runsResp] = await Promise.all([fetchMetrics(param), fetchSummary(param), fetchRuns(50, param)]);
         const daily = metrics.daily || {};
         const meta = metrics.meta || {};
         const s = summary || {};
@@ -206,7 +229,15 @@
           showBanner(metrics.warning + ' (Set GITHUB_TOKEN in your .env and restart the server)');
         }
 
-        document.getElementById('meta-line').textContent = `Window: ${meta.window_days || s.window_days || days} days · Successes: ${meta.successes ?? s.successes ?? '--'} · Failures: ${meta.failures ?? s.failures ?? '--'} · Commits: ${meta.commits ?? '--'}`;
+        // Show the window either as days or a specific since/until range
+        if (param && typeof param === 'object' && param.since) {
+          const startText = new Date(param.since).toLocaleDateString();
+          const endText = param.until ? new Date(param.until).toLocaleDateString() : '';
+          document.getElementById('meta-line').textContent = `Window: ${startText}${endText ? ' → ' + endText : ''} · Successes: ${meta.successes ?? s.successes ?? '--'} · Failures: ${meta.failures ?? s.failures ?? '--'} · Commits: ${meta.commits ?? '--'}`;
+        } else {
+          const daysVal = param && typeof param === 'number' ? param : (meta.window_days || s.window_days || 60);
+          document.getElementById('meta-line').textContent = `Window: ${daysVal} days · Successes: ${meta.successes ?? s.successes ?? '--'} · Failures: ${meta.failures ?? s.failures ?? '--'} · Commits: ${meta.commits ?? '--'}`;
+        }
 
         document.getElementById('total-deploy').textContent = s.total_deployments ?? (meta.successes + meta.failures) ?? '--';
         document.getElementById('avg-lead').textContent = s.median_lead_hours !== undefined ? (s.median_lead_hours !== null ? `${s.median_lead_hours} hr` : 'N/A') : (meta.avg_lead_time_hours ? `${meta.avg_lead_time_hours} hr` : 'N/A');
@@ -233,7 +264,27 @@
     }
 
     // UI wiring
-    flatpickr('#daterange', { mode:'single', enableTime:false, defaultDate:null });
+    flatpickr('#daterange', {
+      mode: 'range',
+      enableTime: false,
+      dateFormat: 'Y-m-d',
+      defaultDate: null,
+      onChange: function(selectedDates, dateStr, instance) {
+        if (!selectedDates || selectedDates.length === 0) return;
+        if (selectedDates.length === 1) {
+          // single date selected -> treat as a single-day window
+          const since = selectedDates[0].toISOString();
+          loadDashboard({ since });
+        } else if (selectedDates.length >= 2) {
+          const since = selectedDates[0].toISOString();
+          // Use end of day for until for inclusive behavior
+          const untilDate = selectedDates[1];
+          untilDate.setHours(23,59,59,999);
+          const until = untilDate.toISOString();
+          loadDashboard({ since, until });
+        }
+      }
+    });
     document.getElementById('daterange').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const v = e.target.value.trim();
@@ -249,9 +300,8 @@
     });
 
     document.getElementById('refresh').addEventListener('click', () => {
-      const v = document.getElementById('daterange').value.trim();
-      const n = Number(v);
-      loadDashboard((!isNaN(n) && n > 0) ? n : null);
+      // Refresh using the currently selected range (days number or since/until object)
+      loadDashboard(currentRange ?? null);
     });
 
     document.getElementById('tz').addEventListener('change', () => loadDashboard());
