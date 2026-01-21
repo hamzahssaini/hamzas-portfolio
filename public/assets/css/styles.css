@@ -1637,30 +1637,25 @@ body>.controls.fixed {
   overflow: hidden;
   isolation: isolate;
 
-  /* User request: black label on the primary CTA */
-  color: #010409;
-
-  /* Use a premium gradient shift instead of a pseudo-element overlay.
-     This avoids the "diagonal stuck" artifact on click/tap in some browsers. */
-  background-image: linear-gradient(110deg, var(--accent-primary) 0%, #1d4ed8 55%, var(--accent-primary) 100%);
-  background-size: 200% 100%;
-  background-position: 0% 0%;
-  transition: background-position 260ms ease-out, transform 180ms ease-out, box-shadow 220ms ease-out;
+  /* Professional solid primary: blue with white label */
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
+  transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
-/* Override .btn-primary (defined later) so the label stays black */
 .btn.btn-primary.btn-projects-pro {
-  color: #010409;
+  color: #ffffff;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .btn-projects-pro:hover {
-    background-position: 100% 0%;
-  }
+.btn-projects-pro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.14);
 }
 
 .btn-projects-pro:focus-visible {
-  background-position: 100% 0%;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
 .btn-projects-pro:active {
@@ -1668,11 +1663,11 @@ body>.controls.fixed {
 }
 
 .btn-projects-pro .btn-icon-right {
-  background: rgba(0, 0, 0, 0.10);
+  background: transparent;
   width: 28px;
   height: 28px;
   border-radius: 999px;
-  transition: transform 150ms ease-out, background-color 150ms ease-out;
+  transition: transform 150ms ease-out;
 }
 
 .btn-projects-pro .btn-icon-right svg {
@@ -1681,15 +1676,44 @@ body>.controls.fixed {
 }
 
 .btn-projects-pro:focus-visible .btn-icon-right {
-  transform: translateX(2px);
-  background: rgba(0, 0, 0, 0.14);
+  transform: none;
+  background: transparent;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .btn-projects-pro:hover .btn-icon-right {
-    transform: translateX(2px);
-    background: rgba(0, 0, 0, 0.14);
+    transform: none;
+    background: transparent;
   }
+}
+
+/* Strong overrides to ensure the right icon doesn't flash or move */
+.btn-projects-pro .btn-icon-right,
+.btn-projects-pro .btn-icon {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.btn-projects-pro:hover .btn-icon-right,
+.btn-projects-pro:focus-visible .btn-icon-right,
+.btn-projects-pro:active .btn-icon-right {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Ensure the arrow stays visible on the gradient without a dark circle */
+.btn-projects-pro .btn-icon-right svg {
+  stroke: #ffffff !important;
+  fill: none !important;
+}
+
+/* Keep the label color black while icon is white */
+.btn-projects-pro .btn-label {
+  color: #010409 !important;
 }
 
 /* GitHub (secondary) */
@@ -1756,6 +1780,88 @@ body>.controls.fixed {
   min-height: 44px;
   justify-content: center;
   padding: 0 18px;
+}
+
+/* Make hero actions consistent and professional */
+.hero-actions .btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  height: 44px;
+}
+
+/* Secondary buttons: subtle outline */
+.btn-secondary,
+.btn-linkedin,
+.btn-github {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary:hover,
+.btn-linkedin:hover,
+.btn-github:hover {
+  background: rgba(15, 23, 42, 0.03) !important;
+  transform: none !important;
+}
+
+/* LinkedIn icon: small filled square to the left */
+.btn-linkedin .btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #0A66C2 !important;
+  color: #fff !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.btn-github .btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent !important;
+  color: inherit !important;
+  margin-right: 8px;
+}
+
+.btn .btn-label {
+  padding-left: 0 !important;
+}
+
+/* Make GitHub button simple (no animation), match LinkedIn style */
+.btn-github-pro,
+.btn-github-pro .btn-icon,
+.btn-github-pro .btn-label {
+  transition: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.btn-github-pro::before {
+  display: none !important;
+}
+
+.btn-github-pro:hover,
+.btn-github-pro:focus-visible,
+.btn-github-pro:active {
+  transform: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: inherit !important;
+  border-color: transparent !important;
+}
+
+.btn-github-pro .btn-icon {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .hero-actions .cv-dropdown {
@@ -2416,6 +2522,85 @@ body>.controls.fixed {
 .btn .btn-label {
   font-size: 0.95rem;
   color: inherit;
+}
+
+/* GitHub: professional outline with subtle icon animation */
+.btn-github-pro {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: none !important;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease !important;
+}
+
+.btn-github-pro .btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent !important;
+  color: inherit !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  transition: background-color 220ms ease, transform 160ms ease !important;
+}
+
+.btn-github-pro:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.08) !important;
+}
+
+.btn-github-pro:hover .btn-icon {
+  background: #111827 !important;
+  color: #fff !important;
+  transform: translateY(-2px) !important;
+}
+
+.btn-github-pro:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-github-pro,
+  .btn-github-pro .btn-icon {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* LinkedIn: add matching subtle hover animation */
+.btn-linkedin {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+.btn-linkedin .btn-icon {
+  transition: background-color 220ms ease, transform 160ms ease !important;
+}
+
+.btn-linkedin:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.08) !important;
+}
+
+.btn-linkedin:hover .btn-icon {
+  background: #074a9a !important;
+  transform: translateY(-2px) scale(1.04) !important;
+}
+
+.btn-linkedin:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.12) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-linkedin,
+  .btn-linkedin .btn-icon {
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
 /* Make buttons match attached sizes */
