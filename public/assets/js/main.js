@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
       archi_zoom_hint: 'Click to zoom',
       contact_sub: 'Interested in working together? We should queue up a time to chat. I’ll buy the coffee.',
       hero_scroll: 'Scroll to find out more',
-      footer_text: '&copy; {year} Hamza Hssaini. Built with Node.js & GitHub Actions.',
+      footer_text: '&copy; <span class="footer-highlight-pink">2026</span> Hamza Hssaini. <span class="footer-highlight-blue">All</span> rights reserved.<br>Built <span class="footer-highlight-blue">with</span> Node.js · CI/CD via GitHub Actions.',
       search_placeholder: 'Search by keywords',
       btn_see_all: 'See all projects',
       form_success_title: 'Message Sent!',
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
       archi_zoom_hint: 'Cliquer pour zoomer',
       contact_sub: 'Intéressé à travailler ensemble ? Discutons-en. Je paie le café.',
       hero_scroll: 'Faites défiler pour en savoir plus',
-      footer_text: '&copy; {year} Hamza Hssaini. Construit avec Node.js & GitHub Actions.',
+      footer_text: '&copy; <span class="footer-highlight-pink">2026</span> Hamza Hssaini. <span class="footer-highlight-blue">All</span> rights reserved.<br>Construit <span class="footer-highlight-blue">avec</span> Node.js · CI/CD via GitHub Actions.',
       search_placeholder: 'Rechercher par mots-clés',
       btn_see_all: 'Voir tous les projets',
       form_success_title: 'Message Envoyé !',
@@ -652,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const key = el.getAttribute('data-i18n');
       if (!map[key]) return;
       const val = map[key];
-      if (key === 'about_text') {
+      if (key === 'about_text' || key === 'footer_text') {
         el.innerHTML = val;
         return;
       }
@@ -921,43 +921,13 @@ document.addEventListener('DOMContentLoaded', () => {
     langBtn.id = 'langToggle';
     langBtn.className = 'lang-btn';
     // Inline SVG flags (compact, professional). Keep a visually-hidden text label for screen readers.
-    const flagEn = `
-      <!-- Union Jack (simplified, high-contrast) -->
-      <svg class="flag-icon" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect width="60" height="30" fill="#012169" />
-        <!-- White diagonals -->
-        <g stroke="#fff" stroke-width="6" stroke-linecap="square">
-          <path d="M0 0 L60 30" />
-          <path d="M60 0 L0 30" />
-        </g>
-        <!-- Red diagonals -->
-        <g stroke="#C8102E" stroke-width="3" stroke-linecap="square">
-          <path d="M0 0 L60 30" />
-          <path d="M60 0 L0 30" />
-        </g>
-        <!-- White cross -->
-        <rect x="25" y="0" width="10" height="30" fill="#fff" />
-        <rect x="0" y="10" width="60" height="10" fill="#fff" />
-        <!-- Red cross overlay -->
-        <rect x="27" y="0" width="6" height="30" fill="#C8102E" />
-        <rect x="0" y="12" width="60" height="6" fill="#C8102E" />
-      </svg>`;
-
-    const flagFr = `
-      <svg class="flag-icon" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect width="8" height="16" x="0" fill="#0055A4" />
-        <rect width="8" height="16" x="8" fill="#FFFFFF" />
-        <rect width="8" height="16" x="16" fill="#EF4135" />
-      </svg>`;
-
+    // Flag SVGs replaced by text as per user request.
     langBtn.innerHTML = `
-      <button class="flag" data-lang="en" aria-label="Switch to English" title="English">
-        ${flagEn}
-        <span class="visually-hidden">English</span>
+      <button class="flag text-mode" data-lang="en" aria-label="Switch to English" title="English" style="font-size: 0.75rem; font-weight: 800; font-family: sans-serif;">
+        EN
       </button>
-      <button class="flag" data-lang="fr" aria-label="Passer en Français" title="Français">
-        ${flagFr}
-        <span class="visually-hidden">Français</span>
+      <button class="flag text-mode" data-lang="fr" aria-label="Passer en Français" title="Français" style="font-size: 0.75rem; font-weight: 800; font-family: sans-serif;">
+        FR
       </button>
     `;
 
@@ -1076,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = contactForm.querySelector('.submit-btn');
       const originalBtnHTML = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span>${map.form_sending}</span>`;
+      submitBtn.innerHTML = `< span > ${map.form_sending}</span > `;
 
       const formData = new FormData(contactForm);
       const data = {
@@ -1098,14 +1068,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           // Show success state UI
           const successHTML = `
-            <div class="form-success reveal visible">
+      < div class="form-success reveal visible" >
                <div class="success-icon">
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                </div>
                <h3>${map.form_success_title}</h3>
                <p>${map.form_success_msg}</p>
-            </div>
-          `;
+            </div >
+      `;
           contactForm.innerHTML = successHTML;
 
           // Revert to fresh form and scroll to top after 5 seconds
@@ -1379,9 +1349,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let text = escapeHtml(loc(item));
         // Handle basic bolding **text**
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        return `<li>${text}</li>`;
+        return `< li > ${text}</li > `;
       }).join('');
-      el.innerHTML = `<ul>${html}</ul>`;
+      el.innerHTML = `< ul > ${html}</ul > `;
     };
 
     // Populate Header
@@ -1403,8 +1373,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (techEl) {
       const tech = p.tech || [];
       techEl.innerHTML = tech.length > 0
-        ? tech.map(t => `<span class="brief-badge">${escapeHtml(t)}</span>`).join('')
-        : `<span class="brief-badge">Cloud Native</span>`;
+        ? tech.map(t => `< span class="brief-badge" > ${escapeHtml(t)}</span > `).join('')
+        : `< span class="brief-badge" > Cloud Native</span > `;
     }
 
     // Populate Architecture Image & Caption
