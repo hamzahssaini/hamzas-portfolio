@@ -102,6 +102,7 @@
         { src: '/images/projects/mission-devops/03.png', caption: { en: 'Kept all pipeline jobs (restore, build, deploy) green on main using .NET/Windows runners for repeatable releases.', fr: 'Maintenu tous les jobs du pipeline (restore, build, deploy) au vert sur main avec des runners .NET/Windows pour des releases fiables.' } },
         { src: '/images/projects/mission-devops/04.png', caption: { en: 'Finished the build job with artifact uploads and cleanup on .NET/Windows runners, ensuring CI hygiene and traceability.', fr: "Terminé le job de build avec upload d’artifacts et nettoyage sur des runners .NET/Windows, garantissant hygiène CI et traçabilité."} },
         { src: '/images/projects/mission-devops/05.png', caption: { en: 'Restored and built the multi-project .NET solution on GitLab Runner (Windows), shipping artifacts cleanly on main.', fr: 'Restauré et construit la solution multi-projet .NET sur GitLab Runner (Windows), livrant les artifacts proprement sur main.' } }
+        ,{ src: '/images/projects/mission-devops/06.png', caption: { en: 'Alternate CI/CD view showing pipeline stages and job logs for the microservices deployment.', fr: 'Vue alternative CI/CD montrant les étapes du pipeline et les logs des jobs pour le déploiement microservices.' } }
       ]
     },
     {
@@ -437,6 +438,9 @@
       ]
     }
   ];
+
+  // Expose projects for external handlers (used by global click handlers)
+  try { window.__PROJECTS_ELITE = PROJECTS; } catch (e) { /* ignore in strict environments */ }
 
   function getLang() {
     const raw = (localStorage.getItem('lang') || 'fr').toLowerCase();
@@ -1141,4 +1145,74 @@
   } else {
     init();
   }
+})();
+
+// Global: open CI/CD proof buttons as project galleries (fallback to mission-devops)
+(function bindCicdButtons() {
+  try {
+    document.addEventListener('click', (ev) => {
+      const raw = ev.target;
+      if (!(raw instanceof Element)) return;
+
+      // Quick-match: explicit cicd button or data-action
+      const explicit = raw.closest('.rw-btn--cicd, [data-action="open-cicd"]');
+      // Also match by visible text or aria-label (helpful for custom markup)
+      const candidate = raw.closest('button, a, .elite-card, article') || raw;
+      const text = (candidate && candidate.textContent) ? candidate.textContent.trim().toLowerCase() : '';
+      const aria = (raw.getAttribute && raw.getAttribute('aria-label')) ? String(raw.getAttribute('aria-label')).toLowerCase() : '';
+      const looksLikeCicd = explicit || /ci\/?cd|pipeline|pipelines/.test(text) || /ci\/?cd|pipeline|pipelines/.test(aria);
+      if (!looksLikeCicd) return;
+
+      ev.preventDefault();
+
+      // Find enclosing project card and try to resolve its project id
+      const card = raw.closest('.elite-card, article[data-project-id], article, .ref-card-header, .card') || null;
+      let projectId = '';
+      if (card) {
+        const archBtn = card.querySelector && (card.querySelector('.elite-icon-btn--arch') || card.querySelector('[data-project-id]') || card.querySelector('[data-project]'));
+        if (archBtn) projectId = archBtn.getAttribute('data-project-id') || archBtn.getAttribute('data-project') || '';
+      }
+
+      // If we still don't have a project id, try to match by the nearest title text
+      if (!projectId) {
+        const titleEl = (card && (card.querySelector('.ref-title') || card.querySelector('.elite-title') || card.querySelector('h3')));
+        const titleText = titleEl ? (titleEl.textContent || '').trim().toLowerCase() : '';
+        const list = (window.__PROJECTS_ELITE || []);
+        if (titleText && list.length) {
+          const found = list.find(p => {
+            const variants = [];
+            if (p.title) {
+              if (typeof p.title === 'object') { variants.push(p.title.en, p.title.fr); }
+              else variants.push(p.title);
+            }
+            if (p.shortTitle) {
+              if (typeof p.shortTitle === 'object') { variants.push(p.shortTitle.en, p.shortTitle.fr); }
+              else variants.push(p.shortTitle);
+            }
+            return variants.filter(Boolean).some(v => {
+              const s = String(v).toLowerCase();
+              return s.includes(titleText) || titleText.includes(s);
+            });
+          });
+          if (found) projectId = found.id || '';
+        }
+      }
+
+      // Fallback to mission-devops
+      if (!projectId) projectId = 'mission-devops';
+
+      const listRef = (window.__PROJECTS_ELITE || []);
+      const project = listRef.find(p => p && String(p.id || '') === String(projectId || ''));
+      if (!project) return;
+      const items = Array.isArray(project.gallery) ? project.gallery : [];
+      if (!items.length) return;
+
+      if (typeof ensureModal === 'function') ensureModal();
+      const lang = (typeof window.updateProjectsLanguage === 'function' && state && state.lang) ? state.lang : 'fr';
+      const title = (project && project.title) ? (project.title[lang] || project.title.en || project.title.fr || '') : '';
+      if (typeof window.__openGalleryModal === 'function') {
+        window.__openGalleryModal(items, title, lang, 0);
+      }
+    });
+  } catch (e) { /* silent */ }
 })();

@@ -50,7 +50,7 @@
   --border-color: #262626;
 
   /* Dark variant of the principal background (subtle glow + deep base) */
-  --bg-principal: radial-gradient(circle at 12% 10%, rgba(59, 130, 246, 0.06), transparent 20%), linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
+  --bg-principal: radial-gradient(circle at 12% 10%, rgba(0, 0, 0, 0.06), transparent 20%), linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
 }
 
 /* Utility: force a section (or element) to use the light theme variables
@@ -444,6 +444,7 @@
   .impact-metric-card {
     transition: none;
   }
+
   .impact-metric-card:hover {
     transform: none;
   }
@@ -494,11 +495,9 @@
   border: 1px solid color-mix(in srgb, var(--rw-btn-accent) 18%, var(--border-color));
   background:
     radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--rw-btn-accent) 18%, transparent) 0%, transparent 62%),
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       color-mix(in srgb, var(--rw-btn-accent) 10%, var(--surface-color)) 0%,
-      color-mix(in srgb, var(--rw-btn-accent) 4%, var(--surface-color)) 100%
-    );
+      color-mix(in srgb, var(--rw-btn-accent) 4%, var(--surface-color)) 100%);
   color: var(--text-primary);
   font-weight: 850;
   font-size: 0.84rem;
@@ -571,11 +570,13 @@
     border-color: color-mix(in srgb, var(--rw-btn-accent) 26%, var(--border-color));
     filter: saturate(1);
   }
+
   35% {
     box-shadow: 0 22px 58px color-mix(in srgb, var(--rw-btn-accent) 28%, rgba(2, 6, 23, 0.18));
     border-color: color-mix(in srgb, var(--rw-btn-accent) 56%, var(--border-color));
     filter: saturate(1.14);
   }
+
   100% {
     box-shadow: 0 12px 30px rgba(2, 6, 23, 0.12);
     border-color: color-mix(in srgb, var(--rw-btn-accent) 22%, var(--border-color));
@@ -584,9 +585,17 @@
 }
 
 @keyframes rw-proof-spark-ico {
-  0% { transform: translateY(0px) rotate(0deg) scale(1); }
-  40% { transform: translateY(-2px) rotate(-6deg) scale(1.06); }
-  100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  0% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+
+  40% {
+    transform: translateY(-2px) rotate(-6deg) scale(1.06);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
 }
 
 #projects .rw-btn-ico {
@@ -655,6 +664,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   #projects .rw-card,
   #projects .rw-btn {
     transition: none !important;
@@ -903,13 +913,23 @@
   }
 
   @keyframes rw-viewer-fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes rw-viewer-rise {
-    from { transform: translateY(10px); }
-    to { transform: translateY(0px); }
+    from {
+      transform: translateY(10px);
+    }
+
+    to {
+      transform: translateY(0px);
+    }
   }
 }
 
@@ -1034,7 +1054,8 @@ ul {
   backdrop-filter: none;
   z-index: 1000;
   border-bottom: 0;
-  padding: 12px 0;
+  padding: 16px 0;
+  /* Increase header height ("white line") */
 }
 
 /* Dark header override when using dark theme */
@@ -1168,7 +1189,7 @@ body>.theme-toggle {
 }
 
 .control-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -1192,45 +1213,23 @@ body>.theme-toggle {
   gap: 8px;
 }
 
-/* Compact pill for language code */
-.lang-btn .control-label {
-  display: inline-block;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  background: transparent;
-  padding: 6px 8px;
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s, transform 0.12s;
-}
-
-/* Active appearance (when toggled) — uses accent for visibility */
-.lang-btn .control-label.active {
-  background: var(--accent-primary);
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
-}
-
-
+/* Language flags: extra small to fit inside line */
 .lang-btn .flag {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 22px;
+  width: 20px;
+  height: 18px;
   border-radius: 4px;
   padding: 0;
   background: var(--surface-color);
   border: 1px solid var(--border-color);
-  margin-left: 6px;
+  margin-left: 4px;
   transition: all 0.2s ease;
-}
-
-.lang-btn .flag .flag-icon {
-  width: 14px;
-  height: 9px;
-  display: inline-block;
-  pointer-events: none;
+  font-size: 0.6rem !important;
+  /* Tiny text */
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .lang-btn .flag:hover {
@@ -1243,6 +1242,18 @@ body>.theme-toggle {
   border-color: #3b82f6 !important;
   color: #fff !important;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+/* Compact pill for language code (unused now but kept for safety) */
+.lang-btn .control-label {
+  display: none;
+}
+
+/* Active appearance (when toggled) — uses accent for visibility */
+.lang-btn .control-label.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
 }
 
 /* Dark mode tweaks: ensure flags remain visible */
@@ -1534,14 +1545,32 @@ body>.controls.fixed {
 }
 
 /* Stagger order: name/title → description → tech → buttons (→ hint) */
-.hero .hero-eyebrow.reveal { transition-delay: 0ms; }
-.hero .hero-title.reveal { transition-delay: 70ms; }
-.hero .hero-value.reveal { transition-delay: 160ms; }
-.hero .hero-tech.reveal { transition-delay: 240ms; }
-.hero .hero-actions.reveal { transition-delay: 320ms; }
-.hero .hero-scroll-hint.reveal { transition-delay: 380ms; }
+.hero .hero-eyebrow.reveal {
+  transition-delay: 0ms;
+}
+
+.hero .hero-title.reveal {
+  transition-delay: 70ms;
+}
+
+.hero .hero-value.reveal {
+  transition-delay: 160ms;
+}
+
+.hero .hero-tech.reveal {
+  transition-delay: 240ms;
+}
+
+.hero .hero-actions.reveal {
+  transition-delay: 320ms;
+}
+
+.hero .hero-scroll-hint.reveal {
+  transition-delay: 380ms;
+}
 
 @media (prefers-reduced-motion: reduce) {
+
   .hero .reveal,
   .hero .hero-tech-item,
   .hero .btn-cv-premium,
@@ -1766,6 +1795,7 @@ body>.controls.fixed {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .btn-github-pro::before,
   .btn-projects-pro,
   .btn-projects-pro .btn-icon-right,
@@ -2183,13 +2213,28 @@ body>.controls.fixed {
   transform: translateY(10px);
 }
 
-.mindset-grid .mindset-card.reveal:nth-child(1) { transition-delay: 0ms; }
-.mindset-grid .mindset-card.reveal:nth-child(2) { transition-delay: 70ms; }
-.mindset-grid .mindset-card.reveal:nth-child(3) { transition-delay: 140ms; }
-.mindset-grid .mindset-card.reveal:nth-child(4) { transition-delay: 210ms; }
-.mindset-grid .mindset-card.reveal:nth-child(5) { transition-delay: 280ms; }
+.mindset-grid .mindset-card.reveal:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.mindset-grid .mindset-card.reveal:nth-child(2) {
+  transition-delay: 70ms;
+}
+
+.mindset-grid .mindset-card.reveal:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+.mindset-grid .mindset-card.reveal:nth-child(4) {
+  transition-delay: 210ms;
+}
+
+.mindset-grid .mindset-card.reveal:nth-child(5) {
+  transition-delay: 280ms;
+}
 
 @media (prefers-reduced-motion: reduce) {
+
   .mindset-section .reveal,
   .mindset-card {
     transition: none !important;
@@ -2423,9 +2468,11 @@ body>.controls.fixed {
   0% {
     transform: translateX(-50%) translateY(0);
   }
+
   60% {
     transform: translateX(-50%) translateY(6px);
   }
+
   100% {
     transform: translateX(-50%) translateY(0);
   }
@@ -2531,6 +2578,11 @@ body>.controls.fixed {
   border: 1px solid rgba(15, 23, 42, 0.08) !important;
   box-shadow: none !important;
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  /* Fixed spacing */
 }
 
 .btn-github-pro .btn-icon {
@@ -2542,8 +2594,9 @@ body>.controls.fixed {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
-  transition: background-color 220ms ease, transform 160ms ease !important;
+  margin-right: 0 !important;
+  /* Managed by gap */
+  transition: transform 220ms ease-out !important;
 }
 
 .btn-github-pro:hover {
@@ -2563,6 +2616,7 @@ body>.controls.fixed {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .btn-github-pro,
   .btn-github-pro .btn-icon {
     transition: none !important;
@@ -2596,6 +2650,7 @@ body>.controls.fixed {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .btn-linkedin,
   .btn-linkedin .btn-icon {
     transition: none !important;
@@ -3643,10 +3698,12 @@ body>.controls.fixed {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .final-cta-icon-btn,
   .final-cta-copy-row {
     transition: none;
   }
+
   .final-cta-icon-btn:hover,
   .final-cta-copy-row:hover {
     transform: none;
@@ -3949,6 +4006,48 @@ body>.controls.fixed {
   margin-top: 100px;
 }
 
+/* Footer: styled copyright block (matches supplied design) */
+.site-footer p {
+  margin: 0;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.site-footer .footer-year {
+  color: var(--accent-secondary);
+  font-weight: 700;
+  padding: 0 6px;
+}
+.site-footer .muted {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.site-footer .footer-meta {
+  display: block;
+  margin-top: 8px;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--text-muted));
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.site-footer .kw {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+.site-footer .tech,
+.site-footer .techlink {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 36px 0;
+    font-size: 0.85rem;
+  }
+  .site-footer .footer-meta {
+    font-size: 0.9rem;
+  }
+}
+
 /* -- Mobile -- */
 @media (max-width: 768px) {
   .hero-title {
@@ -4013,6 +4112,28 @@ body>.controls.fixed {
   gap: 12px;
   align-items: center;
   flex: 0 0 auto;
+}
+
+.header-inner>.controls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: 0;
+  position: fixed;
+  right: 16px;
+  top: 4px;
+  transform: none;
+  height: 24px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  z-index: 2200;
+  gap: 4px;
+  color: #071022;
 }
 
 .circle-icon {
@@ -4847,6 +4968,7 @@ section#education .timeline {
   #certifications .cert-card {
     transition: none;
   }
+
   #certifications .cert-card:hover {
     transform: none;
   }
@@ -4928,6 +5050,7 @@ section#education .timeline {
   .edu-card {
     transition: none;
   }
+
   .edu-card:hover {
     transform: none;
   }
