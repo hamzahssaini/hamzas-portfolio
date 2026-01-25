@@ -1066,8 +1066,24 @@ ul {
 
 .header-inner {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header-nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.header-nav a:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 /* Wider header container for a professional multinational look */
@@ -5754,4 +5770,72 @@ section#education .timeline {
   font-weight: 950;
   line-height: 1;
   letter-spacing: 0.02em;
+}
+
+/* hero-extra merged: Styles for hero extra links (merged from hero-extra.css) */
+.hero-extra-links {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-extra-links .label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.hero-extra-links .extra-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--accent-primary);
+  background: transparent;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 180ms ease, box-shadow 220ms ease, background-color 160ms ease, color 160ms ease;
+  box-shadow: none;
+}
+
+.hero-extra-links .extra-link:focus {
+  outline: 3px solid color-mix(in srgb, var(--accent-primary) 18%, transparent);
+  outline-offset: 3px;
+}
+
+.hero-extra-links .extra-link:hover {
+  transform: translateY(-3px);
+  background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+  box-shadow: 0 10px 22px rgba(37,99,235,0.06);
+  color: color-mix(in srgb, var(--accent-primary) 90%, var(--text-primary));
+}
+
+.hero-extra-links .meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 6px;
+  font-weight: 600;
+}
+
+.hero-extra-links .icon {
+  margin-left: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  transition: transform 180ms ease;
+}
+
+.hero-extra-links .extra-link:hover .icon {
+  transform: translateX(4px);
+}
+
+@media (max-width: 760px) {
+  .hero-extra-links { gap:6px }
+  .hero-extra-links .extra-link { width: fit-content }
 }

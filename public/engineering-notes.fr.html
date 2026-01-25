@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Notes d'ingénierie — Comment j'ai conçu, déployé et mesuré mon portfolio</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/footer.css">
+  <script defer src="assets/js/main.js"></script>
+  <meta name="description" content="Notes d'ingénierie : architecture, CI/CD, métriques DORA et compromis de plateforme.">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="controls" aria-label="Language and theme controls"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="engineering-notes">
+      <nav class="notes-breadcrumb"><a href="/">Accueil</a> · Notes d'ingénierie</nav>
+
+      <header class="notes-header">
+        <p class="eyebrow">Notes d'ingénierie</p>
+        <h1>Comment j'ai conçu, déployé et mesuré mon portfolio en tant que plateforme DevOps</h1>
+
+        <section class="quick-scan">
+          <p class="tl;dr"><strong>TL;DR</strong> J'ai considéré ce portfolio comme une petite plateforme de production : architecture assumée, livraison automatisée avec séparation d'environnements, observabilité fondée sur des métriques de type DORA, et mesure itérative des évolutions. L'objectif est de fournir des preuves reproductibles (artefacts, pipelines, métriques) pour les équipes de recrutement.</p>
+
+          <ul class="key-facts">
+            <li><strong>Périmètre :</strong> Environnement de portfolio CI/CD personnel (pas un service commercial).</li>
+            <li><strong>Métriques :</strong> Générées à partir de pipelines de déploiement réels.</li>
+            <li><strong>Démo :</strong> <a href="/dashboard.html">Tableau des métriques de livraison (démo portfolio)</a></li>
+          </ul>
+        </section>
+      </header>
+
+      <section class="content">
+        <section class="note-section" id="why">
+          <h2>Pourquoi j'ai traité mon portfolio comme un système de production</h2>
+          <p>Les équipes recherchent des preuves de bonnes pratiques de livraison. Traiter le site comme une plateforme produit des artefacts traçables : builds, previews contrôlés, et métriques mesurables. Les compromis sont détaillés et reproductibles.</p>
+
+          <div class="callout" data-kind="Décision DevOps">
+            <div class="callout-label">Décision DevOps</div>
+            <div class="callout-body">Héberger la surface marketing en statique (CDN) ; isoler le tableau de bord runtime dans un déploiement séparé pour réduire la surface d'attaque et permettre l'instrumentation.</div>
+          </div>
+        </section>
+
+        <section class="note-section" id="architecture">
+          <h2>Vue d'ensemble de l'architecture</h2>
+          <p>Surface marketing statique (CDN) + contenu modulaire. La preuve opérationnelle (tableau de bord, ingestion) est déployée séparément et consomme des événements CI triés. Cette séparation limite les coûts et les risques tout en permettant une instrumentation réaliste.</p>
+
+          <figure class="figure-diagram">
+            <svg width="100%" height="180" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Diagramme d'architecture">
+              <rect x="20" y="30" width="220" height="60" rx="8" fill="#f3f4f6" stroke="#d1d5db" />
+              <text x="130" y="65" font-size="14" text-anchor="middle" fill="#111827">GitHub (repo & actions)</text>
+              <rect x="340" y="10" width="220" height="100" rx="8" fill="#fff" stroke="#d1d5db" />
+              <text x="450" y="55" font-size="14" text-anchor="middle" fill="#111827">CI/CD (preview & main)</text>
+              <rect x="660" y="30" width="220" height="60" rx="8" fill="#f3f4f6" stroke="#d1d5db" />
+              <text x="770" y="65" font-size="14" text-anchor="middle" fill="#111827">CDN (site)</text>
+              <line x1="240" y1="60" x2="340" y2="60" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)" />
+              <line x1="560" y1="60" x2="660" y2="60" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)" />
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L6,3 z" fill="#9ca3af" />
+                </marker>
+              </defs>
+            </svg>
+            <figcaption class="figure-caption">Diagramme d'architecture montrant repo → CI/CD → CDN</figcaption>
+          </figure>
+
+          <p class="figure-explain">Pourquoi c'est important : séparer le contenu statique et la télémétrie runtime réduit le rayon d'impact et maintient des coûts faibles tout en permettant une instrumentation ciblée.</p>
+        </section>
+
+        <section class="note-section" id="cicd">
+          <h2>Choix de conception CI/CD</h2>
+          <p>Deux pipelines : un pipeline <em>preview</em> léger pour les PR et un pipeline <em>main</em> protégé pour les déploiements en production. Les previews fournissent des URLs par branche ; le pipeline main publie des artefacts immuables servis par le CDN.</p>
+
+          <div class="callout" data-kind="CI/CD">
+            <div class="callout-label">CI/CD</div>
+            <div class="callout-body">Les previews utilisent des tokens éphémères ; la production utilise un coffre de secrets et des images runner figées. Les déploiements sont des artefacts immuables pour faciliter les rollbacks.</div>
+          </div>
+
+          <figure class="figure-image">
+            <img src="/assets/images/ci-pipeline.png" alt="Capture du pipeline CI" onerror="this.style.opacity=0.5;this.nextElementSibling.style.display='block'" />
+            <figcaption class="figure-caption">Pipeline CI/CD déclenchant des builds automatisés et la publication d'artefacts</figcaption>
+          </figure>
+
+          <p class="figure-explain">Pourquoi c'est important : des pipelines produisant des artefacts reproductibles et des previews accélèrent les revues et réduisent le lead time.</p>
+        </section>
+
+        <section class="note-section" id="metrics">
+          <h2>Intégration des métriques DORA</h2>
+          <p>Signaux collectés : fréquence de déploiement, lead time des changements, taux d'échec des changements, et temps de restauration. Le CI émet des événements horodatés ; la RUM est échantillonnée et anonymisée.</p>
+
+          <div class="callout" data-kind="Observation métrique">
+            <div class="callout-label">Observation métrique</div>
+            <div class="callout-body">Pour la crédibilité du portfolio, je privilégie des métriques représentatives et explicables issues d'événements de pipeline réels plutôt que de la télémétrie à haut volume.</div>
+          </div>
+
+          <figure class="figure-image">
+            <iframe src="/dashboard.html" title="Tableau DORA (démo)" style="width:100%;height:300px;border:1px solid var(--border-color);border-radius:8px;" aria-hidden="false"></iframe>
+            <figcaption class="figure-caption">Tableau des métriques de livraison montrant fréquence, lead time et taux d'échec (démo portfolio)</figcaption>
+          </figure>
+
+          <p class="figure-explain">Pourquoi c'est important : intégrer un exemple live ou capture d'écran donne une preuve immédiate de l'instrumentation et de la provenance des métriques.</p>
+        </section>
+
+        <section class="note-section" id="monitoring">
+          <h2>Surveillance et choix d'observabilité</h2>
+          <p>Échantillonnage RUM léger, agrégation des erreurs client, et ingestion d'événements CI. Les données sont agrégées et nettoyées pour éviter les PII et limiter les coûts de stockage.</p>
+        </section>
+
+        <section class="note-section" id="tradeoffs">
+          <h2>Compromis et limitations</h2>
+          <p>L'hébergement statique réduit les coûts et les risques mais nécessite un service isolé pour les fonctions runtime. Ce compromis rend le portfolio maintenable par une seule personne tout en autorisant une instrumentation pertinente.</p>
+
+          <div class="callout" data-kind="Compromis">
+            <div class="callout-label">Compromis</div>
+            <div class="callout-body">Privilégier la clarté des preuves plutôt que l'étendue de la télémétrie ; l'échantillonnage réduit le bruit mais peut masquer des cas limites.</div>
+          </div>
+        </section>
+
+        <section class="note-section" id="failures">
+          <h2>Ce qui a cassé — et comment je l'ai corrigé</h2>
+          <ol>
+            <li><strong>Surcharge d'instrumentation :</strong> bruit et risques de confidentialité. Correction : réduire l'échantillonnage, agréger, et ajouter une bannière de confidentialité.</li>
+            <li><strong>Dérive des previews :</strong> différences d'environnement. Correction : s'appuyer sur des entrées build‑time et simuler les secrets de production pour les previews.</li>
+          </ol>
+        </section>
+
+        <section class="note-section" id="next">
+          <h2>Améliorations envisagées</h2>
+          <p>Ajouter un playbook d'onboarding pour pipelines corporate et un webhook d'exemple pour démontrer l'ingestion d'événements CI pendant un entretien.</p>
+        </section>
+
+        <section class="note-section" id="closing">
+          <h2>Remarques finales</h2>
+          <p>Cette approche considère le portfolio comme une plateforme : axée sur les preuves, mesurable, et transparente sur les compromis. Pour les recruteurs, elle transforme des affirmations en artefacts vérifiables rapidement.</p>
+          <p class="author">— Hamza Hssaini</p>
+        </section>
+      </section>
+    </article>
+  </main>
+
+  <style>
+    /* Scoped FR styles reuse same classes as EN file */
+    .engineering-notes{width:100%;max-width:100%;margin:0;padding:28px;box-sizing:border-box}
+    .notes-breadcrumb{font-size:13px;color:var(--text-muted);margin-bottom:8px}
+    .notes-breadcrumb a{color:var(--accent-primary);text-decoration:none}
+    .notes-header .eyebrow{color:var(--text-muted);font-weight:700;letter-spacing:0.06em;margin:0 0 8px}
+    .notes-header h1{margin:0 0 12px;font-size:28px;line-height:1.18;color:var(--text-primary)}
+    .quick-scan{background:var(--surface-color);border:1px solid var(--border-color);padding:14px;border-radius:10px;margin:14px 0}
+    .tl\;dr{margin:0 0 8px;color:var(--text-primary)}
+    .key-facts{display:flex;gap:12px;flex-wrap:wrap;margin:0;padding:0;list-style:none}
+    .key-facts li{font-size:14px;color:var(--text-secondary)}
+    .content{margin-top:18px}
+    .note-section{margin:28px 0}
+    .note-section h2{font-size:20px;margin:0 0 10px;color:var(--text-primary)}
+    .note-section p{color:var(--text-secondary);line-height:1.6}
+    .callout{border-left:4px solid var(--border-color);background:var(--surface-color);padding:10px 12px;border-radius:8px;margin-top:12px}
+    .callout-label{font-size:12px;color:var(--text-muted);font-weight:700;margin-bottom:6px}
+    .callout-body{color:var(--text-primary);line-height:1.5}
+    .figure-diagram{margin:16px 0}
+    .figure-image{margin:16px 0}
+    .figure-image img{width:100%;height:auto;border-radius:8px;display:block}
+    .figure-caption{font-size:13px;color:var(--text-muted);margin-top:8px}
+    .figure-explain{color:var(--text-secondary);font-size:14px;margin-top:8px}
+    .author{color:var(--text-secondary);margin-top:22px}
+    @media (max-width:640px){.engineering-notes{padding:14px;margin:18px auto}.notes-header h1{font-size:22px}.figure-explain{font-size:13px}}
+    .reveal-on-scroll{opacity:0;transform:translateY(8px);transition:opacity 420ms ease,transform 420ms ease}
+    .reveal-on-scroll.is-visible{opacity:1;transform:none}
+  </style>
+
+  <script>
+    (function(){
+      const obs = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); } })
+      },{threshold:0.12});
+      document.querySelectorAll('.note-section, .figure-image, .figure-diagram, .callout').forEach(el=>{ el.classList.add('reveal-on-scroll'); obs.observe(el); });
+    })();
+  </script>
+</body>
+</html>

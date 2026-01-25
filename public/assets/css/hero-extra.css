@@ -1,0 +1,24 @@
+/* Styles for hero extra links */
+.hero-extra-links {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.hero-extra-links .label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.hero-extra-links a {
+  display: block;
+  color: var(--accent-primary, #2563eb);
+  text-decoration: none;
+  margin: 2px 0;
+}
+
+.hero-extra-links a:hover {
+  text-decoration: underline;
+}
