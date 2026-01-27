@@ -5782,6 +5782,12 @@ section#education .timeline {
   gap: 8px;
 }
 
+.hero-extra-links .links-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .hero-extra-links .label {
   display: block;
   margin-bottom: 4px;
@@ -5838,4 +5844,5 @@ section#education .timeline {
 @media (max-width: 760px) {
   .hero-extra-links { gap:6px }
   .hero-extra-links .extra-link { width: fit-content }
+  .hero-extra-links .links-row { flex-direction: column; align-items: stretch }
 }
