@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive — Engineering Notes</title>
+    <!-- SEO Optimization -->
+    <meta name="description"
+        content="Technical archive of engineering notes, system architecture, and DevOps practices by Hamza Hssaini. Focused on real-world production systems.">
+
+    <!-- Typography: Inter for a clean, professional feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Minimalist Color Palette */
+            --bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --accent: #059669;
+            /* Sophisticated System Green */
+            --border: #f3f4f6;
+
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --container-width: 680px;
+        }
+
+        /* Reset & Base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 60px 24px 40px;
+        }
+
+        .nav-left a {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s;
+        }
+
+        .nav-left a:hover {
+            opacity: 0.7;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-right a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-right a:hover {
+            color: var(--text-main);
+        }
+
+        .nav-right a.active {
+            color: var(--text-main);
+        }
+
+        /* Layout */
+        main {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px 120px;
+        }
+
+        header {
+            margin-bottom: 64px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        /* Archive List */
+        .archive-list {
+            list-style: none;
+        }
+
+        .entry {
+            display: flex;
+            align-items: baseline;
+            gap: 32px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid transparent;
+        }
+
+        .entry .date {
+            min-width: 90px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-variant-numeric: tabular-nums;
+            font-weight: 400;
+        }
+
+        .entry .title-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+
+        .entry .title-link:hover {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            nav {
+                padding-top: 40px;
+                padding-bottom: 30px;
+            }
+
+            header {
+                margin-bottom: 40px;
+            }
+
+            .entry {
+                flex-direction: column;
+                gap: 4px;
+                margin-bottom: 28px;
+            }
+
+            .entry .date {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .entry .title-link {
+                font-size: 17px;
+                line-height: 1.4;
+            }
+        }
+
+        /* Senior Tone: No animations, no distractions */
+    </style>
+</head>
+
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/" title="Back to Home" id="home-nav">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/archive.html" class="active">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+        </div>
+    </nav>
+
+    <main id="content">
+        <header>
+            <h1 id="page-title">Engineering Notes</h1>
+            <p class="subtitle">
+                Practical notes on cloud infrastructure, automation, and production delivery.
+            </p>
+        </header>
+
+        <ul class="archive-list" role="list">
+            <!-- Entry 1: Real Note -->
+            <li class="entry" role="listitem">
+                <time class="date" datetime="2026-01">January 27,2026</time>
+                <a class="title-link" href="/engineering-notes/portfolio-design.html">Designing & Implementing a
+                    Production-Grade DevOps Portfolio</a>
+            </li>
+        </ul>
+    </main>
+</body>
+
+</html>
