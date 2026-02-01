@@ -1708,8 +1708,10 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // --- Header Scroll Effect ---
+  // Throttled scroll handler to reduce unnecessary DOM updates (fires at most once per ~16ms frame)
   const header = document.querySelector('.site-header');
-  window.addEventListener('scroll', () => {
+  let scrollTicking = false;
+  function updateHeaderOnScroll() {
     if (!header) return;
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (window.scrollY > 50) {
@@ -1729,7 +1731,14 @@ document.addEventListener('DOMContentLoaded', () => {
         header.style.boxShadow = 'none';
       }
     }
-  });
+    scrollTicking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(updateHeaderOnScroll);
+      scrollTicking = true;
+    }
+  }, { passive: true });
 
   // --- Utils ---
   function escapeHtml(text) {

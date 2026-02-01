@@ -264,18 +264,27 @@ async function computeGithubMetrics({ days = WINDOW_DAYS, since, until } = {}) {
     id: r.id,
   })).sort((a, b) => a.time - b.time);
 
-  const leadTimes = [];
-  for (const c of commits) {
-    const cTime = new Date(c.commit.committer.date);
-    const deploy = deploymentEvents.find(d => d.time >= cTime);
-    if (deploy) leadTimes.push(deploy.time - cTime);
+  // Binary search helper: find the first deployment event with time >= targetTime
+  // Returns the index, or deploymentEvents.length if none found
+  function findFirstDeploymentGte(targetTime) {
+    let lo = 0, hi = deploymentEvents.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (deploymentEvents[mid].time < targetTime) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
   }
 
-  const mttrs = [];
-  for (const f of failures) {
-    const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
-    const next = deploymentEvents.find(d => d.time > fTime);
-    if (next) mttrs.push(next.time - fTime);
+  // Binary search helper: find the first deployment event with time > targetTime
+  function findFirstDeploymentGt(targetTime) {
+    let lo = 0, hi = deploymentEvents.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (deploymentEvents[mid].time <= targetTime) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
   }
 
   const successByDay = groupByDay(successes, r => r.updated_at || r.run_started_at || r.created_at);
@@ -294,25 +303,37 @@ async function computeGithubMetrics({ days = WINDOW_DAYS, since, until } = {}) {
     };
   }
 
+  // Compute lead times and daily lead_time_ms_mean in a single pass over commits
+  // Using binary search instead of linear .find() for O(n log m) instead of O(n*m)
+  const leadTimes = [];
   for (const c of commits) {
     const cTime = new Date(c.commit.committer.date);
-    const deploy = deploymentEvents.find(d => d.time >= cTime);
-    if (deploy) {
+    const idx = findFirstDeploymentGte(cTime);
+    if (idx < deploymentEvents.length) {
+      const deploy = deploymentEvents[idx];
+      const leadTime = deploy.time - cTime;
+      leadTimes.push(leadTime);
       const day = deploy.time.toISOString().slice(0, 10);
       daily[day] ??= {};
       daily[day].lead_time_ms_mean ??= [];
-      daily[day].lead_time_ms_mean.push(deploy.time - cTime);
+      daily[day].lead_time_ms_mean.push(leadTime);
     }
   }
 
+  // Compute MTTRs and daily mttr_ms_mean in a single pass over failures
+  // Using binary search instead of linear .find() for O(n log m) instead of O(n*m)
+  const mttrs = [];
   for (const f of failures) {
     const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
-    const next = deploymentEvents.find(d => d.time > fTime);
-    if (next) {
+    const idx = findFirstDeploymentGt(fTime);
+    if (idx < deploymentEvents.length) {
+      const next = deploymentEvents[idx];
+      const mttr = next.time - fTime;
+      mttrs.push(mttr);
       const day = (f.updated_at || f.run_started_at || f.created_at).slice(0, 10);
       daily[day] ??= {};
       daily[day].mttr_ms_mean ??= [];
-      daily[day].mttr_ms_mean.push(next.time - fTime);
+      daily[day].mttr_ms_mean.push(mttr);
     }
   }
 
