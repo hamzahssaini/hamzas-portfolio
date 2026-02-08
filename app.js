@@ -19,24 +19,28 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Config (env)
-const OWNER = process.env.OWNER || 'hamzahssaini';
-const REPO = process.env.REPO || 'dora-metrics';
-const BRANCH = process.env.BRANCH || 'main';
+const OWNER = process.env.OWNER;
+const REPO = process.env.REPO;
+const BRANCH = process.env.BRANCH;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID || '';
-const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 60);
-const DORA_API_KEY = process.env.DORA_API_KEY || '';
-
-// Startup log (mask sensitive)
-console.log('Starting app with:');
-console.log(`  OWNER=${OWNER} REPO=${REPO} BRANCH=${BRANCH} PORT=${PORT} WINDOW_DAYS=${WINDOW_DAYS}`);
-console.log(`  GITHUB_TOKEN set: ${GITHUB_TOKEN ? 'yes' : 'no'}`);
-console.log(`  DORA_API_KEY set: ${DORA_API_KEY ? 'yes' : 'no'}`);
+const DEPLOY_WORKFLOW_ID = process.env.DEPLOY_WORKFLOW_ID;
+const WINDOW_DAYS = Number(process.env.WINDOW_DAYS || 365);
+const DORA_API_KEY = process.env.DORA_API_KEY;
 
 // Middleware (body + logging)
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// CORS for API (helps when opening dashboard.html from file:// or another origin)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '600');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 
 // In-memory stores (simple demo)
 const users = [];
@@ -157,7 +161,10 @@ async function gh(path, params = {}) {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`GitHub API ${res.status}: ${text}`);
+    const err = new Error(`GitHub API ${res.status}: ${text}`);
+    err.status = res.status;
+    err.responseText = text;
+    throw err;
   }
   return res.json();
 }
@@ -198,19 +205,51 @@ function percentile(arr, p) {
   return s[lo] + (s[hi] - s[lo]) * (idx - lo);
 }
 
-async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
+async function computeGithubMetrics({ days = WINDOW_DAYS, since, until } = {}) {
   // If no GitHub token, return an empty-but-valid structure (avoid throwing uncaught)
   if (!GITHUB_TOKEN) {
     return { daily: {}, meta: { successes: 0, failures: 0, commits: 0, window_days: days, total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] } };
   }
 
   const now = Date.now();
-  const since = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
-  const until = new Date(now).toISOString();
+  // If the caller provided explicit ISO since/until, prefer them. Otherwise compute from `days`.
+  let sinceIso = '';
+  let untilIso = '';
+  try {
+    if (since) {
+      sinceIso = new Date(since).toISOString();
+    } else {
+      sinceIso = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+    }
+  } catch (e) {
+    sinceIso = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+  }
+  try {
+    if (until) {
+      untilIso = new Date(until).toISOString();
+    } else {
+      untilIso = new Date(now).toISOString();
+    }
+  } catch (e) {
+    untilIso = new Date(now).toISOString();
+  }
 
-  const [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(since, until)]);
+  let runsResp;
+  let commits;
+  try {
+    [runsResp, commits] = await Promise.all([getWorkflowRunsPage(100), getCommits(sinceIso, untilIso)]);
+  } catch (e) {
+    if (e && (e.status === 401 || e.status === 403)) {
+      return {
+        daily: {},
+        meta: { successes: 0, failures: 0, commits: 0, window_days: days, total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] },
+        warning: 'GITHUB_TOKEN is invalid or lacks permissions; GitHub-backed metrics are disabled',
+      };
+    }
+    throw e;
+  }
   const runsAll = (runsResp.workflow_runs || []);
-  const sinceDate = new Date(since);
+  const sinceDate = new Date(sinceIso);
   const allRuns = runsAll.filter(r => {
     const d = new Date(r.updated_at || r.run_started_at || r.created_at);
     return d >= sinceDate;
@@ -225,18 +264,27 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     id: r.id,
   })).sort((a, b) => a.time - b.time);
 
-  const leadTimes = [];
-  for (const c of commits) {
-    const cTime = new Date(c.commit.committer.date);
-    const deploy = deploymentEvents.find(d => d.time >= cTime);
-    if (deploy) leadTimes.push(deploy.time - cTime);
+  // Binary search helper: find the first deployment event with time >= targetTime
+  // Returns the index, or deploymentEvents.length if none found
+  function findFirstDeploymentGte(targetTime) {
+    let lo = 0, hi = deploymentEvents.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (deploymentEvents[mid].time < targetTime) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
   }
 
-  const mttrs = [];
-  for (const f of failures) {
-    const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
-    const next = deploymentEvents.find(d => d.time > fTime);
-    if (next) mttrs.push(next.time - fTime);
+  // Binary search helper: find the first deployment event with time > targetTime
+  function findFirstDeploymentGt(targetTime) {
+    let lo = 0, hi = deploymentEvents.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (deploymentEvents[mid].time <= targetTime) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
   }
 
   const successByDay = groupByDay(successes, r => r.updated_at || r.run_started_at || r.created_at);
@@ -255,25 +303,37 @@ async function computeGithubMetrics({ days = WINDOW_DAYS } = {}) {
     };
   }
 
+  // Compute lead times and daily lead_time_ms_mean in a single pass over commits
+  // Using binary search instead of linear .find() for O(n log m) instead of O(n*m)
+  const leadTimes = [];
   for (const c of commits) {
     const cTime = new Date(c.commit.committer.date);
-    const deploy = deploymentEvents.find(d => d.time >= cTime);
-    if (deploy) {
+    const idx = findFirstDeploymentGte(cTime);
+    if (idx < deploymentEvents.length) {
+      const deploy = deploymentEvents[idx];
+      const leadTime = deploy.time - cTime;
+      leadTimes.push(leadTime);
       const day = deploy.time.toISOString().slice(0, 10);
       daily[day] ??= {};
       daily[day].lead_time_ms_mean ??= [];
-      daily[day].lead_time_ms_mean.push(deploy.time - cTime);
+      daily[day].lead_time_ms_mean.push(leadTime);
     }
   }
 
+  // Compute MTTRs and daily mttr_ms_mean in a single pass over failures
+  // Using binary search instead of linear .find() for O(n log m) instead of O(n*m)
+  const mttrs = [];
   for (const f of failures) {
     const fTime = new Date(f.updated_at || f.run_started_at || f.created_at);
-    const next = deploymentEvents.find(d => d.time > fTime);
-    if (next) {
+    const idx = findFirstDeploymentGt(fTime);
+    if (idx < deploymentEvents.length) {
+      const next = deploymentEvents[idx];
+      const mttr = next.time - fTime;
+      mttrs.push(mttr);
       const day = (f.updated_at || f.run_started_at || f.created_at).slice(0, 10);
       daily[day] ??= {};
       daily[day].mttr_ms_mean ??= [];
-      daily[day].mttr_ms_mean.push(next.time - fTime);
+      daily[day].mttr_ms_mean.push(mttr);
     }
   }
 
@@ -307,7 +367,17 @@ app.get('/api/runs', async (req, res) => {
     }
     const per_page = Number(req.query.per_page || 50);
     const resp = await getWorkflowRunsPage(per_page);
-    const runs = (resp.workflow_runs || []).map(r => ({
+    const since = req.query.since ? new Date(req.query.since) : null;
+    const until = req.query.until ? new Date(req.query.until) : null;
+    const runs = (resp.workflow_runs || [])
+      .filter(r => {
+        if (!since && !until) return true;
+        const d = new Date(r.updated_at || r.run_started_at || r.created_at);
+        if (since && d < since) return false;
+        if (until && d > until) return false;
+        return true;
+      })
+      .map(r => ({
       id: r.id,
       name: r.name,
       conclusion: r.conclusion,
@@ -319,6 +389,9 @@ app.get('/api/runs', async (req, res) => {
     res.json({ runs });
   } catch (e) {
     console.error('GET /api/runs error:', e && (e.stack || e.message || e));
+    if (e && (e.status === 401 || e.status === 403)) {
+      return res.json({ runs: [], warning: 'GITHUB_TOKEN is invalid or lacks permissions; runs are unavailable' });
+    }
     res.status(500).json({ error: e.message || 'Failed to fetch runs' });
   }
 });
@@ -326,7 +399,9 @@ app.get('/api/runs', async (req, res) => {
 app.get('/api/summary', async (req, res) => {
   try {
     const days = Number(req.query.days || WINDOW_DAYS);
-    const data = await computeGithubMetrics({ days });
+    const since = req.query.since || undefined;
+    const until = req.query.until || undefined;
+    const data = await computeGithubMetrics({ days, since, until });
     const meta = data.meta || {};
     const leadAll = meta.lead_times_ms_all || [];
     const mttrAll = meta.mttr_ms_all || [];
@@ -340,7 +415,17 @@ app.get('/api/summary', async (req, res) => {
     try {
       if (GITHUB_TOKEN) {
         const contributorsResp = await gh(`/repos/${OWNER}/${REPO}/contributors`, { per_page: 100 });
-        contributors_count = Array.isArray(contributorsResp) ? contributorsResp.length : (contributorsResp.length || 0);
+        if (Array.isArray(contributorsResp)) {
+          // Count only the configured OWNER (your portfolio) to avoid counting bots or other org members
+          const ownerLogin = String(OWNER || '').toLowerCase();
+          if (ownerLogin) {
+            contributors_count = contributorsResp.filter(c => String(c.login || '').toLowerCase() === ownerLogin).length;
+          } else {
+            contributors_count = contributorsResp.length || 0;
+          }
+        } else {
+          contributors_count = Number(contributorsResp.length || 0);
+        }
       } else {
         contributors_count = 0;
       }
@@ -359,6 +444,7 @@ app.get('/api/summary', async (req, res) => {
       median_mttr_hours: medianMttr !== null ? Number(medianMttr.toFixed(2)) : null,
       p95_mttr_hours: p95Mttr !== null ? Number(p95Mttr.toFixed(2)) : null,
       contributors_count,
+      ...(data.warning ? { warning: data.warning } : {}),
     });
   } catch (e) {
     console.error('GET /api/summary error:', e && (e.stack || e.message || e));
@@ -370,7 +456,9 @@ app.get('/api/summary', async (req, res) => {
 app.get('/api/metrics/github', async (req, res) => {
   try {
     const days = Number(req.query.days || WINDOW_DAYS);
-    const data = await computeGithubMetrics({ days });
+    const since = req.query.since || undefined;
+    const until = req.query.until || undefined;
+    const data = await computeGithubMetrics({ days, since, until });
     // If token missing, include a friendly warning so front-end can show it
     if (!GITHUB_TOKEN) {
       return res.json({ ...data, warning: 'GITHUB_TOKEN not set; GitHub-backed metrics are disabled' });
@@ -378,6 +466,13 @@ app.get('/api/metrics/github', async (req, res) => {
     return res.json(data);
   } catch (err) {
     console.error('GET /api/metrics/github error', err && (err.stack || err.message || err));
+    if (err && (err.status === 401 || err.status === 403)) {
+      return res.json({
+        daily: {},
+        meta: { successes: 0, failures: 0, commits: 0, window_days: Number(req.query.days || WINDOW_DAYS), total_deployments: 0, lead_times_ms_all: [], mttr_ms_all: [] },
+        warning: 'GITHUB_TOKEN is invalid or lacks permissions; GitHub-backed metrics are disabled',
+      });
+    }
     res.status(500).json({ error: err.message || 'Failed to compute GitHub metrics' });
   }
 });

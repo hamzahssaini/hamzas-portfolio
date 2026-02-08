@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designing & Implementing a Production-Grade DevOps Portfolio — Engineering Notes</title>
+    <!-- SEO Optimization -->
+    <meta name="description"
+        content="Technical deep-dive into the architecture, design decisions, and engineering trade-offs behind a production-grade DevOps portfolio.">
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text-main: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6b7280;
+            --accent: #059669;
+            /* Professional technical green */
+            --border: #f3f4f6;
+            --code-bg: #f9fafb;
+
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --container-width: 680px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .nav-left a {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s;
+        }
+
+        .nav-left a:hover {
+            opacity: 0.7;
+        }
+
+        .nav-right a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.1s;
+        }
+
+        .nav-right a:hover {
+            color: var(--text-main);
+        }
+
+        /* Content Layout */
+        article {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 40px 24px 120px;
+        }
+
+        header {
+            margin-bottom: 48px;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 48px 0 16px;
+            letter-spacing: -0.01em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        p {
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+        }
+
+        ul,
+        ol {
+            margin-bottom: 24px;
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        footer {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 26px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav aria-label="Breadcrumb">
+        <div class="nav-left">
+            <a href="/archive.html">← Archive</a>
+        </div>
+        <div class="nav-right">
+            <a href="/">Home</a>
+        </div>
+    </nav>
+
+    <article>
+        <header>
+            <div class="meta">Jan 2026 • Infrastructure • 6 min read</div>
+            <h1>Designing & Implementing a Production-Grade DevOps Portfolio</h1>
+        </header>
+
+        <section id="introduction">
+            <h2>1. Introduction</h2>
+            <p>Traditional engineering portfolios often focus heavily on visual aesthetics and static project
+                descriptions. While effective for frontend roles, they rarely demonstrate the operational rigor required
+                in a DevOps or Systems Engineering context. An engineering system is better understood through its
+                architecture and the decisions that govern its lifecycle.</p>
+            <p>This note explains why I chose to treat my portfolio not as a website, but as a small-scale production
+                platform. By applying production-grade standards to a personal project, I can demonstrate engineering
+                logic through live artifacts, instrumented metrics, and documented trade-offs rather than marketing
+                claims.</p>
+        </section>
+
+        <section id="design-principles">
+            <h2>2. Design Principles</h2>
+            <p>The implementation followed three core principles designed to reflect professional engineering standards:
+            </p>
+            <ul>
+                <li><strong>Simplicity over complexity:</strong> Avoid over-engineering. Each component exists to solve
+                    a specific problem. If a static solution suffices, dynamic overhead is rejected.</li>
+                <li><strong>Automation mindset:</strong> If a task must be repeated, it must be automated. This applies
+                    to deployment, image processing, and metrics ingestion.</li>
+                <li><strong>Observability over aesthetics:</strong> While clean design is important for usability, the
+                    ability to measure how the system delivers value—through CI/CD signals and DORA metrics—is
+                    prioritized.</li>
+            </ul>
+        </section>
+
+        <section id="architecture-overview">
+            <h2>3. Architecture Overview</h2>
+            <p>The system utilizes a balanced architecture to optimize for performance and functional transparency. The
+                presentation plane is static-first, ensuring high availability and a minimal attack surface. The runtime
+                plane handles instrumented events and dynamic operations like metric processing.</p>
+            <p>The platform is containerized using <code>Docker</code> and served via a <code>Node.js</code> backend.
+                This choice supports environment parity, allowing the same configuration to run on a local development
+                machine or a production cloud environment. This setup allows for future growth, such as adding localized
+                search or more complex observability hooks, without rebuilding the foundation.</p>
+        </section>
+
+        <section id="engineering-decisions">
+            <h2>4. DevOps & Engineering Decisions</h2>
+            <p>Several technical decisions were made during development to ensure maintainability and production
+                readiness:</p>
+            <ul>
+                <li><strong>CI/CD Philosophy:</strong> I utilize GitHub Actions for a gated deployment strategy. Changes
+                    are validated in an ephemeral environment before merging to production. This ensures that the
+                    production system remains immutable and reliable.</li>
+                <li><strong>Environment Separation:</strong> Credentials and configurations are managed via environment
+                    variables (<code>.env</code>). This prevents secrets from entering version control and allows for
+                    seamless transitions between dev, staging, and production.</li>
+                <li><strong>Tooling Selection:</strong> Express was chosen for the backend due to its lightweight
+                    profile and vast middleware ecosystem, which is ideal for creating simple API endpoints for contact
+                    handling and metric ingestion.</li>
+            </ul>
+        </section>
+
+        <section id="metrics-visibility">
+            <h2>5. Metrics & Engineering Visibility</h2>
+            <p>A central feature of this platform is the integration of <strong>DORA (DevOps Research and Assessment)
+                    metrics</strong>. These metrics—Deployment Frequency, Lead Time for Changes, Change Failure Rate,
+                and Time to Restore—are industry standards for measuring delivery performance.</p>
+            <p>Integrating these metrics serves a dual purpose: first, it provides empirical evidence of the platform's
+                stability. Second, it shifts the portfolio from a silent page to an observable system. The dashboard is
+                accessible via a dedicated <a href="/dashboard.html"
+                    style="color: var(--accent); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--accent);">Live
+                    Metrics Dashboard</a>, ensuring that technical teams can inspect real delivery data
+                without being forced through a marketing funnel.</p>
+        </section>
+
+        <section id="philosophy">
+            <h2>6. Engineering Notes Philosophy</h2>
+            <p>Engineering Notes are distinctive from traditional blog posts. While blogs often follow trends or focus
+                on high-level tutorials, these notes serve as a technical knowledge base. They document <strong>the
+                    "why" behind the "what."</strong></p>
+            <p>Future entries will bypass generic content to focus on real-world engineering challenges, including:</p>
+            <ul>
+                <li>Root cause analysis of infrastructure failures.</li>
+                <li>Performance trade-offs in cloud-native architectures.</li>
+                <li>The evolution of CI/CD pipelines as complexity grows.</li>
+                <li>Infrastructure as Code (IaC) trade-offs and modularity.</li>
+                <li>Monitoring and observability anti-patterns.</li>
+            </ul>
+        </section>
+
+        <section id="next-steps">
+            <h2>7. What I’d Improve Next</h2>
+            <p>No production system is perfect. Future refactoring will focus on increasing automation in Infrastructure
+                as Code (IaC) by fully migrating local resource definitions to Terraform modules. Additionally, I intend
+                to implement more granular instrumentation to capture service-level indicators (SLIs) beyond standard
+                deployment metrics.</p>
+            <p>Maintainability will be enhanced by automating dependency updates and implementing more robust automated
+                testing for both the backend logic and frontend reliability.</p>
+        </section>
+
+        <section id="conclusion">
+            <h2>8. Conclusion</h2>
+            <p>Treating a portfolio as a production-grade system provides a baseline for technical communication. It
+                converts abstract claims into verifiable engineering artifacts. These notes will evolve alongside the
+                platform, serving as a long-term record of system design and operational learning.</p>
+        </section>
+
+        <footer>
+            By Hamza Hssaini, Cloud & DevOps Specialist.
+        </footer>
+    </article>
+
+</body>
+
+</html>

@@ -424,15 +424,20 @@ document.addEventListener('DOMContentLoaded', () => {
       nav_about: 'About',
       nav_projects: 'Projects',
       nav_education: 'Education',
-      nav_contact: 'Contact',
+      nav_contact: 'Let\'s Talk',
       hero_role: 'Cloud & DevOps Specialist',
+      hero_title: 'Cloud & DevOps Specialist | Azure & AWS',
+      hero_value: 'I design and automate scalable, production-ready cloud infrastructures using Azure, AWS, Kubernetes, and CI/CD pipelines.',
+      btn_projects: 'View Projects',
+      btn_github_short: 'GitHub',
+      btn_download_cv: 'Download CV',
       btn_contact: 'Get in touch',
       btn_cv: 'Download CV',
       cv_cloud: 'Cloud/DevOps Resume',
       cv_data: 'Data/Analytics Resume',
       cv_support: 'IT Support & Systems Resume',
       btn_github: 'View Source Code',
-      about_title: 'About Myself',
+      about_title: 'About Me',
       projects_title: 'Project Highlights',
       contact_title: 'Let\'s start a project together',
       brief_label_problem: 'PROBLEM',
@@ -442,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
       archi_zoom_hint: 'Click to zoom',
       contact_sub: 'Interested in working together? We should queue up a time to chat. I’ll buy the coffee.',
       hero_scroll: 'Scroll to find out more',
-      footer_text: '&copy; {year} Hamza Hssaini. Built with Node.js & GitHub Actions.',
+      footer_text: '&copy; <span class="footer-highlight-pink">2026</span> Hamza Hssaini. <span class="footer-highlight-blue">All</span> rights reserved.<br>Built <span class="footer-highlight-blue">with</span> Node.js · CI/CD via GitHub Actions.',
       search_placeholder: 'Search by keywords',
       btn_see_all: 'See all projects',
       form_success_title: 'Message Sent!',
@@ -474,7 +479,21 @@ document.addEventListener('DOMContentLoaded', () => {
       form_name: 'Full Name',
       contact_mail_label: 'Mail me',
       email_copied: 'Copied!',
-      phone_copied: 'Copied!'
+      phone_copied: 'Copied!',
+
+      // Section 2 — Proof of Engineering
+      mindset_title: 'How I Work: DevOps Operating Model',
+      mindset_subtitle: 'Production-grade delivery with clear standards and measurable outcomes.',
+      mindset_pillar_1_title: 'Infrastructure as Code',
+      mindset_pillar_1_desc: 'Terraform & Ansible for reproducible, versioned environments',
+      mindset_pillar_2_title: 'CI/CD First Approach',
+      mindset_pillar_2_desc: 'Automated build, test, and deploy with GitHub Actions / GitLab CI',
+      mindset_pillar_3_title: 'Secure by Design',
+      mindset_pillar_3_desc: 'IAM, network segmentation, VPNs, and least-privilege access',
+      mindset_pillar_4_title: 'Cost & Performance Optimization',
+      mindset_pillar_4_desc: 'Right-sizing, monitoring, and cloud cost awareness',
+      mindset_pillar_5_title: 'Production-Ready Documentation',
+      mindset_pillar_5_desc: 'Clear READMEs, diagrams, and operational notes'
     },
     fr: {
       nav_about: 'À propos',
@@ -482,6 +501,11 @@ document.addEventListener('DOMContentLoaded', () => {
       nav_education: 'Formation',
       nav_contact: 'Contact',
       hero_role: "Cloud & DevOps Spécialiste",
+      hero_title: 'Spécialiste Cloud & DevOps | Azure & AWS',
+      hero_value: 'Je conçois et j’automatise des infrastructures cloud évolutives, prêtes pour la production, avec Azure, AWS, Kubernetes et des pipelines CI/CD.',
+      btn_projects: 'Voir les projets',
+      btn_github_short: 'GitHub',
+      btn_download_cv: 'Télécharger CV',
       btn_contact: 'Me contacter',
       btn_cv: 'Télécharger CV',
       cv_cloud: 'CV Cloud/DevOps',
@@ -498,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
       archi_zoom_hint: 'Cliquer pour zoomer',
       contact_sub: 'Intéressé à travailler ensemble ? Discutons-en. Je paie le café.',
       hero_scroll: 'Faites défiler pour en savoir plus',
-      footer_text: '&copy; {year} Hamza Hssaini. Construit avec Node.js & GitHub Actions.',
+      footer_text: '&copy; <span class="footer-highlight-pink">2026</span> Hamza Hssaini. <span class="footer-highlight-blue">All</span> rights reserved.<br>Construit <span class="footer-highlight-blue">avec</span> Node.js · CI/CD via GitHub Actions.',
       search_placeholder: 'Rechercher par mots-clés',
       btn_see_all: 'Voir tous les projets',
       form_success_title: 'Message Envoyé !',
@@ -530,7 +554,21 @@ document.addEventListener('DOMContentLoaded', () => {
       form_name: 'Nom Complet',
       contact_mail_label: 'M\'envoyer un mail',
       email_copied: 'Copié !',
-      phone_copied: 'Copié !'
+      phone_copied: 'Copié !',
+
+      // Section 2 — Proof of Engineering
+      mindset_title: 'Ma façon de travailler : mode opératoire DevOps',
+      mindset_subtitle: 'Livraison de niveau production, avec des standards clairs et des résultats mesurables.',
+      mindset_pillar_1_title: 'Infrastructure as Code',
+      mindset_pillar_1_desc: 'Terraform & Ansible pour des environnements reproductibles et versionnés',
+      mindset_pillar_2_title: 'Approche CI/CD d’abord',
+      mindset_pillar_2_desc: 'Build, tests et déploiements automatisés avec GitHub Actions / GitLab CI',
+      mindset_pillar_3_title: 'Sécurité par conception',
+      mindset_pillar_3_desc: 'IAM, segmentation réseau, VPN et accès au moindre privilège',
+      mindset_pillar_4_title: 'Optimisation coûts & performance',
+      mindset_pillar_4_desc: 'Right-sizing, monitoring et maîtrise des coûts cloud',
+      mindset_pillar_5_title: 'Documentation prête pour la production',
+      mindset_pillar_5_desc: 'READMEs clairs, schémas et notes opérationnelles'
     }
   };
 
@@ -548,6 +586,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function openMenu() {
       menu.hidden = false;
       button.setAttribute('aria-expanded', 'true');
+
+      // Smart positioning: keep the menu visible in the viewport.
+      // Default CSS opens to the right; if it would overflow, flip to the left.
+      try {
+        menu.classList.remove('is-left');
+        if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) return;
+        const rect = menu.getBoundingClientRect();
+        const padding = 12;
+        if (rect.right > (window.innerWidth - padding)) {
+          menu.classList.add('is-left');
+        }
+      } catch (e) { }
     }
 
     button.addEventListener('click', (e) => {
@@ -581,6 +631,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyLanguage(lang) {
     const map = I18N[lang] || I18N.fr;
 
+    // Also support lightweight bilingual blocks (data-en/data-fr) used in the new Projects + Gallery.
+    function applyBilingualBlocks(code) {
+      const normalized = code === 'en' ? 'en' : 'fr';
+      const attr = normalized === 'en' ? 'data-en' : 'data-fr';
+      document.querySelectorAll('[' + attr + ']').forEach(el => {
+        const val = el.getAttribute(attr);
+        if (val == null) return;
+        // Only set textContent (captions/titles are plain text).
+        el.textContent = val;
+      });
+    }
+
     // Keep the document language in sync for accessibility/SEO.
     try {
       document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'fr');
@@ -590,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const key = el.getAttribute('data-i18n');
       if (!map[key]) return;
       const val = map[key];
-      if (key === 'about_text') {
+      if (key === 'about_text' || key === 'footer_text') {
         el.innerHTML = val;
         return;
       }
@@ -621,6 +683,222 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.setAttribute('aria-label', isExpanded ? lessLabel : moreLabel);
       });
     } catch (e) { }
+
+    // Apply bilingual (data-en/data-fr) blocks after normal i18n.
+    try { applyBilingualBlocks(lang); } catch (e) { }
+
+    // If a screenshot viewer is open, refresh its caption.
+    try {
+      if (typeof window.updateRwViewerCaption === 'function') {
+        window.updateRwViewerCaption();
+      }
+    } catch (e) { }
+
+  }
+
+  // One-time micro "spark" on first interaction with proof buttons (per session).
+  // Keeps it subtle and disables automatically for reduced-motion.
+  function initProjectsProofSpark() {
+    try {
+      if (!document.querySelector('#projects .rw-btn')) return;
+
+      const reduceMotion = (() => {
+        try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+        catch (e) { return false; }
+      })();
+      if (reduceMotion) return;
+
+      const key = 'rwProofSparkSeen';
+      try {
+        if (sessionStorage.getItem(key) === '1') return;
+      } catch (e) { /* ignore */ }
+
+      let done = false;
+      document.addEventListener('pointerover', (ev) => {
+        if (done) return;
+        const target = ev.target;
+        if (!(target instanceof Element)) return;
+        const btn = target.closest('#projects .rw-btn');
+        if (!btn) return;
+
+        done = true;
+        try { sessionStorage.setItem(key, '1'); } catch (e) { }
+
+        btn.classList.add('rw-btn--spark');
+        window.setTimeout(() => {
+          try { btn.classList.remove('rw-btn--spark'); } catch (e) { }
+        }, 950);
+      }, { passive: true });
+    } catch (e) { /* silent */ }
+  }
+
+  // Projects galleries: open screenshots inside the same window (no new tab)
+  // with a dedicated viewer overlay that shows full image + caption.
+  function initRwGalleryViewer() {
+    try {
+      const viewer = document.getElementById('rw-viewer');
+      if (!viewer) return;
+
+      const surface = viewer.querySelector('.rw-viewer-surface');
+      const img = viewer.querySelector('.rw-viewer-img');
+      const cap = viewer.querySelector('.rw-viewer-cap');
+      const closeBtn = viewer.querySelector('.rw-viewer-close');
+      if (!surface || !img || !cap || !closeBtn) return;
+
+      let lastCaptionEl = null;
+
+      function isOpen() {
+        return viewer.classList.contains('is-open');
+      }
+
+      function setCaptionFromEl(captionEl) {
+        lastCaptionEl = captionEl;
+        const txt = captionEl ? (captionEl.textContent || '') : '';
+        cap.textContent = txt;
+      }
+
+      function openViewer(fullSrc, captionEl) {
+        if (fullSrc) img.src = fullSrc;
+        img.alt = '';
+        setCaptionFromEl(captionEl);
+        viewer.classList.add('is-open');
+        viewer.setAttribute('aria-hidden', 'false');
+        closeBtn.focus();
+      }
+
+      function closeViewer() {
+        viewer.classList.remove('is-open');
+        viewer.setAttribute('aria-hidden', 'true');
+        try { img.removeAttribute('src'); } catch (e) { }
+        lastCaptionEl = null;
+      }
+
+      // Expose a hook so language switching can refresh caption text
+      window.updateRwViewerCaption = function () {
+        try {
+          if (!isOpen()) return;
+          if (!lastCaptionEl) return;
+          cap.textContent = lastCaptionEl.textContent || '';
+        } catch (e) { }
+      };
+
+      // Close interactions
+      closeBtn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        closeViewer();
+      });
+      viewer.addEventListener('click', (ev) => {
+        // click outside surface closes
+        const target = ev.target;
+        if (!(target instanceof Node)) return;
+        if (surface.contains(target)) return;
+        closeViewer();
+      });
+      document.addEventListener('keydown', (ev) => {
+        if (!isOpen()) return;
+        if (ev.key === 'Escape') closeViewer();
+      });
+
+      // Intercept gallery screenshot clicks
+      document.addEventListener('click', (ev) => {
+        const target = ev.target;
+        if (!(target instanceof Element)) return;
+        const link = target.closest('a.rw-shot-link');
+        if (!link) return;
+        ev.preventDefault();
+
+        const figure = link.closest('figure.rw-shot');
+        const captionEl = figure ? figure.querySelector('.rw-cap') : null;
+        const fullSrc = link.getAttribute('href') || '';
+        openViewer(fullSrc, captionEl);
+      });
+    } catch (e) {
+      // silent
+    }
+  }
+
+  // Projects proof modals (Gallery / CI-CD / Architecture) are implemented as CSS :target.
+  // The close button currently points to #projects which causes an unwanted scroll jump.
+  // Fix: intercept close + Esc/backdrop and clear the hash via history.replaceState (no scroll).
+  function initRwTargetModals() {
+    try {
+      function getActiveRwModalFromHash() {
+        try {
+          const hash = String(window.location.hash || '');
+          if (!hash || hash.length < 2) return null;
+          const el = document.querySelector(hash);
+          if (!el || !(el instanceof Element)) return null;
+          if (!el.classList.contains('rw-modal')) return null;
+          return el;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function closeTargetModalKeepScroll() {
+        const y = window.scrollY || 0;
+        const x = window.scrollX || 0;
+
+        const activeModal = getActiveRwModalFromHash();
+        if (!activeModal) return;
+
+        try {
+          // 1) Change the hash so CSS :target updates and the modal closes.
+          // Use a non-existent id to avoid scrolling.
+          window.location.hash = 'rw-closed';
+        } catch (e) { /* ignore */ }
+
+        try {
+          // 2) Remove the hash from the URL (optional, keeps URL clean).
+          const base = String(window.location.href || '').split('#')[0];
+          if (window.history && typeof window.history.replaceState === 'function') {
+            window.history.replaceState(null, '', base);
+          }
+        } catch (e) { /* ignore */ }
+
+        // Extra safety: restore scroll position in case the browser tries to jump.
+        try {
+          window.requestAnimationFrame(() => {
+            try { window.scrollTo(x, y); } catch (e) { }
+          });
+        } catch (e) { }
+      }
+
+      document.addEventListener('click', (ev) => {
+        const rawTarget = ev.target;
+        const target = (rawTarget instanceof Element)
+          ? rawTarget
+          : (rawTarget && rawTarget.parentElement ? rawTarget.parentElement : null);
+        if (!target) return;
+
+        // Close button (X)
+        const closeLink = target.closest('a.rw-modal-close');
+        if (closeLink) {
+          ev.preventDefault();
+          closeTargetModalKeepScroll();
+          return;
+        }
+
+        // Backdrop click (click outside the modal surface)
+        const modal = target.closest('.rw-modal');
+        if (!modal) return;
+        if (typeof modal.matches === 'function' && !modal.matches(':target')) return;
+
+        const surface = modal.querySelector('.rw-modal-surface');
+        if (surface && surface.contains(target)) return;
+        ev.preventDefault();
+        closeTargetModalKeepScroll();
+      });
+
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Escape') return;
+        if (!getActiveRwModalFromHash()) return;
+        ev.preventDefault();
+        closeTargetModalKeepScroll();
+      });
+    } catch (e) {
+      // silent
+    }
   }
 
   function createControls() {
@@ -643,43 +921,13 @@ document.addEventListener('DOMContentLoaded', () => {
     langBtn.id = 'langToggle';
     langBtn.className = 'lang-btn';
     // Inline SVG flags (compact, professional). Keep a visually-hidden text label for screen readers.
-    const flagEn = `
-      <!-- Union Jack (simplified, high-contrast) -->
-      <svg class="flag-icon" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect width="60" height="30" fill="#012169" />
-        <!-- White diagonals -->
-        <g stroke="#fff" stroke-width="6" stroke-linecap="square">
-          <path d="M0 0 L60 30" />
-          <path d="M60 0 L0 30" />
-        </g>
-        <!-- Red diagonals -->
-        <g stroke="#C8102E" stroke-width="3" stroke-linecap="square">
-          <path d="M0 0 L60 30" />
-          <path d="M60 0 L0 30" />
-        </g>
-        <!-- White cross -->
-        <rect x="25" y="0" width="10" height="30" fill="#fff" />
-        <rect x="0" y="10" width="60" height="10" fill="#fff" />
-        <!-- Red cross overlay -->
-        <rect x="27" y="0" width="6" height="30" fill="#C8102E" />
-        <rect x="0" y="12" width="60" height="6" fill="#C8102E" />
-      </svg>`;
-
-    const flagFr = `
-      <svg class="flag-icon" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect width="8" height="16" x="0" fill="#0055A4" />
-        <rect width="8" height="16" x="8" fill="#FFFFFF" />
-        <rect width="8" height="16" x="16" fill="#EF4135" />
-      </svg>`;
-
+    // Flag SVGs replaced by text as per user request.
     langBtn.innerHTML = `
-      <button class="flag" data-lang="en" aria-label="Switch to English" title="English">
-        ${flagEn}
-        <span class="visually-hidden">English</span>
+      <button class="flag text-mode" data-lang="en" aria-label="Switch to English" title="English" style="font-size: 0.75rem; font-weight: 800; font-family: sans-serif;">
+        EN
       </button>
-      <button class="flag" data-lang="fr" aria-label="Passer en Français" title="Français">
-        ${flagFr}
-        <span class="visually-hidden">Français</span>
+      <button class="flag text-mode" data-lang="fr" aria-label="Passer en Français" title="Français" style="font-size: 0.75rem; font-weight: 800; font-family: sans-serif;">
+        FR
       </button>
     `;
 
@@ -798,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = contactForm.querySelector('.submit-btn');
       const originalBtnHTML = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span>${map.form_sending}</span>`;
+      submitBtn.innerHTML = `< span > ${map.form_sending}</span > `;
 
       const formData = new FormData(contactForm);
       const data = {
@@ -820,14 +1068,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           // Show success state UI
           const successHTML = `
-            <div class="form-success reveal visible">
+      < div class="form-success reveal visible" >
                <div class="success-icon">
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                </div>
                <h3>${map.form_success_title}</h3>
                <p>${map.form_success_msg}</p>
-            </div>
-          `;
+            </div >
+      `;
           contactForm.innerHTML = successHTML;
 
           // Revert to fresh form and scroll to top after 5 seconds
@@ -929,6 +1177,119 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- Final CTA: Copy email / phone ---
+  (function initFinalCtaCopy() {
+    const root = document.getElementById('contact');
+    if (!root) return;
+
+    const emailBtn = document.getElementById('ctaEmailCopy');
+    const phoneBtn = document.getElementById('ctaPhoneCopy');
+
+    async function copyText(text) {
+      const value = String(text || '').trim();
+      if (!value) return false;
+
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
+
+        const ta = document.createElement('textarea');
+        ta.value = value;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.left = '-1000px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (err) {
+        try { console.error('Copy failed:', err); } catch (e) { }
+        return false;
+      }
+    }
+
+    function flashCopied(el) {
+      if (!el) return;
+      el.classList.add('is-copied');
+      window.setTimeout(() => el.classList.remove('is-copied'), 1600);
+    }
+
+    function attachCopyAndLongPress(el, opts) {
+      if (!el) return;
+      const copySelector = opts.copySelector || '[data-copy-value]';
+      const longPressHref = opts.longPressHref || '';
+      const longPressMs = typeof opts.longPressMs === 'number' ? opts.longPressMs : 650;
+
+      let longPressTimer = null;
+      let didLongPress = false;
+
+      function clearTimer() {
+        if (longPressTimer) {
+          window.clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      }
+
+      function startLongPress(e) {
+        didLongPress = false;
+        clearTimer();
+
+        // Only enable long-press behavior on touch.
+        // Pointer Events: pointerType === 'touch'.
+        // Touch Events fallback: touchstart has no pointerType.
+        const isTouch = (e && e.pointerType === 'touch') || (e && e.type === 'touchstart');
+        if (!isTouch || !longPressHref) return;
+
+        longPressTimer = window.setTimeout(() => {
+          didLongPress = true;
+          try {
+            window.location.href = longPressHref;
+          } catch (err) {
+            // no-op
+          }
+        }, longPressMs);
+      }
+
+      function cancelLongPress() {
+        clearTimer();
+      }
+
+      el.addEventListener('pointerdown', startLongPress);
+      el.addEventListener('pointerup', cancelLongPress);
+      el.addEventListener('pointercancel', cancelLongPress);
+      el.addEventListener('pointerleave', cancelLongPress);
+      el.addEventListener('touchstart', startLongPress, { passive: true });
+      el.addEventListener('touchend', cancelLongPress);
+
+      el.addEventListener('click', async (e) => {
+        if (didLongPress) {
+          // Avoid copying after the long-press already opened the app.
+          didLongPress = false;
+          return;
+        }
+        const valueEl = el.querySelector(copySelector);
+        const ok = await copyText(valueEl ? valueEl.getAttribute('data-copy-value') : '');
+        if (ok) flashCopied(el);
+      });
+    }
+
+    attachCopyAndLongPress(emailBtn, {
+      longPressHref: 'mailto:hamzahssaini0@gmail.com',
+      copySelector: '[data-copy-value]',
+      longPressMs: 650,
+    });
+
+    attachCopyAndLongPress(phoneBtn, {
+      longPressHref: 'tel:+212766991541',
+      copySelector: '[data-copy-value]',
+      longPressMs: 650,
+    });
+  })();
+
   // debounce helper
   function debounce(fn, ms = 200) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
@@ -988,9 +1349,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let text = escapeHtml(loc(item));
         // Handle basic bolding **text**
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        return `<li>${text}</li>`;
+        return `< li > ${text}</li > `;
       }).join('');
-      el.innerHTML = `<ul>${html}</ul>`;
+      el.innerHTML = `< ul > ${html}</ul > `;
     };
 
     // Populate Header
@@ -1012,8 +1373,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (techEl) {
       const tech = p.tech || [];
       techEl.innerHTML = tech.length > 0
-        ? tech.map(t => `<span class="brief-badge">${escapeHtml(t)}</span>`).join('')
-        : `<span class="brief-badge">Cloud Native</span>`;
+        ? tech.map(t => `< span class="brief-badge" > ${escapeHtml(t)}</span > `).join('')
+        : `< span class="brief-badge" > Cloud Native</span > `;
     }
 
     // Populate Architecture Image & Caption
@@ -1261,9 +1622,96 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(el);
   });
 
+  // --- Metrics (Impact) Count-Up Animation ---
+  // Subtle: triggers once per metric when it enters viewport.
+  // If reduced motion is enabled, values stay static.
+  (function initImpactMetricsCountUp() {
+    try {
+      const section = document.getElementById('metrics-impact');
+      if (!section) return;
+
+      const numbers = Array.from(section.querySelectorAll('.impact-metric-number[data-target]'));
+      if (!numbers.length) return;
+
+      const reduceMotion = (() => {
+        try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+        catch (e) { return false; }
+      })();
+
+      function formatMetric(target, suffix, forcePlus) {
+        const n = Number(target);
+        const abs = Math.abs(Math.round(n));
+        const isNeg = n < 0;
+        const prefix = isNeg ? '−' : (forcePlus ? '+' : '');
+        return prefix + String(abs) + (suffix || '');
+      }
+
+      // Ensure default text is the real value (not placeholders).
+      numbers.forEach((el) => {
+        const target = Number(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        const forcePlus = el.getAttribute('data-plus') === '1';
+        const finalText = formatMetric(target, suffix, forcePlus);
+        el.setAttribute('data-final', finalText);
+        // Keep what's in HTML if already correct; otherwise enforce.
+        if (!el.textContent || el.textContent.trim() === '0%' || el.textContent.trim() === '0') {
+          el.textContent = finalText;
+        }
+      });
+
+      if (reduceMotion) return;
+
+      function animateToTarget(el) {
+        const target = Number(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        const forcePlus = el.getAttribute('data-plus') === '1';
+        const durationMs = 900;
+
+        const startValue = 0;
+        const endValue = target;
+
+        // Reset to 0 right before animation (element is visible now).
+        el.textContent = (forcePlus ? '+' : '') + '0' + suffix;
+
+        const start = performance.now();
+        function tick(now) {
+          const t = Math.min(1, (now - start) / durationMs);
+          // Ease-out (cubic)
+          const eased = 1 - Math.pow(1 - t, 3);
+          const current = startValue + (endValue - startValue) * eased;
+          const text = formatMetric(current, suffix, forcePlus);
+          el.textContent = text;
+          if (t < 1) requestAnimationFrame(tick);
+          else el.textContent = formatMetric(endValue, suffix, forcePlus);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      let ran = false;
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          if (ran) return;
+          ran = true;
+          sectionObserver.disconnect();
+          numbers.forEach(el => animateToTarget(el));
+        });
+      }, {
+        threshold: 0.22,
+        rootMargin: '0px 0px -10% 0px'
+      });
+
+      sectionObserver.observe(section);
+    } catch (e) {
+      // silent fail
+    }
+  })();
+
   // --- Header Scroll Effect ---
+  // Throttled scroll handler to reduce unnecessary DOM updates (fires at most once per ~16ms frame)
   const header = document.querySelector('.site-header');
-  window.addEventListener('scroll', () => {
+  let scrollTicking = false;
+  function updateHeaderOnScroll() {
     if (!header) return;
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (window.scrollY > 50) {
@@ -1283,7 +1731,14 @@ document.addEventListener('DOMContentLoaded', () => {
         header.style.boxShadow = 'none';
       }
     }
-  });
+    scrollTicking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(updateHeaderOnScroll);
+      scrollTicking = true;
+    }
+  }, { passive: true });
 
   // --- Utils ---
   function escapeHtml(text) {
@@ -1303,5 +1758,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial render & Localization
   const initialLang = localStorage.getItem('lang') || 'fr';
   applyLanguage(initialLang);
+
+  // Enhance Projects proof links after language is applied.
+  initProjectsProofSpark();
+
+  // Enable in-page screenshot viewer for Projects galleries.
+  initRwGalleryViewer();
+
+  // Prevent "close" from scrolling to #projects.
+  initRwTargetModals();
 
 });
