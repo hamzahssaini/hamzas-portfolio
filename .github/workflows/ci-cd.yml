@@ -53,16 +53,16 @@ jobs:
       - name: Build & Push Backend Image
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}-backend
-          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.5 ./services/backend
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.6 ./services/backend
           docker push $IMAGE:${{ github.sha }}
-          docker push $IMAGE:v1.0.5
+          docker push $IMAGE:v1.0.6
 
       - name: Build & Push Frontend Image
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}-frontend
-          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.5 ./services/frontend
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.6 ./services/frontend
           docker push $IMAGE:${{ github.sha }}
-          docker push $IMAGE:v1.0.5
+          docker push $IMAGE:v1.0.6
 
   deploy:
     name: Deploy to DigitalOcean
