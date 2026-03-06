@@ -60,9 +60,19 @@ jobs:
       - name: Build & Push Frontend Image
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}-frontend
-          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.4 ./services/frontend
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest ./services/frontend
           docker push $IMAGE:${{ github.sha }}
           docker push $IMAGE:latest
+
+  deploy:
+    name: Deploy to DigitalOcean
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install DigitalOcean CLI (doctl)
         uses: digitalocean/action-doctl@v2
