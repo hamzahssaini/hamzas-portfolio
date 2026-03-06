@@ -46,14 +46,20 @@ This repository is used to **simulate and improve** these metrics via small, fre
 .
 ├── .github/
 │   └── workflows/
-│       └── ci-cd.yml      # GitHub Actions CI/CD pipeline
-├── models/                # (Optional) Data models / domain logic
-├── node_modules/          # Dependencies
-├── .env                   # Environment variables
-├── app.js                 # Main application entry point
-├── Dockerfile             # Container image definition
-├── package.json
-└── package-lock.json
+│       └── ci-cd.yml              # GitHub Actions CI/CD pipeline
+├── services/
+│   ├── backend/                   # Node.js/Express API (DORA metrics + contact)
+│   │   ├── app.js
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   ├── Dockerfile
+│   │   └── scripts/
+│   └── frontend/                  # Static portfolio + dashboard (Nginx)
+│       ├── public/
+│       ├── Dockerfile
+│       └── nginx.conf
+├── .env                           # (Local dev) environment variables
+└── README.md
 ```
 
 ---
@@ -127,19 +133,22 @@ git clone https://github.com/hamzahssaini/dora-metrics.git
 cd dora-metrics
 ```
 
-2. **Install dependencies**
+2. **Start the backend (API)**
 
 ```bash
+cd services/backend
 npm ci
-```
-
-3. **Start the application**
-
-```bash
 npm start
-# or
-node app.js
 ```
+
+The backend listens on `PORT` (default `3000`). Health: `GET /healthz`.
+
+3. **Open the frontend**
+
+- Recommended (served by backend during dev): open `http://localhost:3000/` **only if** you run a separate static server or reverse-proxy.
+- Simplest: open the static file directly: `services/frontend/public/index.html`.
+
+For the metrics dashboard, prefer: `http://localhost:3000/dashboard.html` when you serve the frontend via a web server. If you open it via `file://`, it will prompt you to start the backend.
 
 4. **Run tests**
 
@@ -198,6 +207,26 @@ Planned or possible enhancements:
   - Compute and display DORA metrics
 - Add automated tests and code coverage
 - Add a small UI or dashboard to visualize DORA metrics over time
+
+---
+
+## 🐳 Docker Builds (ready for Kubernetes)
+
+Backend image:
+
+```bash
+docker build -t dora-backend:local services/backend
+docker run --rm -p 3000:3000 --env-file .env dora-backend:local
+```
+
+Frontend image:
+
+```bash
+docker build -t dora-frontend:local services/frontend
+docker run --rm -p 8080:80 dora-frontend:local
+```
+
+In Kubernetes, you typically route `/api/*` to the backend Service and `/` to the frontend Service using an Ingress.
 
 ---
 
