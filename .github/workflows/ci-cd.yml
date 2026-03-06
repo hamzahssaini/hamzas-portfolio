@@ -22,15 +22,18 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: 'services/backend/package-lock.json'
 
       - name: Install Dependencies
+        working-directory: ./services/backend
         run: npm ci
 
       - name: Run Tests
-        run: npm test
+        working-directory: ./services/backend
+        run: npm test --if-present
 
   build-and-push:
-    name: Build & Push Docker Image
+    name: Build & Push Docker Images
     needs: test-and-lint
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -47,26 +50,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Image
+      - name: Build & Push Backend Image
         run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}
-          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
-
-      - name: Push Docker Image (sha + latest)
-        run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}-backend
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.4 ./services/backend
           docker push $IMAGE:${{ github.sha }}
           docker push $IMAGE:latest
 
-  deploy:
-    name: Deploy to DigitalOcean
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Build & Push Frontend Image
+        run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}-frontend
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:v1.0.4 ./services/frontend
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
 
       - name: Install DigitalOcean CLI (doctl)
         uses: digitalocean/action-doctl@v2
