@@ -1,0 +1,19 @@
+{
+  "name": "dora-metrics",
+  "version": "1.0.0",
+  "description": "DORA Metrics Dashboard",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo 'No build step required'" 
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "morgan": "^1.10.1",
+    "node-fetch": "^2.7.0",
+    "nodemailer": "^7.0.12"
+  },
+  "devDependencies": {}
+}
