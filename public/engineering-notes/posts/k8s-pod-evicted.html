@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">The Kubernetes "Eviction Graveyard"</title>
+    <title lang="fr">Le « Cimetière d'Évictions » Kubernetes</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --accent: #059669;
+            --border: #f3f4f6;
+            --font: 'Calibri', sans-serif;
+            --container-width: 680px;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: var(--font); line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+        nav { display: flex; justify-content: space-between; align-items: center; max-width: var(--container-width); margin: 0 auto; padding: 60px 24px 40px; }
+        .nav-left a { color: var(--text-main); text-decoration: none; display: flex; align-items: center; transition: opacity 0.2s; }
+        .nav-left a:hover { opacity: 0.7; }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-right a:hover { color: var(--text-main); }
+        main { max-width: var(--container-width); margin: 0 auto; padding: 0 24px 120px; }
+        
+        header { margin-bottom: 64px; }
+        h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 8px; line-height: 1.3;}
+        .subtitle { color: var(--text-muted); font-size: 15px; font-weight: 400; }
+        article { line-height: 1.8; color: #374151; }
+        h2 { margin-top: 48px; margin-bottom: 16px; font-size: 20px; font-weight: 600; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+        h3 { margin-top: 32px; margin-bottom: 12px; font-size: 17px; font-weight: 600; color: var(--text-main);}
+        p { margin-bottom: 20px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; }
+        li { margin-bottom: 8px; }
+        strong { color: var(--text-main); font-weight: 600; }
+        
+        .visual-container { margin: 32px 0; }
+        .visual-container img { border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; height: auto; display: block; }
+        
+        pre { background: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 8px; overflow-x: auto; margin-bottom: 24px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.5; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);}
+        code { font-family: inherit; }
+        p code, li code { background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; border: 1px solid #e2e8f0;}
+
+        blockquote { border-left: 4px solid var(--accent); padding-left: 16px; margin-bottom: 24px; font-style: italic; color: #4b5563; background: #f9fafb; padding: 16px; border-radius: 0 8px 8px 0;}
+
+        @media (max-width: 600px) { nav { padding-top: 40px; padding-bottom: 30px; } header { margin-bottom: 40px; } h1 { font-size: 22px; } }
+    </style>
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--text-main);">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    <main id="content">
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <header>
+                <h1>🧟‍♂️ The Kubernetes "Eviction Graveyard": How to Fix and Prevent Ephemeral-Storage Crashes</h1>
+                <p class="subtitle">A hands-on guide to maintaining cluster stability under heavy AI and data-processing workloads.</p>
+            </header>
+            <article>
+                <p>If you have been managing Kubernetes clusters for a while, especially clusters running heavy AI, OCR, or data-processing workloads, you've probably run into the dreaded <strong>"Eviction Graveyard."</strong></p>
+                <p>You run <code>kubectl get pods</code>, expecting to see a clean list of running microservices, and instead, you are greeted by this nightmare:</p>
+                
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-pod-evicted/evicted-pods.png" alt="List of Evicted Kubernetes Pods">
+                </div>
+
+                <p>Dozens, sometimes hundreds, of dead pods cluttering your namespace.</p>
+                <p>In this post, I will break down exactly what this error means, how to clean it up instantly, and most importantly, the <strong>Enterprise Best Practices</strong> to ensure it never happens to your production cluster again.</p>
+
+                <h2>🔍 What is the "Eviction Graveyard"?</h2>
+                <p>When a pod shows as <code>Evicted</code>, it means the Kubernetes Worker Node completely ran out of a critical resource—usually RAM or Hard Drive space (<code>ephemeral-storage</code>).</p>
+                <p>To prevent the entire Linux server from crashing, the Kubelet goes into <strong>"survival mode"</strong> and aggressively assassinates the pods consuming the most resources.</p>
+                
+                <blockquote>However, because your pods are managed by a Deployment, Kubernetes immediately says, <em>"Oh no, the pod died! Let me spin up a replacement."</em> The new pod starts, fills up the hard drive again, and gets killed again. This endless loop creates the graveyard of dead pods.</blockquote>
+                
+                <p>If you see <code>ContainerStatusUnknown</code>, it means the Worker Node was struggling so badly (likely at 100% CPU or 100% Disk IO) that it temporarily lost communication with the Kubernetes Control Plane.</p>
+
+                <h2>🧯 The Immediate Fix (Putting out the fire)</h2>
+                <p>Before we fix the root cause, let's clean up your terminal and free up the node.</p>
+
+                <h3>1. Clean up the Graveyard</h3>
+                <p>Those Evicted pods are completely dead, but they are cluttering your view. You can instantly wipe all failed pods in your namespace with this command:</p>
+<pre><code>kubectl delete pods --field-selector status.phase=Failed -n &lt;your-namespace&gt;</code></pre>
+
+                <h3>2. Free up the Node's Disk Space</h3>
+                <p>Usually, this happens because local Docker/Containerd images and temporary files have filled up the node's disk. SSH into your struggling worker node and prune the unused images:</p>
+<pre><code># If using RKE2/Containerd:
+sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
+
+# If using standard Docker:
+docker image prune -a</code></pre>
+
+                <h2>🏗️ The Root Cause: Ephemeral-Storage</h2>
+                <p>In my case, the issue was tied to <strong>AI Document Processing microservices</strong>.</p>
+                <p>When your application downloads large PDFs or images, processes them, and saves temp files to the local Linux container (<code>/tmp</code>), it consumes <code>ephemeral-storage</code>. If the app doesn't delete those files after processing, the pod bloats until it consumes the node's entire hard drive.</p>
+
+                <h2>🌟 Enterprise Best Practices (The Permanent Fix)</h2>
+                <p>In a professional DevOps environment, you never want a single rogue microservice to fill up a server's hard drive and take down neighboring applications. Here is the two-step best practice to secure your cluster.</p>
+
+                <h3>1. The DevOps Fix: Enforce Resource Limits</h3>
+                <p>You must tell Kubernetes to isolate the damage. By setting ephemeral-storage limits in your Helm Chart or Deployment YAML, you instruct Kubernetes: <em>"If this specific pod writes more than 3GB of temporary files, kill ONLY this pod, before it threatens the rest of the node."</em></p>
+                <p>Add this to your <code>deployment.yaml</code> under the <code>resources</code> block:</p>
+<pre><code>resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+    ephemeral-storage: "1Gi"  # Asks the node to guarantee 1GB of disk space
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+    ephemeral-storage: "3Gi"  # Kills the pod if it exceeds 3GB of temp files!</code></pre>
+
+                <h3>2. The Developer Fix: Code-Level Cleanup</h3>
+                <p>Infrastructure limits are the safety net, but the actual cure requires good software engineering. If your application processes files (like an AI model running inference on documents), the code must include a cleanup phase.</p>
+                <p>Ensure your developers are using standard cleanup methods in their code (e.g., Python's <code>os.remove(temp_file_path)</code> or <code>tempfile.TemporaryDirectory()</code>) as soon as the API response is sent to the user.</p>
+
+                <h2>Conclusion</h2>
+                <p>Kubernetes is incredibly resilient, but it relies on us to give it the right boundaries. By combining automated cleanup commands, strict YAML resource limits, and good developer practices, you can permanently banish the Eviction Graveyard from your cluster.</p>
+                <p><em>Have you run into the Eviction Graveyard before? Let me know how you solved it on LinkedIn!</em></p>
+            </article>
+        </div>
+
+        <!-- FRENCH VERSION -->
+        <div lang="fr">
+            <header>
+                <h1>🧟‍♂️ Le « Cimetière d'Évictions » Kubernetes : Comment Réparer et Prévenir les Plantages</h1>
+                <p class="subtitle">Un guide pratique pour maintenir la stabilité du cluster sous de lourdes charges d'IA et de traitement de données.</p>
+            </header>
+            <article>
+                <p>Si vous gérez des clusters Kubernetes depuis un certain temps, en particulier des clusters exécutant de lourdes charges de travail d'IA, d'OCR ou de traitement de données, vous avez probablement déjà rencontré le redouté <strong>« Cimetière d'Évictions »</strong>.</p>
+                <p>Vous lancez <code>kubectl get pods</code> en vous attendant à voir une liste propre de microservices en cours d'exécution, et au lieu de cela, vous êtes accueilli par ce cauchemar :</p>
+                
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-pod-evicted/evicted-pods.png" alt="Liste des Pods Kubernetes Évincés">
+                </div>
+
+                <p>Des dizaines, parfois des centaines, de pods morts encombrent votre namespace.</p>
+                <p>Dans cet article, je vais vous expliquer exactement ce que signifie cette erreur, comment la nettoyer instantanément, et surtout, les <strong>Meilleures Pratiques d'Entreprise</strong> pour s'assurer que cela ne se produise plus jamais sur votre cluster de production.</p>
+
+                <h2>🔍 Qu'est-ce que le « Cimetière d'Évictions » ?</h2>
+                <p>Lorsqu'un pod affiche le statut <code>Evicted</code> (Évincé), cela signifie que le nœud de travail Kubernetes est complètement à court d'une ressource critique, généralement de la RAM ou de l'espace disque (<code>ephemeral-storage</code>).</p>
+                <p>Pour éviter que le serveur Linux entier ne plante, le Kubelet passe en <strong>« mode survie »</strong> et assassine agressivement les pods qui consomment le plus de ressources.</p>
+                
+                <blockquote>Cependant, parce que vos pods sont gérés par un Deployment, Kubernetes se dit immédiatement : <em>« Oh non, le pod est mort ! Laissez-moi en démarrer un de remplacement. »</em> Le nouveau pod démarre, remplit à nouveau le disque dur, et est tué à nouveau. Cette boucle sans fin crée le cimetière de pods morts.</blockquote>
+                
+                <p>Si vous voyez <code>ContainerStatusUnknown</code>, cela signifie que le nœud de travail était tellement en difficulté (probablement à 100 % de CPU ou 100 % d'E/S disque) qu'il a temporairement perdu la communication avec le Control Plane de Kubernetes.</p>
+
+                <h2>🧯 La Correction Immédiate (Éteindre l'incendie)</h2>
+                <p>Avant de corriger la cause fondamentale, nettoyons votre terminal et soulageons le nœud.</p>
+
+                <h3>1. Nettoyer le Cimetière</h3>
+                <p>Ces pods évincés sont complètement morts, mais ils encombrent votre vue. Vous pouvez supprimer instantanément tous les pods en échec dans votre namespace avec cette commande :</p>
+<pre><code>kubectl delete pods --field-selector status.phase=Failed -n &lt;votre-namespace&gt;</code></pre>
+
+                <h3>2. Libérer l'Espace Disque du Nœud</h3>
+                <p>Généralement, cela se produit parce que les images Docker/Containerd locales et les fichiers temporaires ont rempli le disque du nœud. Connectez-vous en SSH à votre nœud en difficulté et purgez les images inutilisées :</p>
+<pre><code># Si vous utilisez RKE2/Containerd :
+sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
+
+# Si vous utilisez Docker standard :
+docker image prune -a</code></pre>
+
+                <h2>🏗️ La Cause Profonde : Stockage Éphémère (ephemeral-storage)</h2>
+                <p>Dans mon cas, le problème était lié aux <strong>microservices de traitement de documents par IA</strong>.</p>
+                <p>Lorsque votre application télécharge de gros PDF ou images, les traite et enregistre des fichiers temporaires dans le conteneur Linux local (<code>/tmp</code>), elle consomme du <code>ephemeral-storage</code>. Si l'application ne supprime pas ces fichiers après traitement, le pod gonfle jusqu'à consommer tout le disque dur du nœud.</p>
+
+                <h2>🌟 Meilleures Pratiques d'Entreprise (La Solution Permanente)</h2>
+                <p>Dans un environnement DevOps professionnel, vous ne voulez jamais qu'un seul microservice malveillant remplisse le disque dur d'un serveur et fasse tomber les applications voisines. Voici la meilleure pratique en deux étapes pour sécuriser votre cluster.</p>
+
+                <h3>1. La Solution DevOps : Appliquer les Limites de Ressources</h3>
+                <p>Vous devez dire à Kubernetes de contenir les dégâts. En définissant des limites de stockage éphémère dans votre Chart Helm ou votre fichier YAML de déploiement, vous donnez la consigne à Kubernetes : <em>« Si ce pod spécifique écrit plus de 3 Go de fichiers temporaires, tue UNIQUEMENT ce pod, avant qu'il ne menace le reste du nœud. »</em></p>
+                <p>Ajoutez ceci à votre <code>deployment.yaml</code> sous le bloc <code>resources</code> :</p>
+<pre><code>resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+    ephemeral-storage: "1Gi"  # Demande au nœud de garantir 1 Go d'espace disque
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+    ephemeral-storage: "3Gi"  # Tue le pod s'il dépasse 3 Go de fichiers temporaires !</code></pre>
+
+                <h3>2. La Solution Développeur : Nettoyage au Niveau du Code</h3>
+                <p>Les limites d'infrastructure sont un filet de sécurité, mais le véritable remède nécessite une bonne ingénierie logicielle. Si votre application traite des fichiers (comme un modèle d'IA effectuant des inférences sur des documents), le code doit inclure une phase de nettoyage.</p>
+                <p>Assurez-vous que vos développeurs utilisent des méthodes de nettoyage standard dans leur code (par ex. <code>os.remove(chemin_fichier_temp)</code> en Python ou <code>tempfile.TemporaryDirectory()</code>) dès que la réponse API est envoyée à l'utilisateur.</p>
+
+                <h2>Conclusion</h2>
+                <p>Kubernetes est incroyablement résilient, mais il compte sur nous pour lui donner les bonnes limites. En combinant des commandes de nettoyage automatisées, des limites de ressources YAML strictes et de bonnes pratiques de développement, vous pouvez bannir définitivement le Cimetière d'Évictions de votre cluster.</p>
+                <p><em>Avez-vous déjà rencontré le Cimetière d'Évictions ? Dites-moi comment vous l'avez résolu sur LinkedIn !</em></p>
+            </article>
+        </div>
+    </main>
+</body>
+</html>
