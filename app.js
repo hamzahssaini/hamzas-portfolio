@@ -473,18 +473,11 @@ app.get('/api/metrics/github', async (req, res) => {
 // ----- Frontend (optional, for local dev) -----
 // Default behavior is API-only (better for Kubernetes). For local dev, set:
 //   SERVE_FRONTEND=true
-// so the backend serves the static portfolio from services/frontend/public.
-if (SERVE_FRONTEND) {
-  app.use(express.static(FRONTEND_PUBLIC_DIR));
-  app.get('/', (req, res) => {
-    res.sendFile('index.html', { root: FRONTEND_PUBLIC_DIR });
-  });
-} else {
-  // API-only service (Ingress routes / -> frontend, /api -> backend)
-  app.get('/', (req, res) => {
-    res.json({ service: 'dora-metrics-backend', status: 'ok' });
-  });
-}
+// Serve the static frontend (default for single-service app)
+app.use(express.static(FRONTEND_PUBLIC_DIR));
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: FRONTEND_PUBLIC_DIR });
+});
 
 // API 404 handler (return JSON for unknown API endpoints)
 app.use('/api', (req, res) => {
