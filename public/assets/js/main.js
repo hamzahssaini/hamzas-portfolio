@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  const eduContainer = document.querySelector('.timeline');
+  const eduContainer = document.querySelector('#education .timeline');
 
   function renderEducation(lang) {
     if (!eduContainer) return;
