@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">Architecting and Validating a High-Availability Redis Cluster on Kubernetes</title>
+    <title lang="fr">Architecturer et Valider un Cluster Redis à Haute Disponibilité sur Kubernetes</title>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px; 
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: color 0.2s; 
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+
+        /* Images */
+        .visual-container { margin: 40px 0; border-radius: 12px; overflow: hidden; background: #f8fafc; padding: 16px; border: 1px solid var(--border); }
+        .visual-container img { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .visual-container p { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-top: 16px; 
+            margin-bottom: 0;
+            text-align: center; 
+            font-style: italic;
+        }
+
+        /* Code Blocks */
+        pre { 
+            background: var(--code-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            overflow-x: auto; 
+            margin: 32px 0; 
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+        pre code { 
+            background: transparent; 
+            color: var(--code-text); 
+            padding: 0; 
+            border: none; 
+            font-size: 14px; 
+            font-family: var(--font-mono);
+            line-height: 1.5;
+        }
+        code { 
+            background: #f1f5f9; 
+            color: #0f172a; 
+            padding: 3px 6px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            font-family: var(--font-mono);
+            border: 1px solid #e2e8f0; 
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    </style>
+
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--accent); font-weight: 600;">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    
+    <main id="content">
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <article>
+            <header>
+                <div class="meta">Kubernetes • Architecture • Case Study</div>
+                <h1> Architecting and Validating a High-Availability Redis Cluster on Kubernetes</h1>
+            </header>
+
+            <section>
+                <p>When you first learn Kubernetes, you spend most of your time dealing with stateless applications (like a Node.js API or a React frontend). If a stateless pod dies, Kubernetes spins up a new one, and nobody notices.</p>   
+                <p>But what happens when you need to deploy a <strong>Stateful application</strong>, like a Database or a Cache?</p>
+                <p>Recently, my development team needed a robust caching layer. Instead of spinning up a standard, single-pod Redis instance, I architected a High-Availability (HA) Redis Master-Replica Cluster on our Kubernetes environment.</p>
+                <p>Unlike standard Deployments, running a distributed database requires strict pod ordering, persistent storage, and sticky network identities. Here is a breakdown of how I designed the architecture, deployed the infrastructure, and rigorously validated the replication network.</p>
+
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-Redis/architucture.png" alt="Redis Architecture Diagram">
+                    <p>High-Level Architecture of the Redis HA Cluster on Kubernetes</p>
+                </div>
+            </section>
+
+            <section>
+                <h2> Phase 1: The Architecture & Deployment</h2>
+                <p>To build a true HA database in Kubernetes, you cannot use a standard Deployment. I structured my manifest using industry best practices, relying heavily on <code>StatefulSets</code>.</p>
+                <p>Here are the core components I engineered for this stack:</p>
+
+                <h3>1. The Compute Layer (StatefulSets):</h3>
+                <p>I deployed two separate StatefulSets: one for the <code>redis-master</code> (1 replica) and one for the <code>redis-slave</code> (2 replicas). By using StatefulSets, Kubernetes guarantees strict ordering: <code>redis-slave-0</code> will not boot until <code>redis-master-0</code> is fully running and ready.</p>
+
+                <h3>2. The Storage Layer (Dynamic PVCs):</h3>
+                <p>If a Redis pod crashes, we cannot lose the data. Instead of using dangerous manual <code>hostPath</code> volumes, I implemented <code>volumeClaimTemplates</code> linked to our <code>local-path</code> StorageClass. This tells Kubernetes to dynamically provision 8GB Persistent Volumes and tightly bind them to specific pods.</p>
+
+<pre><code class="language-yaml">volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: "8Gi"</code></pre>
+
+                <h3>3. The Network Identity (Headless Services):</h3>
+                <p>Replicas need to know exactly how to find the Master. I provisioned a Headless Service (<code>ClusterIP: None</code>). This bypasses the standard Kubernetes load balancer and generates a permanent DNS record for the master pod (<code>redis-master-0.redis-headless</code>), ensuring the slaves never lose their connection to the primary database.</p>
+
+                <h3>The Deployment:</h3>
+                <p>With the architecture codified in a unified YAML manifest, provisioning the entire database infrastructure took a single command:</p>        
+
+<pre><code class="language-bash">kubectl apply -f redis-ha-cluster.yaml -n redis</code></pre>
+            </section>
+
+            <section>
+                <h2> Phase 2: The Validation Runbook</h2>
+                <p>In the DevOps world, deploying infrastructure is only 50% of the job. The other 50% is mathematically proving that it works. You cannot just trust that <code>kubectl get pods</code> says Running. You have to dive into the database engine itself.</p>
+                <p>Here is my 4-step testing runbook to certify a Redis cluster for production.</p>
+
+                <h3>Test 1: The Replication Status Check</h3>
+                <p>First, we need to ask the Redis Master if it actually sees its worker nodes. I execute directly into the Master pod and query the internal Redis metrics:</p>
+
+<pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli info replication</code></pre>
+
+                <p><strong>What I look for:</strong></p>
+                <ul>
+                    <li><code>role:master</code></li>
+                    <li><code>connected_slaves:2</code> (This confirms both replica pods successfully registered with the master).</li>
+                </ul>
+
+                <p>Next, I reverse the test. I check the Replica pod to ensure it has an active, healthy handshake with the Master:</p>
+
+<pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli info replication</code></pre>
+
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-Redis/redis-pods-master.png" alt="Redis Master Pod Replication Status">
+                    <p>Verifying the Master node's replication statistics and registered slaves.</p>
+                </div>
+
+                <p><strong>What I look for:</strong></p>
+                <ul>
+                    <li><code>role:slave</code></li>
+                    <li><code>master_link_status:up</code> (<strong>Critical:</strong> If this says "down", the pods are running, but the network replication is broken!)</li>
+                </ul>
+
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-Redis/redis-slave.png" alt="Redis Slave Node Link Status">
+                    <p>Confirming the Slave node has successfully linked and synced with the Master.</p>
+                </div>
+
+                <h3>Test 2: The Data Propagation Test (The Ultimate Proof)</h3> 
+                <p>Status checks are great, but the ultimate proof of a working cluster is testing the actual data flow. I simulate a backend application by writing data to the Master, and immediately querying the Slave to see if the data replicated across the Kubernetes network.</p>
+
+                <p><strong>Step A: Write to the Master</strong></p>
+<pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli set mytest "Hello-Redis"</code></pre>
+
+                <p><strong>Step B: Read from the Slave</strong></p>
+<pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli get mytest</code></pre>
+
+                <p><strong>Result:</strong> The slave instantly returns <code>"Hello-Redis"</code>. The async replication is working flawlessly.</p>
+
+                <h3>Test 3: Analyzing the Boot Logs</h3>
+                <p>Even if the cluster is replicating data, there might be hidden warnings (like permission issues or memory fragmentation warnings). I always audit the boot sequence of the Master:</p>
+
+<pre><code class="language-bash">kubectl logs redis-master-0 -n redis</code></pre>
+
+                <p><strong>What I look for:</strong></p>
+                <ul>
+                    <li><code>* Ready to accept connections</code></li>
+                    <li><code>* Replica redis-slave-0... identity confirmed</code></li>
+                    <li><code>* Synchronization with replica succeeded</code></li>
+                </ul>
+
+                <h3>Test 4: The External Network Test (NodePort)</h3>
+                <p>Finally, because my developers need to access this cache from outside the cluster during their local development phase, I exposed the Master via a specific NodePort (<code>30903</code>).</p>
+                <p>To prove the routing works from an external machine, I ran a ping test from my local Windows terminal directly to the Kubernetes Worker Node IP:</p>
+
+<pre><code class="language-bash">redis-cli -h 192.168.1.81 -p 30903 ping</code></pre>
+
+                <p><strong>Result:</strong> It returns <code>PONG</code>. The Kubernetes Kube-Proxy is successfully routing external TCP traffic directly into the StatefulSet.</p>
+            </section>
+
+            <section>
+                <h2> Conclusion</h2>
+                <p>By combining Kubernetes StatefulSets with a rigorous testing runbook, you can deploy enterprise-grade databases with absolute confidence.</p>
+                <p>Never assume an infrastructure deployment is successful just because the pods have a green status. Always verify the application-level logic—check the replication links, test the data propagation, and audit the logs. That is how you build unbreakable platforms.</p>
+            </section>
+            </article>
+        </div>
+
+        <!-- FRENCH VERSION -->
+        <div lang="fr">
+            <article>
+            <header>
+                <div class="meta">Kubernetes • Architecture • Étude de Cas</div>
+                <h1> Architecturer et Valider un Cluster Redis à Haute Disponibilité sur Kubernetes</h1>
+            </header>
+
+            <section>
+                <p>Lorsque vous apprenez Kubernetes pour la première fois, vous passez la majeure partie de votre temps à gérer des applications sans état (comme une API Node.js ou un frontend React). Si un pod sans état meurt, Kubernetes en lance un nouveau, et personne ne le remarque.</p>   
+                <p>Mais que se passe-t-il lorsque vous devez déployer une <strong>application avec État (Stateful)</strong>, comme une Base de données ou un Cache ?</p>
+                <p>Récemment, mon équipe de développement avait besoin d'une couche de mise en cache robuste. Au lieu de lancer une instance Redis standard à pod unique, j'ai architecturé un Cluster Redis Maître-Réplica à Haute Disponibilité (HA) sur notre environnement Kubernetes.</p>
+                <p>Contrairement aux Déploiements standards, l'exécution d'une base de données distribuée nécessite un ordre strict des pods, un stockage persistant, et des identités réseau fixes. Voici une analyse de la manière dont j'ai conçu l'architecture, déployé l'infrastructure, et rigoureusement validé le réseau de réplication.</p>
+
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-Redis/architucture.png" alt="Schéma de l'Architecture Redis">
+                    <p>Architecture de Haut Niveau du Cluster Redis HA sur Kubernetes</p>
+                </div>
+            </section>
+
+            <section>
+                <h2> Phase 1: L'Architecture & Déploiement</h2>
+                <p>Pour construire une véritable base de données HA dans Kubernetes, vous ne pouvez pas utiliser un Déploiement standard. J'ai structuré mon manifeste en utilisant les meilleures pratiques de l'industrie, m'appuyant fortement sur les <code>StatefulSets</code>.</p>
+                <p>Voici les composants de base que j'ai conçus pour cette pile (stack) :</p>
+
+                <h3>1. La Couche de Calcul (StatefulSets) :</h3>
+                <p>J'ai déployé deux StatefulSets séparés : un pour le <code>redis-master</code> (1 réplica) et un pour le <code>redis-slave</code> (2 réplicas). L'utilisation de StatefulSets permet à Kubernetes de garantir un ordre strict : <code>redis-slave-0</code> ne démarrera pas tant que <code>redis-master-0</code> ne sera pas complètement en cours d'exécution et prêt (ready).</p>
+
+                <h3>2. La Couche de Stockage (PVC Dynamiques) :</h3>
+                <p>Dans l'éventualité où un pod Redis se crashe, nous ne pouvons pas perdre les données. Au lieu d'utiliser des volumes manuels dangereux comme <code>hostPath</code>, j'ai implémenté des <code>volumeClaimTemplates</code> liés à notre StorageClass <code>local-path</code>. Cela indique à Kubernetes de provisionner dynamiquement des Volumes Persistants de 8 Go et de les lier étroitement à des pods spécifiques.</p>
+
+<pre><code class="language-yaml">volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: "8Gi"</code></pre>
+
+                <h3>3. L'Identité Réseau (Services Headless) :</h3>
+                <p>Les réplicas doivent savoir exactement comment trouver le Maître. J'ai provisionné un Service Headless (<code>ClusterIP: None</code>). Cela contourne l'équilibreur de charge standard de Kubernetes et génère un enregistrement DNS permanent pour le pod maître (<code>redis-master-0.redis-headless</code>), garantissant que les esclaves ne perdent jamais leur connexion à la base de données principale.</p>
+
+                <h3>Le Déploiement :</h3>
+                <p>L'architecture étant codifiée dans un manifeste YAML unifié, le provisionnement de l'ensemble de l'infrastructure de la base de données a nécessité une seule commande :</p>        
+
+<pre><code class="language-bash">kubectl apply -f redis-ha-cluster.yaml -n redis</code></pre>
+            </section>
+
+            <section>
+                <h2> Phase 2: Le Plan de Validation (Runbook)</h2>
+                <p>Dans le monde DevOps, déployer une infrastructure ne représente que 50 % du travail. Les autres 50 % consistent à prouver mathématiquement que cela fonctionne. Vous ne pouvez pas vous contenter de croire que <code>kubectl get pods</code> indique Running. Vous devez plonger dans le moteur de la base de données lui-même.</p>
+                <p>Voici mon plan de test en 4 étapes pour certifier un cluster Redis pour la production.</p>
+
+                <h3>Test 1 : La Vérification du Statut de Réplication</h3>
+                <p>Tout d'abord, nous devons demander au Maître Redis s'il voit réellement ses nœuds de travail. Je m'exécute directement dans le pod Maître et interroge les métriques internes de Redis :</p>
+
+<pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli info replication</code></pre>
+
+                <p><strong>Ce que je recherche :</strong></p>
+                <ul>
+                    <li><code>role:master</code></li>
+                    <li><code>connected_slaves:2</code> (Ceci confirme que les deux pods réplicas se sont correctement enregistrés auprès du maître).</li>
+                </ul>
+
+                <p>Ensuite, j'inverse le test. Je vérifie le pod Réplica pour m'assurer qu'il dispose d'une connexion (handshake) active et saine avec le Maître :</p>
+
+<pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli info replication</code></pre>
+
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-Redis/redis-pods-master.png" alt="Statut de Réplication du Pod Maître Redis">
+                    <p>Vérification des statistiques de réplication du nœud Maître et des esclaves enregistrés.</p>
+                </div>
+
+                <p><strong>Ce que je recherche :</strong></p>
+                <ul>
+                    <li><code>role:slave</code></li>
+                    <li><code>master_link_status:up</code> (<strong>Critique :</strong> Si cela dit "down", les pods sont en cours d'exécution, mais la réplication réseau est rompue !)</li>
+                </ul>
+
+                <div class="visual-container">
+                    <img src="/engineering-notes/images/k8s-Redis/redis-slave.png" alt="Statut du Lien du Nœud Esclave Redis">
+                    <p>Confirmation que le nœud Esclave s'est lié et synchronisé avec succès avec le Maître.</p>
+                </div>
+
+                <h3>Test 2 : Le Test de Propagation des Données (La Preuve Ultime)</h3> 
+                <p>Les vérifications de statut sont formidables, mais la preuve ultime d'un cluster fonctionnel réside dans le test du flux de données réel. Je simule une application backend en écrivant des données sur le Maître, et en interrogeant immédiatement l'Esclave pour m'assurer que les données ont bien été répliquées à travers le réseau Kubernetes.</p>
+
+                <p><strong>Étape A : Écrire sur le Maître</strong></p>
+<pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli set mytest "Hello-Redis"</code></pre>
+
+                <p><strong>Étape B : Lire depuis l'Esclave</strong></p>
+<pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli get mytest</code></pre>
+
+                <p><strong>Résultat :</strong> L'esclave renvoie instantanément <code>"Hello-Redis"</code>. La réplication asynchrone fonctionne parfaitement.</p>
+
+                <h3>Test 3 : L'Analyse des Journaux de Démarrage (Boot Logs)</h3>
+                <p>Même si le cluster réplique des données, il peut y avoir des avertissements cachés (comme des problèmes d'autorisation ou des alertes de fragmentation de mémoire). J'audit toujours la séquence de démarrage du Maître :</p>
+
+<pre><code class="language-bash">kubectl logs redis-master-0 -n redis</code></pre>
+
+                <p><strong>Ce que je recherche :</strong></p>
+                <ul>
+                    <li><code>* Ready to accept connections</code></li>
+                    <li><code>* Replica redis-slave-0... identity confirmed</code></li>
+                    <li><code>* Synchronization with replica succeeded</code></li>
+                </ul>
+
+                <h3>Test 4 : Le Test du Réseau Externe (NodePort)</h3>
+                <p>Enfin, comme mes développeurs ont besoin d'accéder à ce cache depuis l'extérieur du cluster pendant leur phase de développement local, j'ai exposé le Maître via un NodePort spécifique (<code>30903</code>).</p>
+                <p>Pour prouver que le routage fonctionne depuis une machine externe, j'ai effectué un test de ping depuis mon terminal Windows local directement vers l'IP du nœud de travail (Worker Node) Kubernetes :</p>
+
+<pre><code class="language-bash">redis-cli -h 192.168.1.81 -p 30903 ping</code></pre>
+
+                <p><strong>Résultat :</strong> Il retourne <code>PONG</code>. Le Kubernetes Kube-Proxy achemine avec succès le trafic TCP externe directement dans le StatefulSet.</p>
+            </section>
+
+            <section>
+                <h2> Conclusion</h2>
+                <p>En combinant les StatefulSets de Kubernetes avec un runbook de test rigoureux, vous pouvez déployer des bases de données de qualité entreprise avec une confiance absolue.</p>
+                <p>Ne présumez jamais qu'un déploiement d'infrastructure est un succès sous prétexte que les pods affichent un statut au vert. Vérifiez toujours la logique au niveau de l'application : examinez les liens de réplication, testez la propagation des données, et analysez les journaux (logs). C'est ainsi que l'on construit des plateformes incassables.</p>
+            </section>
+            </article>
+        </div>
+    </main>
+</body>
+</html>

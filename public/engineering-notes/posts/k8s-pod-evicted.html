@@ -230,7 +230,7 @@
                 <p>Dozens, sometimes hundreds, of dead pods cluttering your namespace.</p>
                 <p>In this post, I will break down exactly what this error means, how to clean it up instantly, and most importantly, the <strong>Enterprise Best Practices</strong> to ensure it never happens to your production cluster again.</p>
 
-                <h2>🔍 What is the "Eviction Graveyard"?</h2>
+                <h2> What is the "Eviction Graveyard"?</h2>
                 <p>When a pod shows as <code>Evicted</code>, it means the Kubernetes Worker Node completely ran out of a critical resource—usually RAM or Hard Drive space (<code>ephemeral-storage</code>).</p>
                 <p>To prevent the entire Linux server from crashing, the Kubelet goes into <strong>"survival mode"</strong> and aggressively assassinates the pods consuming the most resources.</p>
                 
@@ -238,7 +238,7 @@
                 
                 <p>If you see <code>ContainerStatusUnknown</code>, it means the Worker Node was struggling so badly (likely at 100% CPU or 100% Disk IO) that it temporarily lost communication with the Kubernetes Control Plane.</p>
 
-                <h2>🧯 The Immediate Fix (Putting out the fire)</h2>
+                <h2> The Immediate Fix (Putting out the fire)</h2>
                 <p>Before we fix the root cause, let's clean up your terminal and free up the node.</p>
 
                 <h3>1. Clean up the Graveyard</h3>
@@ -253,11 +253,11 @@ sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
 # If using standard Docker:
 docker image prune -a</code></pre>
 
-                <h2>🏗️ The Root Cause: Ephemeral-Storage</h2>
+                <h2> The Root Cause: Ephemeral-Storage</h2>
                 <p>In my case, the issue was tied to <strong>AI Document Processing microservices</strong>.</p>
                 <p>When your application downloads large PDFs or images, processes them, and saves temp files to the local Linux container (<code>/tmp</code>), it consumes <code>ephemeral-storage</code>. If the app doesn't delete those files after processing, the pod bloats until it consumes the node's entire hard drive.</p>
 
-                <h2>🌟 Enterprise Best Practices (The Permanent Fix)</h2>
+                <h2> Enterprise Best Practices (The Permanent Fix)</h2>
                 <p>In a professional DevOps environment, you never want a single rogue microservice to fill up a server's hard drive and take down neighboring applications. Here is the two-step best practice to secure your cluster.</p>
 
                 <h3>1. The DevOps Fix: Enforce Resource Limits</h3>
@@ -300,7 +300,7 @@ docker image prune -a</code></pre>
                 <p>Des dizaines, parfois des centaines, de pods morts encombrent votre namespace.</p>
                 <p>Dans cet article, je vais vous expliquer exactement ce que signifie cette erreur, comment la nettoyer instantanément, et surtout, les <strong>Meilleures Pratiques d'Entreprise</strong> pour s'assurer que cela ne se produise plus jamais sur votre cluster de production.</p>
 
-                <h2>🔍 Qu'est-ce que le « Cimetière d'Évictions » ?</h2>
+                <h2> Qu'est-ce que le « Cimetière d'Évictions » ?</h2>
                 <p>Lorsqu'un pod affiche le statut <code>Evicted</code> (Évincé), cela signifie que le nœud de travail Kubernetes est complètement à court d'une ressource critique, généralement de la RAM ou de l'espace disque (<code>ephemeral-storage</code>).</p>
                 <p>Pour éviter que le serveur Linux entier ne plante, le Kubelet passe en <strong>« mode survie »</strong> et assassine agressivement les pods qui consomment le plus de ressources.</p>
                 
@@ -308,7 +308,7 @@ docker image prune -a</code></pre>
                 
                 <p>Si vous voyez <code>ContainerStatusUnknown</code>, cela signifie que le nœud de travail était tellement en difficulté (probablement à 100 % de CPU ou 100 % d'E/S disque) qu'il a temporairement perdu la communication avec le Control Plane de Kubernetes.</p>
 
-                <h2>🧯 La Correction Immédiate (Éteindre l'incendie)</h2>
+                <h2> La Correction Immédiate (Éteindre l'incendie)</h2>
                 <p>Avant de corriger la cause fondamentale, nettoyons votre terminal et soulageons le nœud.</p>
 
                 <h3>1. Nettoyer le Cimetière</h3>
@@ -323,11 +323,11 @@ sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
 # Si vous utilisez Docker standard :
 docker image prune -a</code></pre>
 
-                <h2>🏗️ La Cause Profonde : Stockage Éphémère (ephemeral-storage)</h2>
+                <h2> La Cause Profonde : Stockage Éphémère (ephemeral-storage)</h2>
                 <p>Dans mon cas, le problème était lié aux <strong>microservices de traitement de documents par IA</strong>.</p>
                 <p>Lorsque votre application télécharge de gros PDF ou images, les traite et enregistre des fichiers temporaires dans le conteneur Linux local (<code>/tmp</code>), elle consomme du <code>ephemeral-storage</code>. Si l'application ne supprime pas ces fichiers après traitement, le pod gonfle jusqu'à consommer tout le disque dur du nœud.</p>
 
-                <h2>🌟 Meilleures Pratiques d'Entreprise (La Solution Permanente)</h2>
+                <h2> Meilleures Pratiques d'Entreprise (La Solution Permanente)</h2>
                 <p>Dans un environnement DevOps professionnel, vous ne voulez jamais qu'un seul microservice malveillant remplisse le disque dur d'un serveur et fasse tomber les applications voisines. Voici la meilleure pratique en deux étapes pour sécuriser votre cluster.</p>
 
                 <h3>1. La Solution DevOps : Appliquer les Limites de Ressources</h3>

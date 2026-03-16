@@ -216,7 +216,7 @@
         <!-- ENGLISH VERSION -->
         <div lang="en">
             <header>
-                <h1>🕵️‍♂️ Decoding Kubernetes: When CrashLoopBackOff Turns into an "Error" State</h1>
+                <h1> Decoding Kubernetes: When CrashLoopBackOff Turns into an "Error" State</h1>
                 <p class="subtitle">A senior engineer's guide to troubleshooting pods with 1/2 ready containers.</p>
             </header>
             <article>
@@ -230,7 +230,7 @@
 
                 <p>Here is how I approached troubleshooting this like a Senior DevOps Engineer, and how you can fix it in your own clusters.</p>
 
-                <h2>🔍 Step 1: Understanding the "1/2" State</h2>
+                <h2> Step 1: Understanding the "1/2" State</h2>
                 <p>The biggest clue here isn't the word "Error"—it's the <strong>1/2</strong>.</p>
                 <p>This tells us that there are two containers defined inside this single pod. One of the containers successfully started and is perfectly healthy (the 1), but the second container is the one crashing and causing the <code>Error</code> / <code>CrashLoopBackOff</code> loop.</p>
                 <p>In modern Kubernetes architectures, running two containers in a pod usually means one of two things:</p>
@@ -239,7 +239,7 @@
                     <li><strong>A Sidecar Container</strong>: A helper container (like a database proxy, a logging agent, or an Istio/Linkerd mesh proxy) running alongside your main application.</li>
                 </ul>
 
-                <h2>🛠️ Step 2: The Senior Engineer's Debugging Workflow</h2>
+                <h2> Step 2: The Senior Engineer's Debugging Workflow</h2>
                 <p>When faced with this, you shouldn't just guess or blindly restart the deployment. You need to ask Kubernetes for the evidence.</p>
 
                 <h3>1. Identify the Crashing Container</h3>
@@ -261,7 +261,7 @@
                 <p><em>(Pro-Tip: If the container crashed so fast that the current logs are empty, append the <code>--previous</code> flag to see the logs from the previous failed attempt!)</em></p>
 <pre><code>kubectl logs my-microservice-deployment-c6f985468-gmlc2 -c &lt;name-of-crashing-container&gt; --previous</code></pre>
 
-                <h2>💡 Common Causes and Fixes</h2>
+                <h2> Common Causes and Fixes</h2>
                 <p>Based on the logs and the Exit Code, here is how you resolve the most common culprits behind the <code>1/2</code> Error state:</p>
 
                 <h3>Scenario A: The Sidecar Proxy is Failing (Network Issue)</h3>
@@ -276,7 +276,7 @@
                 <p>Sometimes the app is actually running fine, but it takes 60 seconds to boot up. If your Kubernetes <code>livenessProbe</code> is configured to check the app after only 10 seconds, Kubernetes assumes the app is broken and kills it, triggering the <code>Error</code> and <code>CrashLoopBackOff</code>.</p>
                 <p><strong>The Fix:</strong> Increase the <code>initialDelaySeconds</code> in your deployment YAML, or better yet, use a <code>startupProbe</code> (designed specifically for slow-starting legacy applications).</p>
 
-                <h2>🎯 Conclusion</h2>
+                <h2> Conclusion</h2>
                 <p>A <code>CrashLoopBackOff</code> accompanied by an <code>Error</code> state is Kubernetes working exactly as designed—it is protecting the cluster from a faulty process. By systematically breaking down the pod using <code>kubectl describe</code> and isolating the container logs, you can quickly move past the scary status messages and directly address the root cause.</p>
             </article>
         </div>
@@ -284,7 +284,7 @@
         <!-- FRENCH VERSION -->
         <div lang="fr">
             <header>
-                <h1>🕵️‍♂️ Décoder Kubernetes : Quand un CrashLoopBackOff devient un état "Error"</h1>
+                <h1> Décoder Kubernetes : Quand un CrashLoopBackOff devient un état "Error"</h1>
                 <p class="subtitle">Le guide d'un ingénieur senior pour dépanner les pods avec des conteneurs 1/2 prêts.</p>
             </header>
             <article>
@@ -298,7 +298,7 @@
 
                 <p>Voici comment j'ai abordé le dépannage de ce problème en tant qu'ingénieur DevOps Senior, et comment vous pouvez le résoudre dans vos propres clusters.</p>
 
-                <h2>🔍 Étape 1 : Comprendre l'état "1/2"</h2>
+                <h2> Étape 1 : Comprendre l'état "1/2"</h2>
                 <p>Le plus grand indice ici n'est pas le mot "Error"—c'est le <strong>1/2</strong>.</p>
                 <p>Cela nous indique qu'il y a deux conteneurs définis à l'intérieur de ce même pod. L'un des conteneurs a démarré avec succès et est parfaitement sain (le 1), mais le second conteneur est celui qui plante et provoque la boucle <code>Error</code> / <code>CrashLoopBackOff</code>.</p>
                 <p>Dans les architectures Kubernetes modernes, exécuter deux conteneurs dans un pod signifie généralement l'une de ces deux choses :</p>
@@ -307,7 +307,7 @@
                     <li><strong>Un Sidecar Container</strong> : Un conteneur de support (comme un proxy de base de données, un agent de journalisation ou un proxy de service mesh Istio/Linkerd) exécuté aux côtés de votre application principale.</li>
                 </ul>
 
-                <h2>🛠️ Étape 2 : Le Workflow de Débogage de l'Ingénieur Senior</h2>
+                <h2> Étape 2 : Le Workflow de Débogage de l'Ingénieur Senior</h2>
                 <p>Confronté à cela, vous ne devriez pas vous contenter de deviner ou de redémarrer aveuglément le déploiement. Vous devez demander à Kubernetes des preuves basées sur des faits.</p>
 
                 <h3>1. Identifier le Conteneur en Échec</h3>
@@ -329,7 +329,7 @@
                 <p><em>(Astuce de Pro : Si le conteneur a planté si vite que les journaux actuels sont vides, ajoutez l'option <code>--previous</code> pour voir les journaux de la tentative de plantage précédente !)</em></p>
 <pre><code>kubectl logs my-microservice-deployment-c6f985468-gmlc2 -c &lt;nom-du-conteneur-en-echec&gt; --previous</code></pre>
 
-                <h2>💡 Causes Communes et Solutions</h2>
+                <h2> Causes Communes et Solutions</h2>
                 <p>Sur la base des logs et du code de sortie, voici comment résoudre les causes les plus probables de l'état d'erreur <code>1/2</code> :</p>
 
                 <h3>Scénario A : Le Proxy Sidecar Échoue (Problème Réseau)</h3>
@@ -344,7 +344,7 @@
                 <p>Parfois l'application fonctionne parfaitement bien, mais elle met 60 secondes à démarrer. Si votre <code>livenessProbe</code> Kubernetes est configurée pour vérifier l'application après seulement 10 secondes, Kubernetes suppose que l'application est en panne et la tue, déclenchant les statuts <code>Error</code> et <code>CrashLoopBackOff</code>.</p>
                 <p><strong>La Solution :</strong> Augmentez la valeur <code>initialDelaySeconds</code> dans votre YAML de déploiement, ou mieux encore, utilisez une <code>startupProbe</code> (conçue spécifiquement pour les applications héritées/legacy ayant un démarrage lent).</p>
 
-                <h2>🎯 Conclusion</h2>
+                <h2> Conclusion</h2>
                 <p>Un <code>CrashLoopBackOff</code> accompagné d'un état <code>Error</code> indique que Kubernetes fonctionne exactement comme prévu : il protège le cluster contre un processus défectueux. En décomposant méthodiquement l'état du pod à l'aide de <code>kubectl describe</code> et en isolant les logs du conteneur en cause, vous pouvez rapidement outrepasser les messages d'état initiaux et vous attaquer directement à la source de l'erreur.</p>
             </article>
         </div>
