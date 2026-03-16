@@ -358,7 +358,7 @@ frontend:
 
         
         <section id="troubleshooting">
-            <h2>🚧 Trench Notes: Troubleshooting AWS Guardrails & Security Traps</h2>
+            <h2> Troubleshooting AWS Guardrails & Security Traps</h2>
             <p>Enterprise cloud deployments rarely survive first contact with the cloud provider's API without hitting security or quota guardrails. During this migration, I encountered and resolved several advanced AWS and Kubernetes roadblocks. Documenting these challenges highlights the realities of transitioning from bare-metal orchestration to managed cloud environments.</p>
 
             <h3>1. Bypassing Cloud Sandbox Quotas (EC2 FinOps)</h3>
@@ -421,7 +421,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="finops">
-            <h2>💰 FinOps & Cost Management: Embracing Ephemeral Infrastructure</h2>
+            <h2> FinOps & Cost Management: Embracing Ephemeral Infrastructure</h2>
             <p>Managed cloud environments possess immense capabilities, but they inherently carry substantial billing implications. The managed EKS Control Plane independently incurs roughly <strong>$73/month</strong>. Because I am currently operating on a strict $53 AWS promotional credit margin, leaving this cluster perpetually running would completely drain my budget within weeks.</p>
             <p><strong>This highlights the ultimate leverage of strict Infrastructure as Code.</strong> Because my entire environment is thoroughly codified and stateless, my cluster itself can act as ephemeral infrastructure. At the end of my technical sessions, I reduce my daily AWS burn rate back down to strictly <strong>$0.00</strong> by executing:</p>
 <pre><code class="language-bash">terraform destroy --auto-approve</code></pre>
@@ -433,7 +433,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="conclusion">
-            <h2>🎯 Conclusion</h2>
+            <h2> Conclusion</h2>
             <p>Migrating my workloads from on-premise localized orchestration into AWS EKS proves definitively that Kubernetes remains the ultimate computing equalizer. By layering Terraform for rock-solid deterministic infrastructure and Helm for agile application delivery, I successfully built a platform-agnostic enterprise pipeline.</p>
             <p>Whether I am deploying a rudimentary two-tier portfolio architecture or maintaining a massive 100-service AI processing platform, the fundamental pipeline remains utterly identical, aggressively automated, and infinitely scalable.</p>
         </section>
