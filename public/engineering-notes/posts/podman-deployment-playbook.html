@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Deployment Playbook: Podman 1.6.4 (Legacy Systems)</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #d84125;
+            --accent-hover: #b91c1c;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 800px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .nav-left a {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s;
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        header { padding: 48px 0 32px; border-bottom: 2px solid var(--border); margin-bottom: 40px; text-align: center; }
+        h1 {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .meta {
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Content Styling */
+        h2 { font-size: 26px; font-weight: 700; margin: 48px 0 24px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+        h3 { font-size: 20px; font-weight: 600; margin: 32px 0 16px; color: var(--text-main); }
+        p { margin-bottom: 24px; font-size: 17px; color: #4b5563; }
+        
+        /* Modern Pro Table */
+        .fast-fix-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); table-layout: fixed; }
+        .fast-fix-table th { background-color: #f3f4f6; color: var(--text-main); font-weight: 700; padding: 16px 20px; text-align: left; font-size: 15px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em;}
+        .fast-fix-table th:nth-child(1) { width: 30%; }
+        .fast-fix-table th:nth-child(2) { width: 30%; }
+        .fast-fix-table th:nth-child(3) { width: 40%; }
+        .fast-fix-table td { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15px; vertical-align: top; color: #4b5563; word-wrap: break-word; }
+        .fast-fix-table tr:last-child td { border-bottom: none; }
+        .fast-fix-table tr:nth-child(even) td { background-color: #fafafa; }
+        .error-tag { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-family: var(--font-mono); font-size: 13px; display: inline-block; margin-bottom: 8px;}
+        .solution-step { background: #ecfdf5; color: #065f46; padding: 4px 8px; border-radius: 6px; font-weight: 600; display: inline-block; margin-bottom: 8px;}
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            white-space: pre;
+            overflow-x: auto;
+            max-width: 100%;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .table-code-block code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        /* Lists */
+        ul { margin: 0 0 24px 24px; padding: 0; }
+        li { margin-bottom: 12px; font-size: 17px; color: #4b5563; }
+        
+        .alert { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 32px 0; font-size: 16px; color: #92400e; }
+        .alert-title { font-weight: 700; margin-bottom: 8px; display: block; }
+        
+        .expert-quote { padding: 24px; border-radius: 12px; font-style: italic; color: #374151; background-color: #f8fafc; border-left: 4px solid var(--accent); margin-bottom: 16px;}
+        .expert-quote strong { font-weight: 700; font-style: normal; display: block; margin-bottom: 4px; color: var(--text-main);}
+
+        @media (max-width: 768px) {
+            nav, main { margin: 16px; width: auto; }
+            main { padding: 0 20px 60px; }
+            h1 { font-size: 32px; }
+            .fast-fix-table th, .fast-fix-table td { padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a href="../archive.html" aria-label="Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/">Home</a>
+            <a href="../archive.html">Notes</a>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+            <header>
+                <div class="meta">DEVOPS PLAYBOOK &middot; PODMAN &middot; LEGACY SYSTEMS</div>
+                <h1> Deployment Playbook: Podman 1.6.4</h1>
+            </header>
+
+            <h2>Phase 1: Pre-Deployment (The "Must-Haves")</h2>
+            <p>Before running the script, perform these <strong>3 steps</strong>. They prevent 90% of the errors.</p>
+            
+            <ul>
+                <li>
+                    <strong>Check Podman Version:</strong><br>
+                    <code>podman version</code> (Ensure it is 1.6.x).
+                </li>
+                <li>
+                    <strong>Fix the Security Policy (Fixes "Registry Policy" Error):</strong>
+<pre><code>mkdir -p /etc/containers
+echo '{"default": [{"type": "insecureAcceptAnything"}]}' > /etc/containers/policy.json</code></pre>
+                </li>
+                <li>
+                    <strong>Mandatory Sudo:</strong><br>
+                    In Podman 1.6.4, rootless mode is unstable. Tell the client: <em>"To ensure kernel-level stability for Java threading, we must execute as a privileged user."</em>
+                </li>
+            </ul>
+
+            <h2>Phase 2: The "Error vs. Solution" Fast-Fix Table</h2>
+            <table class="fast-fix-table">
+                <thead>
+                    <tr>
+                        <th>If you see this Error message...</th>
+                        <th>Why it happened...</th>
+                        <th>The FAST Fix...</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="error-tag">kernel does not support overlay fs or d_type support</span></td>
+                        <td>The hard drive (XFS) is too old for the overlay driver.</td>
+                        <td>
+                            <span class="solution-step">Switch to VFS Driver:</span><br>
+                            1. <code>vi /etc/containers/storage.conf</code><br>
+                            2. Set <code>driver = "vfs"</code><br>
+                            3. <code>rm -rf /var/lib/containers/storage/*</code>
+                        </td>
+                    </tr>
+                    <tr>
+
+                        <td><span class="error-tag">pthread_create failed (EPERM)</span> or <span class="error-tag">Insufficient memory for JRE</span></td>
+                        <td>The Seccomp security filter is blocking Java threads.</td>
+                        <td>
+                            <span class="solution-step">Add Security Flag:</span><br>
+                            Add <code>--security-opt seccomp=unconfined</code> to the <code>podman run</code> command.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="error-tag">Permission Denied (inside the logs)</span></td>
+                        <td>SELinux is blocking the folder mounts.</td>
+                        <td>
+                            <span class="solution-step">Relax SELinux:</span><br>
+                            1. Run <code>setenforce 0</code><br>
+                            2. Ensure volume mounts have the <code>:Z</code> flag.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="error-tag">Could not resolve host: mirrorlist.centos.org</span></td>
+                        <td>CentOS 7 is End-of-Life. Official repos are dead.</td>
+                        <td>
+                            <span class="solution-step">Switch to Vault:</span><br>
+                            Use the following <code>sed</code> commands to point <code>/etc/yum.repos.d/</code> to <code>vault.centos.org</code>:
+<div class="table-code-block"><code class="block-code">sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*</code></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Phase 3: Final Validation Commands</h2>
+            <p>After the script finishes, run these to prove the "Health" of the deployment to the client:</p>
+
+            <ul>
+                <li>
+                    <strong>Check if Container is Running:</strong><br>
+                    <code>podman ps</code>
+                </li>
+                <li>
+                    <strong>Check App Logs (The most important part):</strong><br>
+                    <code>podman logs --tail 50 skyidgetparam</code><br>
+                    <em>(Look for the Spring Boot "Started" message. If you see it, you won!)</em>
+                </li>
+                <li>
+                    <strong>Check if Port is Listening:</strong><br>
+                    <code>netstat -tulnp | grep 8056</code>
+                </li>
+                <li>
+                    <strong>Check Folder Mounting:</strong><br>
+                    <code>podman exec skyidgetparam ls /app/configs</code>
+                </li>
+            </ul>
+
+            <h2>Phase 4: Expert "Closing Statements" for the Client</h2>
+            <div class="expert-quote">
+                <strong>On Security:</strong>
+                "We disabled Seccomp specifically for the Java runtime to allow modern high-performance threading on this legacy kernel."
+            </div>
+            <div class="expert-quote">
+                <strong>On Storage:</strong>
+                "We verified the XFS filesystem driver. If your production environment uses ftype=1, we can switch back to Overlay for better performance; otherwise, VFS ensures 100% reliability."
+            </div>
+            <div class="expert-quote">
+                <strong>On sudo:</strong>
+                "Podman 1.6.4 requires privileged execution to correctly manage SELinux labels (:Z) on host volumes."
+            </div>
+
+        </article>
+    </main>
+</body>
+</html>

@@ -8,14 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const path = (location.pathname || '').replace(/\\/g, '/').toLowerCase();
       const isHome = !!document.querySelector('.hero') || path === '/' || path === '' || path.endsWith('/index.html');
 
-      // Respect stored preference first, otherwise default homepage->dark
+      // Respect stored preference first, otherwise default homepage->light
       const saved = localStorage.getItem('theme'); // 'light' | 'dark' | null
       if (saved === 'dark' || saved === 'light') {
         if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
         else document.documentElement.removeAttribute('data-theme');
       } else {
-        if (isHome) document.documentElement.setAttribute('data-theme', 'dark');
-        else document.documentElement.removeAttribute('data-theme');
+        document.documentElement.removeAttribute('data-theme');
       }
       // cleanup any stale toggle element (we'll create a fresh control below)
       const existing = document.getElementById('themeToggle');
