@@ -140,32 +140,61 @@
         }
 
         /* Code Blocks */
-        pre { 
-            background: var(--code-bg); 
-            padding: 20px; 
-            border-radius: 12px; 
-            overflow-x: auto; 
-            margin: 32px 0; 
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        pre code { 
-            background: transparent; 
-            color: var(--code-text); 
-            padding: 0; 
-            border: none; 
-            font-size: 14px; 
-            font-family: var(--font-mono);
-            line-height: 1.5;
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
-        code { 
-            background: #f1f5f9; 
-            color: #0f172a; 
-            padding: 3px 6px; 
-            border-radius: 6px; 
-            font-size: 14px; 
+        pre code, .table-code-block code {
             font-family: var(--font-mono);
-            border: 1px solid #e2e8f0; 
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
         }
 
         @media (max-width: 768px) {
@@ -237,6 +266,7 @@
             <p>A junior engineer builds infrastructure specifically for the workload immediately in front of them, usually by relying on "ClickOps" in the AWS Management Console. A senior engineer abstracts the infrastructure entirely through standardized code.</p>
             <p>To guarantee that this environment remains 100% reproducible and state-managed, I modularized the AWS infrastructure utilizing Terraform. My project structure adopts best-practices for logical separation:</p>
 
+<div class="code-header">Bash</div>
 <pre><code>eks-infrastructure/
 ├── providers.tf      # AWS provider and Terraform backend config
 ├── variables.tf      # Dynamic variables for reusability
@@ -245,6 +275,7 @@
 
             <h3>1. Variables.tf (Making it Dynamic)</h3>
             <p>By defining explicit variables, different modular environments (e.g., staging vs. production) can be instantiated instantly.</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-hcl">variable "region" {
   description = "AWS Region"
   type        = string
@@ -259,6 +290,7 @@ variable "cluster_name" {
 
             <h3>2. vpc.tf (The Network Foundation)</h3>
             <p>A resilient EKS deployment requires a robust network layer. I provisioned a custom Virtual Private Cloud (VPC) implementing public and private subnets, ensuring that the worker nodes sit securely behind a NAT Gateway—mitigating exposure to the public internet.</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-hcl">module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
@@ -277,6 +309,7 @@ variable "cluster_name" {
 
             <h3>3. eks.tf (The Compute Layer)</h3>
             <p>Compute cost is the primary bottleneck for cloud projects. I leveraged AWS Spot Instances for the underlying worker nodes to drastically slash compute costs without sacrificing application performance or reliability.</p>     
+<div class="code-header">Terminal</div>
 <pre><code class="language-hcl">module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -304,6 +337,7 @@ variable "cluster_name" {
         <section id="phase-2-provisioning">
             <h2> Phase 2: Provisioning the Cluster</h2>
             <p>With infrastructure treated purely as software, orchestrating the entire AWS footprint requires merely three standard operations.</p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash"># Initialize Terraform backend and download AWS Provider modules
 terraform init
 
@@ -313,6 +347,7 @@ terraform plan
 # Provision the VPC, NAT Gateways, and EKS Control Plane mapping
 terraform apply --auto-approve</code></pre>
             <p>Once Terraform execution concludes successfully (typically around 15 minutes for the EKS Control Plane), I dynamically update my local configuration to context switch into the newly provisioned Cloud cluster:</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-bash">aws eks update-kubeconfig --region eu-west-3 --name portfolio-production-cluster</code></pre>
         </section>
 
@@ -321,12 +356,14 @@ terraform apply --auto-approve</code></pre>
             <p>With the physical and virtual control plane online, workload deployment commenced utilizing a Helm Umbrella Chart.</p>
             <p>However, migrating to an AWS-backed cloud environment introduced a specific networking challenge. Locally within RKE2, I resolved ingress traffic by setting my service type to <code>NodePort</code>. In AWS, traffic hitting random high-numbered NodePorts is automatically dropped by default EC2 Security Groups.</p>
             <p>The elegant cloud-native solution involved a simple declarative modification to my <code>values.yaml</code>, specifically requesting an integrated cloud Load Balancer instead constraints:</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-yaml"># values.yaml
 frontend:
   service:
     type: LoadBalancer
     port: 80</code></pre>
             <p>Following this single architectural modification, the unified frontend and backend deployment rolled out instantly:</p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">helm install portfolio-app ./helm-portfolio-chart -n production --create-namespace</code></pre>
             <p>The native AWS Cloud Controller seamlessly intercepts the <code>LoadBalancer</code> specification and automatically provisions a physical <strong>AWS Classic Load Balancer (ELB)</strong>, mapping network traffic natively down into the appropriate Kubernetes pod ingress paths.</p>
         </section>
@@ -364,7 +401,8 @@ frontend:
             <h3>1. Bypassing Cloud Sandbox Quotas (EC2 FinOps)</h3>
             <p><strong>The Challenge:</strong> During the initial terraform apply, the EKS Managed Node Group creation failed with an <code>AsgInstanceLaunchFailures</code> error, stating the instance type was not eligible for the Free Tier. Because I was operating within a strict AWS promotional credit sandbox, AWS instituted hard guardrails against provisioning standard <code>t3.medium</code> compute nodes.</p>
             <p><strong>The Fix:</strong> Instead of blindly guessing allowed instance types, I queried the AWS API directly using the CLI to discover exactly what the sandbox would allow:</p>
-            <pre><code class="language-bash">aws ec2 describe-instance-types --filters "Name=free-tier-eligible,Values=true" --query "InstanceTypes[*].InstanceType" --region eu-west-3</code></pre>
+            <div class="code-header">Terminal</div>
+<pre><code class="language-bash">aws ec2 describe-instance-types --filters "Name=free-tier-eligible,Values=true" --query "InstanceTypes[*].InstanceType" --region eu-west-3</code></pre>
 
             <div class="visual-container">
                 <img src="/engineering-notes/images/portfolio-EKS-Prod/qoutas.png" alt="Terminal showing the aws ec2 describe-instance-types command">
@@ -375,7 +413,8 @@ frontend:
 
             <h3>2. AuthN: The "Provide Credentials" Trap</h3>
             <p><strong>The Challenge:</strong> After successfully provisioning the cluster and updating my local kubeconfig to use my <code>eks-admin</code> profile, my kubectl client aggressively rejected my connection:</p>
-            <pre><code class="language-text">user@deploy:~/gitops-portfolio/eks-terraform$ kubectl get nodes
+            <div class="code-header">Bash</div>
+<pre><code class="language-text">user@deploy:~/gitops-portfolio/eks-terraform$ kubectl get nodes
 E0316 13:47:03.803824 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: the server has asked for the client to provide credentials"
 error: You must be logged in to the server (the server has asked for the client to provide credentials)</code></pre>
             <p><strong>The Root Cause & Fix:</strong> This is a classic Authentication (AuthN) failure. Even though my AWS CLI was generating valid STS tokens locally, the modern EKS Control Plane uses a strict Access Entries system. Because my <code>eks-admin</code> IAM user was not officially registered inside the EKS cluster's identity map, Kubernetes simply refused to acknowledge the token.</p>
@@ -389,7 +428,8 @@ error: You must be logged in to the server (the server has asked for the client 
 
             <h3>3. AuthZ: The 403 Forbidden RBAC Error</h3>
             <p><strong>The Challenge:</strong> Immediately after fixing the credentials issue, I ran <code>kubectl get nodes</code> again and hit the next layer of security:</p>
-            <pre><code class="language-text">Error from server (Forbidden): nodes is forbidden: User "arn:aws:iam::842675983309:user/eks-admin" cannot list resource "nodes" in API group "" at the cluster scope</code></pre>
+            <div class="code-header">Terminal</div>
+<pre><code class="language-text">Error from server (Forbidden): nodes is forbidden: User "arn:aws:iam::842675983309:user/eks-admin" cannot list resource "nodes" in API group "" at the cluster scope</code></pre>
             <p><strong>The Senior Fix:</strong> This is a textbook Authorization (AuthZ) error. EKS now recognized who I was (Authentication), but I had zero permissions inside the cluster (Authorization). Creating an Access Entry is not enough; it must be bound to a strict Role-Based Access Control (RBAC) policy.</p>
 
             <div class="visual-container">
@@ -424,6 +464,7 @@ error: You must be logged in to the server (the server has asked for the client 
             <h2> FinOps & Cost Management: Embracing Ephemeral Infrastructure</h2>
             <p>Managed cloud environments possess immense capabilities, but they inherently carry substantial billing implications. The managed EKS Control Plane independently incurs roughly <strong>$73/month</strong>. Because I am currently operating on a strict $53 AWS promotional credit margin, leaving this cluster perpetually running would completely drain my budget within weeks.</p>
             <p><strong>This highlights the ultimate leverage of strict Infrastructure as Code.</strong> Because my entire environment is thoroughly codified and stateless, my cluster itself can act as ephemeral infrastructure. At the end of my technical sessions, I reduce my daily AWS burn rate back down to strictly <strong>$0.00</strong> by executing:</p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">terraform destroy --auto-approve</code></pre>
 <div class="visual-container">
     <img src="/engineering-notes/images/portfolio-EKS-Prod/destroy.png" alt="Terminal showing terraform destroy output">
@@ -465,6 +506,7 @@ error: You must be logged in to the server (the server has asked for the client 
             <p>Un ingénieur junior construit une infrastructure spécifiquement pour la charge de travail se trouvant immédiatement devant lui, s'appuyant souvent sur le "ClickOps" dans la console de gestion AWS. Un ingénieur senior abstrait entièrement l'infrastructure grâce à du code standardisé.</p>
             <p>Afin de garantir que cet environnement reste 100 % reproductible et géré par état, j'ai modularisé l'infrastructure AWS à l'aide de Terraform. La structure de mon projet adopte les meilleures pratiques en matière de séparation logique :</p>
 
+<div class="code-header">Terminal</div>
 <pre><code>eks-infrastructure/
 ├── providers.tf      # Configuration du fournisseur AWS et du backend Terraform
 ├── variables.tf      # Variables dynamiques pour la réutilisabilité
@@ -473,6 +515,7 @@ error: You must be logged in to the server (the server has asked for the client 
 
             <h3>1. Variables.tf (Le rendre Dynamique)</h3>
             <p>En définissant des variables explicites, différents environnements modulaires (par ex., pré-production vs. production) peuvent être instanciés instantanément.</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-hcl">variable "region" {
   description = "Région AWS"
   type        = string
@@ -487,6 +530,7 @@ variable "cluster_name" {
 
             <h3>2. vpc.tf (La Fondation Réseau)</h3>
             <p>Un déploiement EKS résilient nécessite une couche réseau solide. J'ai provisionné un Réseau Privé Virtuel (VPC) personnalisé implémentant des sous-réseaux publics et privés, garantissant que les nœuds de travail se trouvent en toute sécurité derrière une passerelle NAT — limitant ainsi l'exposition à l'internet public.</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-hcl">module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
@@ -505,6 +549,7 @@ variable "cluster_name" {
 
             <h3>3. eks.tf (La Couche de Calcul)</h3>
             <p>Le coût du calcul est le principal goulot d'étranglement des projets cloud. J'ai utilisé des Instances Spot AWS pour les nœuds de travail sous-jacents afin de réduire considérablement les coûts de calcul sans sacrifier les performances ou la fiabilité de l'application.</p>     
+<div class="code-header">Terminal</div>
 <pre><code class="language-hcl">module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -532,6 +577,7 @@ variable "cluster_name" {
         <section id="phase-2-provisioning">
             <h2> Phase 2: Provisionnement du Cluster</h2>
             <p>L'infrastructure étant traitée purement comme du logiciel, l'orchestration de l'ensemble de l'empreinte AWS ne requiert que trois opérations standard.</p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash"># Initialiser le backend Terraform et télécharger les modules du Fournisseur AWS
 terraform init
 
@@ -541,6 +587,7 @@ terraform plan
 # Provisionner le VPC, les Passerelles NAT et le mapping du Plan de Contrôle EKS
 terraform apply --auto-approve</code></pre>
             <p>Une fois l'exécution de Terraform terminée avec succès (généralement environ 15 minutes pour le plan de contrôle EKS), je mets dynamiquement à jour ma configuration locale pour basculer vers le nouveau cluster Cloud :</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-bash">aws eks update-kubeconfig --region eu-west-3 --name portfolio-production-cluster</code></pre>
         </section>
 
@@ -549,12 +596,14 @@ terraform apply --auto-approve</code></pre>
             <p>Le plan de contrôle physique et virtuel étant en ligne, le déploiement des charges de travail a commencé à l'aide d'un Helm Umbrella Chart.</p>
             <p>Cependant, la migration vers un environnement cloud basé sur AWS a introduit un défi de réseau spécifique. Localement au sein de RKE2, je gérais le trafic d'entrée en définissant mon type de service sur <code>NodePort</code>. Dans AWS, le trafic arrivant sur des NodePorts élevés aléatoires est automatiquement rejeté par les groupes de sécurité EC2 par défaut.</p>
             <p>La solution élégante Cloud-native consistait en une simple modification déclarative de mon <code>values.yaml</code>, demandant spécifiquement un équilibreur de charge cloud intégré au lieu des contraintes précédentes :</p>
+<div class="code-header">Terminal</div>
 <pre><code class="language-yaml"># values.yaml
 frontend:
   service:
     type: LoadBalancer
     port: 80</code></pre>
             <p>À la suite de cette unique modification architecturale, le déploiement unifié du frontend et du backend s'est déroulé instantanément :</p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">helm install portfolio-app ./helm-portfolio-chart -n production --create-namespace</code></pre>
             <p>Le contrôleur natif d'AWS détecte de manière transparente la spécification <code>LoadBalancer</code> et provisionne automatiquement un physique <strong>AWS Classic Load Balancer (ELB)</strong>, acheminant naturellement le trafic réseau vers les chemins d'entrée des pods Kubernetes appropriés.</p>
         </section>
@@ -587,7 +636,8 @@ frontend:
             <h3>1. Contourner les Quotas des Sandboxes Cloud (FinOps EC2)</h3>
             <p><strong>Le Défi :</strong> Lors de l'exécution initiale du <code>terraform apply</code>, la création du Groupe de Nœuds Managés EKS a échoué avec une erreur <code>AsgInstanceLaunchFailures</code>, indiquant que le type d'instance n'était pas éligible pour l'Offre Gratuite (Free Tier). Comme j'opérais dans le cadre strict d'un crédit promotionnel AWS (sandbox), AWS imposait des garde-fous stricts contre le provisionnement de nœuds standard <code>t3.medium</code>.</p>
             <p><strong>La Solution :</strong> Au lieu de deviner aveuglément les types d'instances autorisés, j'ai directement interrogé l'API AWS en utilisant la CLI pour découvrir exactement ce que la sandbox permettait :</p>
-            <pre><code class="language-bash">aws ec2 describe-instance-types --filters "Name=free-tier-eligible,Values=true" --query "InstanceTypes[*].InstanceType" --region eu-west-3</code></pre>
+            <div class="code-header">Terminal</div>
+<pre><code class="language-bash">aws ec2 describe-instance-types --filters "Name=free-tier-eligible,Values=true" --query "InstanceTypes[*].InstanceType" --region eu-west-3</code></pre>
 
             <div class="visual-container">
                 <img src="/engineering-notes/images/portfolio-EKS-Prod/qoutas.png" alt="Terminal affichant la commande aws ec2 describe-instance-types">
@@ -598,7 +648,8 @@ frontend:
 
             <h3>2. AuthN : Le Piège du "Provide Credentials"</h3>
             <p><strong>Le Défi :</strong> Après avoir provisionné le cluster avec succès et mis à jour mon kubeconfig local pour utiliser mon profil <code>eks-admin</code>, mon client kubectl a catégoriquement rejeté ma connexion :</p>
-            <pre><code class="language-text">user@deploy:~/gitops-portfolio/eks-terraform$ kubectl get nodes
+            <div class="code-header">Bash</div>
+<pre><code class="language-text">user@deploy:~/gitops-portfolio/eks-terraform$ kubectl get nodes
 E0316 13:47:03.803824 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: the server has asked for the client to provide credentials"
 error: You must be logged in to the server (the server has asked for the client to provide credentials)</code></pre>
             <p><strong>La Cause Racine & La Solution :</strong> Il s'agit d'un échec classique d'Authentification (AuthN). Bien que ma CLI AWS générait des jetons STS valides localement, le Plan de Contrôle (Control Plane) moderne d'EKS utilise un système strict d'Access Entries. Étant donné que mon utilisateur IAM <code>eks-admin</code> n'était pas officiellement enregistré dans la carte d'identités du cluster EKS, Kubernetes refusait tout simplement de reconnaître le jeton.</p>
@@ -612,7 +663,8 @@ error: You must be logged in to the server (the server has asked for the client 
 
             <h3>3. AuthZ : L'Erreur RBAC 403 Forbidden</h3>
             <p><strong>Le Défi :</strong> Immédiatement après avoir résolu le problème d'identifiants, j'ai relancé <code>kubectl get nodes</code> et me suis heurté à la couche de sécurité suivante :</p>
-            <pre><code class="language-text">Error from server (Forbidden): nodes is forbidden: User "arn:aws:iam::842675983309:user/eks-admin" cannot list resource "nodes" in API group "" at the cluster scope</code></pre>
+            <div class="code-header">Terminal</div>
+<pre><code class="language-text">Error from server (Forbidden): nodes is forbidden: User "arn:aws:iam::842675983309:user/eks-admin" cannot list resource "nodes" in API group "" at the cluster scope</code></pre>
             <p><strong>La Solution Expert :</strong> C'est une erreur d'Autorisation (AuthZ) d'école. EKS reconnaissait désormais qui j'étais (Authentification), mais je n'avais aucune permission à l'intérieur du cluster (Autorisation). Créer une Access Entry n'est pas suffisant ; elle doit être liée à une politique stricte de contrôle d'accès basé sur les rôles (RBAC).</p>
 
             <div class="visual-container">
@@ -647,6 +699,7 @@ error: You must be logged in to the server (the server has asked for the client 
             <h2> FinOps & Gestion des Coûts : Adopter l'Infrastructure Éphémère</h2>
             <p>Les environnements cloud managés possèdent d'immenses capacités, mais ils portent inévitablement des conséquences financières substantielles. Le Plan de Contrôle managé d'EKS engendre à lui seul environ <strong>73 $/mois</strong>. Comme je fonctionne actuellement avec une stricte marge de crédit promotionnel AWS de 53 $, laisser ce cluster fonctionner de manière continue viderait complètement mon budget en quelques semaines.</p>
             <p><strong>Ceci souligne l'effet de levier ultime d'une Infrastructure en tant que Code stricte.</strong> Étant donné que mon environnement complet est rigoureusement codifié et sans état, mon cluster lui-même peut agir comme une infrastructure éphémère. À la fin de mes sessions techniques, je réduis mon taux de consommation quotidien AWS pour atteindre strictement <strong>0,00 $</strong> en exécutant :</p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">terraform destroy --auto-approve</code></pre>
 <div class="visual-container">
     <img src="/engineering-notes/images/portfolio-EKS-Prod/destroy.png" alt="Terminal affichant le résultat de terraform destroy">

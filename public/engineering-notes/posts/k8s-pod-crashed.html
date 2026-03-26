@@ -141,32 +141,61 @@
         }
 
         /* Code Blocks */
-        pre { 
-            background: var(--code-bg); 
-            padding: 20px; 
-            border-radius: 12px; 
-            overflow-x: auto; 
-            margin: 32px 0; 
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        pre code { 
-            background: transparent; 
-            color: var(--code-text); 
-            padding: 0; 
-            border: none; 
-            font-size: 14px; 
-            font-family: var(--font-mono);
-            line-height: 1.5;
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
-        code { 
-            background: #f1f5f9; 
-            color: #0f172a; 
-            padding: 3px 6px; 
-            border-radius: 6px; 
-            font-size: 14px; 
+        pre code, .table-code-block code {
             font-family: var(--font-mono);
-            border: 1px solid #e2e8f0; 
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
         }
 
         @media (max-width: 768px) {
@@ -244,6 +273,7 @@
 
                 <h3>1. Identify the Crashing Container</h3>
                 <p>First, we need to know the names of the two containers inside the pod. Run the describe command:</p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl describe pod my-microservice-deployment-c6f985468-gmlc2</code></pre>
                 <p>Scroll down to the <code>Containers:</code> section. You will see two containers listed. Look at their State. One will say <code>Running</code>, and the other will say <code>Waiting (Reason: CrashLoopBackOff)</code> or <code>Terminated (Reason: Error)</code>. Note the name of the failing container.</p>
 
@@ -257,8 +287,10 @@
 
                 <h3>3. Isolate the Logs</h3>
                 <p>Normally, <code>kubectl logs &lt;pod-name&gt;</code> shows the logs. But because there are two containers, Kubernetes might complain or only show the healthy one. You must specify the exact name of the crashing container you found in Step 1:</p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl logs my-microservice-deployment-c6f985468-gmlc2 -c &lt;name-of-crashing-container&gt;</code></pre>
                 <p><em>(Pro-Tip: If the container crashed so fast that the current logs are empty, append the <code>--previous</code> flag to see the logs from the previous failed attempt!)</em></p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl logs my-microservice-deployment-c6f985468-gmlc2 -c &lt;name-of-crashing-container&gt; --previous</code></pre>
 
                 <h2> Common Causes and Fixes</h2>
@@ -312,6 +344,7 @@
 
                 <h3>1. Identifier le Conteneur en Échec</h3>
                 <p>Tout d'abord, nous devons connaître les noms des deux conteneurs à l'intérieur du pod. Exécutez la commande describe :</p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl describe pod my-microservice-deployment-c6f985468-gmlc2</code></pre>
                 <p>Faites défiler jusqu'à la section <code>Containers:</code>. Vous verrez deux conteneurs listés. Regardez leur état (State). L'un dira <code>Running</code>, et l'autre dira <code>Waiting (Reason: CrashLoopBackOff)</code> ou <code>Terminated (Reason: Error)</code>. Notez le nom du conteneur qui échoue.</p>
 
@@ -325,8 +358,10 @@
 
                 <h3>3. Isoler les Journaux (Logs)</h3>
                 <p>Normalement, <code>kubectl logs &lt;pod-name&gt;</code> affiche les journaux. Mais parce qu'il y a deux conteneurs, Kubernetes pourrait refuser ou n'afficher que celui qui est sain. Vous devez spécifier le nom exact du conteneur qui plante, identifié à l'Étape 1 :</p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl logs my-microservice-deployment-c6f985468-gmlc2 -c &lt;nom-du-conteneur-en-echec&gt;</code></pre>
                 <p><em>(Astuce de Pro : Si le conteneur a planté si vite que les journaux actuels sont vides, ajoutez l'option <code>--previous</code> pour voir les journaux de la tentative de plantage précédente !)</em></p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl logs my-microservice-deployment-c6f985468-gmlc2 -c &lt;nom-du-conteneur-en-echec&gt; --previous</code></pre>
 
                 <h2> Causes Communes et Solutions</h2>

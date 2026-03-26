@@ -140,32 +140,61 @@
         }
 
         /* Code Blocks */
-        pre { 
-            background: var(--code-bg); 
-            padding: 20px; 
-            border-radius: 12px; 
-            overflow-x: auto; 
-            margin: 32px 0; 
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        pre code { 
-            background: transparent; 
-            color: var(--code-text); 
-            padding: 0; 
-            border: none; 
-            font-size: 14px; 
-            font-family: var(--font-mono);
-            line-height: 1.5;
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
-        code { 
-            background: #f1f5f9; 
-            color: #0f172a; 
-            padding: 3px 6px; 
-            border-radius: 6px; 
-            font-size: 14px; 
+        pre code, .table-code-block code {
             font-family: var(--font-mono);
-            border: 1px solid #e2e8f0; 
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
         }
 
         @media (max-width: 768px) {
@@ -244,6 +273,7 @@
                 <h3>2. The Storage Layer (Dynamic PVCs):</h3>
                 <p>If a Redis pod crashes, we cannot lose the data. Instead of using dangerous manual <code>hostPath</code> volumes, I implemented <code>volumeClaimTemplates</code> linked to our <code>local-path</code> StorageClass. This tells Kubernetes to dynamically provision 8GB Persistent Volumes and tightly bind them to specific pods.</p>
 
+<div class="code-header">YAML</div>
 <pre><code class="language-yaml">volumeClaimTemplates:
   - metadata:
       name: redis-data
@@ -260,6 +290,7 @@
                 <h3>The Deployment:</h3>
                 <p>With the architecture codified in a unified YAML manifest, provisioning the entire database infrastructure took a single command:</p>        
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl apply -f redis-ha-cluster.yaml -n redis</code></pre>
             </section>
 
@@ -271,6 +302,7 @@
                 <h3>Test 1: The Replication Status Check</h3>
                 <p>First, we need to ask the Redis Master if it actually sees its worker nodes. I execute directly into the Master pod and query the internal Redis metrics:</p>
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli info replication</code></pre>
 
                 <p><strong>What I look for:</strong></p>
@@ -281,6 +313,7 @@
 
                 <p>Next, I reverse the test. I check the Replica pod to ensure it has an active, healthy handshake with the Master:</p>
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli info replication</code></pre>
 
                 <div class="visual-container">
@@ -303,9 +336,11 @@
                 <p>Status checks are great, but the ultimate proof of a working cluster is testing the actual data flow. I simulate a backend application by writing data to the Master, and immediately querying the Slave to see if the data replicated across the Kubernetes network.</p>
 
                 <p><strong>Step A: Write to the Master</strong></p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli set mytest "Hello-Redis"</code></pre>
 
                 <p><strong>Step B: Read from the Slave</strong></p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli get mytest</code></pre>
 
                 <p><strong>Result:</strong> The slave instantly returns <code>"Hello-Redis"</code>. The async replication is working flawlessly.</p>
@@ -313,6 +348,7 @@
                 <h3>Test 3: Analyzing the Boot Logs</h3>
                 <p>Even if the cluster is replicating data, there might be hidden warnings (like permission issues or memory fragmentation warnings). I always audit the boot sequence of the Master:</p>
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl logs redis-master-0 -n redis</code></pre>
 
                 <p><strong>What I look for:</strong></p>
@@ -326,6 +362,7 @@
                 <p>Finally, because my developers need to access this cache from outside the cluster during their local development phase, I exposed the Master via a specific NodePort (<code>30903</code>).</p>
                 <p>To prove the routing works from an external machine, I ran a ping test from my local Windows terminal directly to the Kubernetes Worker Node IP:</p>
 
+<div class="code-header">YAML</div>
 <pre><code class="language-bash">redis-cli -h 192.168.1.81 -p 30903 ping</code></pre>
 
                 <p><strong>Result:</strong> It returns <code>PONG</code>. The Kubernetes Kube-Proxy is successfully routing external TCP traffic directly into the StatefulSet.</p>
@@ -370,6 +407,7 @@
                 <h3>2. La Couche de Stockage (PVC Dynamiques) :</h3>
                 <p>Dans l'éventualité où un pod Redis se crashe, nous ne pouvons pas perdre les données. Au lieu d'utiliser des volumes manuels dangereux comme <code>hostPath</code>, j'ai implémenté des <code>volumeClaimTemplates</code> liés à notre StorageClass <code>local-path</code>. Cela indique à Kubernetes de provisionner dynamiquement des Volumes Persistants de 8 Go et de les lier étroitement à des pods spécifiques.</p>
 
+<div class="code-header">YAML</div>
 <pre><code class="language-yaml">volumeClaimTemplates:
   - metadata:
       name: redis-data
@@ -386,6 +424,7 @@
                 <h3>Le Déploiement :</h3>
                 <p>L'architecture étant codifiée dans un manifeste YAML unifié, le provisionnement de l'ensemble de l'infrastructure de la base de données a nécessité une seule commande :</p>        
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl apply -f redis-ha-cluster.yaml -n redis</code></pre>
             </section>
 
@@ -397,6 +436,7 @@
                 <h3>Test 1 : La Vérification du Statut de Réplication</h3>
                 <p>Tout d'abord, nous devons demander au Maître Redis s'il voit réellement ses nœuds de travail. Je m'exécute directement dans le pod Maître et interroge les métriques internes de Redis :</p>
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli info replication</code></pre>
 
                 <p><strong>Ce que je recherche :</strong></p>
@@ -407,6 +447,7 @@
 
                 <p>Ensuite, j'inverse le test. Je vérifie le pod Réplica pour m'assurer qu'il dispose d'une connexion (handshake) active et saine avec le Maître :</p>
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli info replication</code></pre>
 
                 <div class="visual-container">
@@ -429,9 +470,11 @@
                 <p>Les vérifications de statut sont formidables, mais la preuve ultime d'un cluster fonctionnel réside dans le test du flux de données réel. Je simule une application backend en écrivant des données sur le Maître, et en interrogeant immédiatement l'Esclave pour m'assurer que les données ont bien été répliquées à travers le réseau Kubernetes.</p>
 
                 <p><strong>Étape A : Écrire sur le Maître</strong></p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-master-0 -n redis -- redis-cli set mytest "Hello-Redis"</code></pre>
 
                 <p><strong>Étape B : Lire depuis l'Esclave</strong></p>
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl exec -it redis-slave-0 -n redis -- redis-cli get mytest</code></pre>
 
                 <p><strong>Résultat :</strong> L'esclave renvoie instantanément <code>"Hello-Redis"</code>. La réplication asynchrone fonctionne parfaitement.</p>
@@ -439,6 +482,7 @@
                 <h3>Test 3 : L'Analyse des Journaux de Démarrage (Boot Logs)</h3>
                 <p>Même si le cluster réplique des données, il peut y avoir des avertissements cachés (comme des problèmes d'autorisation ou des alertes de fragmentation de mémoire). J'audit toujours la séquence de démarrage du Maître :</p>
 
+<div class="code-header">Bash</div>
 <pre><code class="language-bash">kubectl logs redis-master-0 -n redis</code></pre>
 
                 <p><strong>Ce que je recherche :</strong></p>
@@ -452,6 +496,7 @@
                 <p>Enfin, comme mes développeurs ont besoin d'accéder à ce cache depuis l'extérieur du cluster pendant leur phase de développement local, j'ai exposé le Maître via un NodePort spécifique (<code>30903</code>).</p>
                 <p>Pour prouver que le routage fonctionne depuis une machine externe, j'ai effectué un test de ping depuis mon terminal Windows local directement vers l'IP du nœud de travail (Worker Node) Kubernetes :</p>
 
+<div class="code-header">YAML</div>
 <pre><code class="language-bash">redis-cli -h 192.168.1.81 -p 30903 ping</code></pre>
 
                 <p><strong>Résultat :</strong> Il retourne <code>PONG</code>. Le Kubernetes Kube-Proxy achemine avec succès le trafic TCP externe directement dans le StatefulSet.</p>

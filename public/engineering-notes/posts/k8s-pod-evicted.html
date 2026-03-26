@@ -141,32 +141,61 @@
         }
 
         /* Code Blocks */
-        pre { 
-            background: var(--code-bg); 
-            padding: 20px; 
-            border-radius: 12px; 
-            overflow-x: auto; 
-            margin: 32px 0; 
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        pre code { 
-            background: transparent; 
-            color: var(--code-text); 
-            padding: 0; 
-            border: none; 
-            font-size: 14px; 
-            font-family: var(--font-mono);
-            line-height: 1.5;
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
-        code { 
-            background: #f1f5f9; 
-            color: #0f172a; 
-            padding: 3px 6px; 
-            border-radius: 6px; 
-            font-size: 14px; 
+        pre code, .table-code-block code {
             font-family: var(--font-mono);
-            border: 1px solid #e2e8f0; 
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
         }
 
         @media (max-width: 768px) {
@@ -243,10 +272,12 @@
 
                 <h3>1. Clean up the Graveyard</h3>
                 <p>Those Evicted pods are completely dead, but they are cluttering your view. You can instantly wipe all failed pods in your namespace with this command:</p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl delete pods --field-selector status.phase=Failed -n &lt;your-namespace&gt;</code></pre>
 
                 <h3>2. Free up the Node's Disk Space</h3>
                 <p>Usually, this happens because local Docker/Containerd images and temporary files have filled up the node's disk. SSH into your struggling worker node and prune the unused images:</p>
+<div class="code-header">Bash</div>
 <pre><code># If using RKE2/Containerd:
 sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
 
@@ -263,6 +294,7 @@ docker image prune -a</code></pre>
                 <h3>1. The DevOps Fix: Enforce Resource Limits</h3>
                 <p>You must tell Kubernetes to isolate the damage. By setting ephemeral-storage limits in your Helm Chart or Deployment YAML, you instruct Kubernetes: <em>"If this specific pod writes more than 3GB of temporary files, kill ONLY this pod, before it threatens the rest of the node."</em></p>
                 <p>Add this to your <code>deployment.yaml</code> under the <code>resources</code> block:</p>
+<div class="code-header">Terminal</div>
 <pre><code>resources:
   requests:
     cpu: "500m"
@@ -313,10 +345,12 @@ docker image prune -a</code></pre>
 
                 <h3>1. Nettoyer le Cimetière</h3>
                 <p>Ces pods évincés sont complètement morts, mais ils encombrent votre vue. Vous pouvez supprimer instantanément tous les pods en échec dans votre namespace avec cette commande :</p>
+<div class="code-header">Bash</div>
 <pre><code>kubectl delete pods --field-selector status.phase=Failed -n &lt;votre-namespace&gt;</code></pre>
 
                 <h3>2. Libérer l'Espace Disque du Nœud</h3>
                 <p>Généralement, cela se produit parce que les images Docker/Containerd locales et les fichiers temporaires ont rempli le disque du nœud. Connectez-vous en SSH à votre nœud en difficulté et purgez les images inutilisées :</p>
+<div class="code-header">Bash</div>
 <pre><code># Si vous utilisez RKE2/Containerd :
 sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
 
@@ -333,6 +367,7 @@ docker image prune -a</code></pre>
                 <h3>1. La Solution DevOps : Appliquer les Limites de Ressources</h3>
                 <p>Vous devez dire à Kubernetes de contenir les dégâts. En définissant des limites de stockage éphémère dans votre Chart Helm ou votre fichier YAML de déploiement, vous donnez la consigne à Kubernetes : <em>« Si ce pod spécifique écrit plus de 3 Go de fichiers temporaires, tue UNIQUEMENT ce pod, avant qu'il ne menace le reste du nœud. »</em></p>
                 <p>Ajoutez ceci à votre <code>deployment.yaml</code> sous le bloc <code>resources</code> :</p>
+<div class="code-header">Terminal</div>
 <pre><code>resources:
   requests:
     cpu: "500m"

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering On-Premise CI/CD: GitLab Runners for Docker-in-Docker</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #e24329; /* GitLab Orange/Red */
+            --accent-hover: #fc6d26;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 800px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .nav-left a {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s;
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        header { padding: 48px 0 32px; border-bottom: 2px solid var(--border); margin-bottom: 40px; text-align: center; }
+        h1 {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .meta {
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Content Styling */
+        h2 { font-size: 26px; font-weight: 700; margin: 48px 0 24px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+        h3 { font-size: 20px; font-weight: 600; margin: 32px 0 16px; color: var(--text-main); }
+        p { margin-bottom: 24px; font-size: 17px; color: #4b5563; }
+        
+        .hero-img { width: 100%; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+        /* Modern Pro Table & Cards */
+        .incident-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .incident-card h3 { margin-top: 0; color: #111827; }
+        .incident-card .tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-bottom: 16px; font-family: var(--font-mono); }
+        .tag-error { background: #fee2e2; color: #991b1b; }
+        .tag-cause { background: #fef3c7; color: #92400e; }
+        .tag-fix { background: #ecfdf5; color: #065f46; }
+
+        .expert-quote { padding: 24px; border-radius: 12px; font-style: italic; color: #374151; background-color: #f8fafc; border-left: 4px solid #3b82f6; margin-bottom: 16px;}
+        .expert-quote strong { font-weight: 700; font-style: normal; display: block; margin-bottom: 4px; color: var(--text-main);}
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        /* MacOS style mock buttons for the senior terminal feel */
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Lists */
+        ul { margin: 0 0 24px 24px; padding: 0; }
+        li { margin-bottom: 12px; font-size: 17px; color: #4b5563; }
+        
+        @media (max-width: 768px) {
+            nav, main { margin: 16px; width: auto; }
+            main { padding: 0 20px 60px; }
+            h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a href="../archive.html" aria-label="Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/">Home</a>
+            <a href="../archive.html">Notes</a>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+            <header>
+                <div class="meta">DEVOPS PLAYBOOK &middot; GITLAB CI/CD &middot; DOCKER-IN-DOCKER</div>
+                <h1>Mastering On-Premise CI/CD: Bootstrapping & Debugging GitLab Runners</h1>
+            </header>
+            
+            <!-- Hero Image -->
+            <img src="../images/gitlab-runner/img1.png" alt="GitLab Runner Architecture" class="hero-img" onerror="this.style.display='none'">
+
+            <p>When transitioning from managed cloud platforms (like GitHub Actions or GitLab SaaS) to a self-hosted, air-gapped, or on-premise infrastructure, engineers are abruptly introduced to a harsh reality: <strong>Code does not compile itself.</strong></p>
+
+            <p>Recently, I was architecting a CI/CD pipeline on a private GitLab instance. After writing the <code>.gitlab-ci.yml</code> pipeline and pushing to the main branch, the pipeline immediately stalled, displaying a notorious warning:</p>
+
+            <div class="expert-quote">
+                "This job is stuck because you don't have any active runners that can run this job."
+            </div>
+
+            <p>To process the workloads, I needed to bootstrap a dedicated Linux compute node, configure it for <strong>Docker-in-Docker (DinD)</strong> build executions, and connect it to the master GitLab server.</p>
+            <p>What seemed like a simple binary installation turned into a masterclass in DevOps networking and security token management. Here is how I architected the runner and bypassed the networking roadblocks I hit along the way.</p>
+
+            <h2>Phase 1: Bootstrapping the Compute (The Privileged Executor)</h2>
+            <p>To execute pipeline jobs, GitLab relies on a background service called a <code>gitlab-runner</code>. I SSH'd into my deployment Linux server and systematically pulled the binaries and registered the service:</p>
+
+            <div class="code-header">Bash</div>
+<pre><code># 1. Download the Linux binary
+sudo curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+
+# 2. Grant execution permissions
+sudo chmod +x /usr/local/bin/gitlab-runner
+
+# 3. Create an isolated system user
+sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+
+# 4. Install and initialize the service
+sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+sudo gitlab-runner start</code></pre>
+
+            <h3>The Registration Configuration:</h3>
+            <p>To connect this runner to GitLab, I utilized the <code>docker</code> executor. Because our pipeline requires the container to spin up other containers (to build our application images), I passed the <code>--docker-privileged</code> flag, effectively granting the DinD environment root access to the host engine.</p>
+
+            <div class="code-header">Bash</div>
+<pre><code>sudo gitlab-runner register \
+  --non-interactive \
+  --url "http://192.168.1.48/" \
+  --registration-token "SECRET_TOKEN" \
+  --executor "docker" \
+  --docker-image "docker:24.0.5" \
+  --description "docker-runner-deploy-machine" \
+  --docker-privileged</code></pre>
+
+            <p>While the setup architecture was sound, connecting on-premise components always surfaces network and security traps. Here are my Trench Notes from resolving them.</p>
+
+            <h2> Trench Notes: Overcoming Self-Hosted Networking & Security</h2>
+
+            <div class="incident-card">
+                <h3>Roadblock 1: The "Ghost Token" (403 Forbidden)</h3>
+                
+                <p><span class="tag tag-error">The Incident</span></p>
+                <p>Upon running the <code>gitlab-runner register</code> command, the CLI immediately crashed and threw a PANIC state:</p>
+                <pre style="margin-top: 0; padding: 16px;"><code>POST http://192.168.1.48/api/v4/runners: 403 Forbidden. PANIC: Failed to register the runner.</code></pre>
+
+                <p><span class="tag tag-cause">The Root Cause</span></p>
+                <p>A <strong>403 Forbidden</strong> at this specific step is an AuthN rejection. When navigating the GitLab UI earlier to view runner configurations, I had accidentally refreshed the page near the "Reset Token" module. GitLab’s security daemon instantly invalidated the existing registration token. The terminal was aggressively sending a dead "ghost" token to the API.</p>
+
+                <p><span class="tag tag-fix">The Fix</span></p>
+                <p>I pulled a fresh cryptographic token from the Web UI, inserted it into the CLI command, and the API successfully handshaked with my compute node.</p>
+            </div>
+
+            <div class="incident-card">
+                <h3>Roadblock 2: The Container DNS Isolation Trap</h3>
+                
+                <p><span class="tag tag-error">The Incident</span></p>
+                <p>Once the runner attached, the CI/CD job successfully began initializing. However, the exact moment the isolated Docker container attempted to execute <code>git clone</code> to pull my repository, it crashed fatally:</p>
+                <pre style="margin-top: 0; padding: 16px;"><code>fatal: http://gitlab.internal.com/... not valid: is this a git repository?
+ERROR: Job failed: exit code 1</code></pre>
+
+                <p><span class="tag tag-cause">The Root Cause</span></p>
+                <p>This is a phenomenal networking conundrum. Our GitLab instance was configured internally with an <code>external_url</code> string mapping (e.g., <code>gitlab.internal.com</code>). When the GitLab server assigned the job to the Runner, it commanded it to download the code via that custom DNS string.</p>
+                <p>However, because the runner spun up an entirely isolated Docker container to execute the job, that specific container <strong>lacked the host machine's internal DNS routing tables</strong>. The container failed to resolve <code>gitlab.internal.com</code> back to our internal local IP (<code>192.168.1.48</code>) and timed out instantly.</p>
+
+                <p><span class="tag tag-fix">The Architect's Fix (DNS Injection)</span></p>
+                <p>Rather than writing messy <code>/etc/hosts</code> entries onto the server OS, I opened the runner's master configuration map (<code>/etc/gitlab-runner/config.toml</code>).</p>
+                <p>We can solve this natively at the runner orchestration level in one of two ways:</p>
+
+                <p><strong>Method A (The Force Route):</strong> Forcing the <code>clone_url</code> globally in the configuration ensures the runner skips DNS parsing and hard-routes traffic explicitly to the provided local IP block.</p>
+                <div class="code-header">TOML</div>
+<pre><code>[[runners]]
+  name = "docker-runner-deploy-machine"
+  url = "http://192.168.1.48"
+  clone_url = "http://192.168.1.48"   # Forced Route Injection</code></pre>
+
+                <p><strong>Method B (The Elegant DNS Hack):</strong> Instructing the GitLab Runner controller to inject specific <code>extra_hosts</code> data inside the Docker execution pod exactly at the time of creation.</p>
+                <div class="code-header">TOML</div>
+<pre><code>[runners.docker]
+    image = "docker:24.0.5"
+    privileged = true
+    extra_hosts =["gitlab.internal.com:192.168.1.48"]   # DNS Mapping Injection</code></pre>
+                
+                <p>Applying this fix to <code>config.toml</code> and executing <code>sudo gitlab-runner restart</code> bridged the networking gap perfectly.</p>
+            </div>
+
+            <h2> Conclusion</h2>
+            <p>Successfully engineering a CI/CD environment requires significantly more logic than basic CLI utilization; it requires an inherent understanding of network abstraction and daemon isolation. Whether bypassing containerized DNS boundaries through configuration injection or handling container privileges, the value of a Senior Platform Engineer is in recognizing the specific communication roadblocks across a decoupled infrastructure stack.</p>
+
+        </article>
+    </main>
+</body>
+</html>
