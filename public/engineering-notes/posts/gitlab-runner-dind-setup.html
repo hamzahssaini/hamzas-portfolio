@@ -245,7 +245,7 @@ sudo gitlab-runner start</code></pre>
             <div class="code-header">Bash</div>
 <pre><code>sudo gitlab-runner register \
   --non-interactive \
-  --url "http://192.168.1.48/" \
+  --url "http://192.168.1.X/" \
   --registration-token "SECRET_TOKEN" \
   --executor "docker" \
   --docker-image "docker:24.0.5" \
@@ -261,7 +261,7 @@ sudo gitlab-runner start</code></pre>
                 
                 <p><span class="tag tag-error">The Incident</span></p>
                 <p>Upon running the <code>gitlab-runner register</code> command, the CLI immediately crashed and threw a PANIC state:</p>
-                <pre style="margin-top: 0; padding: 16px;"><code>POST http://192.168.1.48/api/v4/runners: 403 Forbidden. PANIC: Failed to register the runner.</code></pre>
+                <pre style="margin-top: 0; padding: 16px;"><code>POST http://192.168.1.X/api/v4/runners: 403 Forbidden. PANIC: Failed to register the runner.</code></pre>
 
                 <p><span class="tag tag-cause">The Root Cause</span></p>
                 <p>A <strong>403 Forbidden</strong> at this specific step is an AuthN rejection. When navigating the GitLab UI earlier to view runner configurations, I had accidentally refreshed the page near the "Reset Token" module. GitLab’s security daemon instantly invalidated the existing registration token. The terminal was aggressively sending a dead "ghost" token to the API.</p>
@@ -280,7 +280,7 @@ ERROR: Job failed: exit code 1</code></pre>
 
                 <p><span class="tag tag-cause">The Root Cause</span></p>
                 <p>This is a phenomenal networking conundrum. Our GitLab instance was configured internally with an <code>external_url</code> string mapping (e.g., <code>gitlab.internal.com</code>). When the GitLab server assigned the job to the Runner, it commanded it to download the code via that custom DNS string.</p>
-                <p>However, because the runner spun up an entirely isolated Docker container to execute the job, that specific container <strong>lacked the host machine's internal DNS routing tables</strong>. The container failed to resolve <code>gitlab.internal.com</code> back to our internal local IP (<code>192.168.1.48</code>) and timed out instantly.</p>
+                <p>However, because the runner spun up an entirely isolated Docker container to execute the job, that specific container <strong>lacked the host machine's internal DNS routing tables</strong>. The container failed to resolve <code>gitlab.internal.com</code> back to our internal local IP (<code>192.168.1.X</code>) and timed out instantly.</p>
 
                 <p><span class="tag tag-fix">The Architect's Fix (DNS Injection)</span></p>
                 <p>Rather than writing messy <code>/etc/hosts</code> entries onto the server OS, I opened the runner's master configuration map (<code>/etc/gitlab-runner/config.toml</code>).</p>
@@ -290,15 +290,15 @@ ERROR: Job failed: exit code 1</code></pre>
                 <div class="code-header">TOML</div>
 <pre><code>[[runners]]
   name = "docker-runner-deploy-machine"
-  url = "http://192.168.1.48"
-  clone_url = "http://192.168.1.48"   # Forced Route Injection</code></pre>
+  url = "http://192.168.1.X"
+  clone_url = "http://192.168.1.X"   # Forced Route Injection</code></pre>
 
                 <p><strong>Method B (The Elegant DNS Hack):</strong> Instructing the GitLab Runner controller to inject specific <code>extra_hosts</code> data inside the Docker execution pod exactly at the time of creation.</p>
                 <div class="code-header">TOML</div>
 <pre><code>[runners.docker]
     image = "docker:24.0.5"
     privileged = true
-    extra_hosts =["gitlab.internal.com:192.168.1.48"]   # DNS Mapping Injection</code></pre>
+    extra_hosts =["gitlab.internal.com:192.168.1.X"]   # DNS Mapping Injection</code></pre>
                 
                 <p>Applying this fix to <code>config.toml</code> and executing <code>sudo gitlab-runner restart</code> bridged the networking gap perfectly.</p>
             </div>
