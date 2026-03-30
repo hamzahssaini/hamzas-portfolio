@@ -76,14 +76,31 @@
 
             <div class="hero-extra-links">
               <span class="label">Technical Insights</span>
-              <div class="links-row">
-                <a class="extra-link extra-link--external" href="/dashboard.html" target="_blank"
-                  rel="noopener noreferrer" data-en="Delivery Metrics Dashboard" data-fr="Tableau de bord Metrics">
-                  Delivery Metrics Dashboard
-                </a>
-                <a class="extra-link" href="/engineering-notes/archive.html" data-en="Engineering Notes"
-                  data-fr="Notes d'Ingénierie" data-href-en="/engineering-notes/archive.html"
-                  data-href-fr="/engineering-notes/archive.html">Engineering Notes</a>
+              <div class="links-row" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+                <div class="eng-notes-link-group">
+                  <a class="extra-link extra-link--external" href="/dashboard.html"
+                    style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span data-en="Delivery Metrics Dashboard" data-fr="Tableau de bord Metrics">Delivery Metrics Dashboard</span>
+                    <span aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; font-size: 10px; font-style: italic; line-height: 1; opacity: 0.7;">i</span>
+                  </a>
+                  <div class="eng-notes-tooltip" data-en="A live dashboard tracking my real-world CI/CD performance (Deployment Frequency, Lead Times, CFR)." data-fr="Un tableau de bord en direct suivant mes performances CI/CD réelles (Fréquence, Délais, CFR).">
+                    A live dashboard tracking my real-world CI/CD performance (Deployment Frequency, Lead Times, CFR).
+                  </div>
+                </div>
+                <style>
+                  .eng-notes-link-group { position: relative; display: inline-flex; align-items: center; }
+                  .eng-notes-tooltip { visibility: hidden; opacity: 0; position: absolute; top: calc(100% + 5px); left: 0; width: 250px; background-color: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 12px; font-size: 13px; line-height: 1.4; color: var(--text-color, #374151); transition: opacity 0.2s, visibility 0.2s; z-index: 1000; pointer-events: none; }
+                  .eng-notes-link-group:hover .eng-notes-tooltip, .eng-notes-link-group:active .eng-notes-tooltip { visibility: visible; opacity: 1; }
+                </style>
+                <div class="eng-notes-link-group">
+                  <a class="extra-link" href="/engineering-notes/archive.html" data-href-en="/engineering-notes/archive.html" data-href-fr="/engineering-notes/archive.html" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span data-en="Engineering Notes" data-fr="Notes d'Ingénierie">Engineering Notes</span>
+                    <span aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; font-size: 10px; font-style: italic; line-height: 1; opacity: 0.7;">i</span>
+                  </a>
+                  <div class="eng-notes-tooltip" data-en="A dedicated section where you can find blog posts about daily challenges, experiences, and technical solutions." data-fr="Une section dédiée où vous pouvez trouver des articles sur les défis quotidiens, les expériences et les solutions techniques.">
+                    A dedicated section where you can find blog posts about daily challenges, experiences, and technical solutions.
+                  </div>
+                </div>
               </div>
             </div>
 
