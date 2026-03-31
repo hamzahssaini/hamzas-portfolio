@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s OpsFlow | Production Grade Cheat Sheet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0B0F19; --bg-surface: #131A2A; --bg-surface-hover: #1A2235;
+            --border-color: #232E42; --border-glow: rgba(59, 130, 246, 0.4);
+            --text-primary: #F1F5F9; --text-secondary: #94A3B8;
+            --accent-primary: #3B82F6; --accent-primary-hover: #2563EB;
+            --terminal-hdr: #1E293B; --terminal-bg: #030712;
+            --terminal-text: #22D3EE; --terminal-prompt: #E2E8F0;
+            --badge-essential: #059669; --badge-intermediate: #D97706; --badge-advanced: #E11D48;
+            --tag-bg: rgba(51, 65, 85, 0.5); --tag-text: #60A5FA;
+            --sidebar-width: 280px; --header-height: 70px;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body.light-theme {
+            --bg-main: #F8FAFC; --bg-surface: #FFFFFF; --bg-surface-hover: #F1F5F9;
+            --border-color: #E2E8F0; --border-glow: rgba(59, 130, 246, 0.2);
+            --text-primary: #0F172A; --text-secondary: #475569;
+            --terminal-hdr: #E2E8F0; --terminal-bg: #0F172A;
+            --terminal-text: #4ADE80; --terminal-prompt: #94A3B8;
+            --tag-bg: #EFF6FF; --tag-text: #2563EB;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-main); color: var(--text-primary); line-height: 1.6; overflow: hidden; transition: background-color 0.3s, color 0.3s; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        .main-wrapper { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        kbd { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 6px; font-family: inherit; font-size: 0.75rem; color: var(--text-secondary); box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+
+        .top-navbar { height: var(--header-height); background-color: var(--bg-surface); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .logo-wrapper { display: flex; align-items: center; gap: 16px; }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-icon-bg { background: linear-gradient(135deg, var(--accent-primary), #8B5CF6); color: white; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4); }
+        .logo h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+        .mobile-only { display: none; }
+
+        .search-container { flex: 0 1 540px; position: relative; display: flex; align-items: center; }
+        .search-icon { position: absolute; left: 16px; color: var(--text-secondary); pointer-events: none; }
+        #searchInput { width: 100%; padding: 12px 16px 12px 42px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-main); color: var(--text-primary); font-size: 0.95rem; transition: all 0.2s; }
+        #searchInput:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .search-shortcut { position: absolute; right: 12px; pointer-events: none; display: flex; gap: 4px; }
+
+        .icon-btn { background: transparent; border: 1px solid transparent; color: var(--text-secondary); cursor: pointer; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .icon-btn:hover { background-color: var(--bg-main); color: var(--text-primary); }
+
+        .sidebar { width: var(--sidebar-width); background-color: var(--bg-surface); border-right: 1px solid var(--border-color); overflow-y: auto; padding: 24px 16px; flex-shrink: 0; display: flex; flex-direction: column; gap: 32px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 15; }
+        .sidebar-section h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; margin-bottom: 12px; padding-left: 12px; font-weight: 600; }
+        .category-list { list-style: none; }
+        .category-list li { padding: 10px 12px; margin-bottom: 4px; border-radius: 8px; cursor: pointer; color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+        .category-list li:hover { background-color: var(--bg-surface-hover); color: var(--text-primary); }
+        .category-list li.active { background-color: rgba(59, 130, 246, 0.1); color: var(--accent-primary); }
+        .cat-icon { font-size: 1.1rem; opacity: 0.8; }
+        .category-list li.active .cat-icon { opacity: 1; }
+
+        .sidebar-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 10; }
+
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        .content-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .content-header h2 { font-size: 1.75rem; font-weight: 600; margin-bottom: 8px; }
+        .subtitle { color: var(--text-secondary); font-size: 0.9rem; }
+        .stat-badge { background: var(--bg-surface); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; font-weight: 500; }
+        #commandCount { color: var(--text-primary); font-weight: 600; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 24px; align-items: start; }
+        .command-card { position: relative; border-radius: 12px; background: transparent; outline: none; z-index: 1; cursor: default; animation: fadeIn 0.4s ease-out forwards; }
+        .command-card::before { content: ''; position: absolute; inset: 0; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: inherit; z-index: -1; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-glow { position: absolute; inset: -1px; border-radius: 12px; background: linear-gradient(135deg, var(--accent-primary), #8B5CF6); opacity: 0; transition: opacity 0.3s; z-index: -2; filter: blur(8px); }
+        .command-card:hover::before, .command-card:focus-visible::before { transform: translateY(-4px); border-color: var(--border-glow); background-color: var(--bg-surface-hover); }
+        .command-card:hover .card-glow, .command-card:focus-visible .card-glow { opacity: 0.5; transform: translateY(-4px); }
+        .card-inner { padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.3s; }
+        .command-card:hover .card-inner { transform: translateY(-4px); }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-meta { display: flex; align-items: center; gap: 10px; }
+        .difficulty-badge { padding: 4px 10px; border-radius: 12px; color: #fff; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .difficulty-badge.essential { background-color: var(--badge-essential); }
+        .difficulty-badge.intermediate { background-color: var(--badge-intermediate); }
+        .difficulty-badge.advanced { background-color: var(--badge-advanced); }
+
+        .category-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+        .fav-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding: 4px; border-radius: 50%; }
+        .fav-btn:hover { color: #F59E0B; transform: scale(1.15); background: rgba(245, 158, 11, 0.1); }
+        .fav-btn.active { color: #F59E0B; }
+        .fav-btn.active svg { fill: #F59E0B; }
+
+        .card-title { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.01em; }
+        .card-description { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; }
+
+        .terminal-wrapper { border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .terminal-header { background: var(--terminal-hdr); height: 28px; display: flex; align-items: center; padding: 0 12px; gap: 8px; position: relative; }
+        .term-dots { display: flex; gap: 6px; }
+        .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .term-dot.close { background: #FF5F56; }
+        .term-dot.min { background: #FFBD2E; }
+        .term-dot.max { background: #27C93F; }
+        .term-title { position: absolute; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-secondary); }
+
+        .terminal-body { background: var(--terminal-bg); padding: 16px; display: flex; align-items: flex-start; gap: 12px; position: relative; }
+        .terminal-body .prompt { color: var(--terminal-prompt); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: bold; user-select: none; }
+        .command-text { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.9rem; color: var(--terminal-text); white-space: pre-wrap; word-break: break-all; flex: 1; line-height: 1.5; }
+        .copy-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: var(--text-secondary); cursor: pointer; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; margin-top: -4px; right: 12px; }
+        .copy-btn:hover { background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
+
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .tags-container { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { background-color: var(--tag-bg); color: var(--tag-text); font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: 500; }
+
+        .expand-btn { background: none; border: none; color: var(--accent-primary); cursor: pointer; font-size: 0.9rem; font-weight: 500; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .expand-btn:hover { background: rgba(59, 130, 246, 0.1); }
+        .expand-btn svg { transition: transform 0.3s; }
+        .expand-btn.open svg { transform: rotate(180deg); }
+
+        .card-expanded-content { display: none; padding-top: 16px; border-top: 1px dashed var(--border-color); }
+        .card-expanded-content.show { display: block; animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .notes-wrapper { background: rgba(59, 130, 246, 0.05); padding: 16px; border-radius: 8px; border-left: 3px solid var(--accent-primary); display: flex; gap: 12px; }
+        .notes-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .expanded-notes { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+        .empty-state { text-align: center; padding: 100px 20px; color: var(--text-secondary); animation: fadeIn 0.4s; }
+        .empty-state.hidden { display: none; }
+        .empty-icon svg { width: 64px; height: 64px; margin-bottom: 20px; opacity: 0.3; }
+        .empty-state h3 { font-size: 1.5rem; margin-bottom: 8px; color: var(--text-primary); font-weight: 600; }
+
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.3); animation: toastSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .toast svg { color: #10B981; }
+        .toast.fadeOut { animation: toastFadeOut 0.3s ease forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastSlideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastFadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
+
+        @media (max-width: 1100px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .mobile-only { display: block; }
+            .top-navbar { padding: 0 16px; }
+            .sidebar { position: absolute; top: 0; bottom: 0; left: 0; transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 25px rgba(0,0,0,0.5); }
+            .sidebar-overlay.active { display: block; }
+            .main-content { padding: 24px 16px; }
+            .search-container { flex: 1; margin: 0 16px; }
+            .search-shortcut { display: none; }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <header class="top-navbar">
+            <div class="logo-wrapper">
+                <button id="mobileMenuBtn" class="icon-btn mobile-only" aria-label="Toggle Menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
+                </button>
+                <a href="/" style="text-decoration:none; color:inherit;">
+                    <div class="logo">
+                        <div class="logo-icon-bg">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                        </div>
+                        <h1>Back To Portfolio</h1>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="search-container">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <input type="text" id="searchInput" placeholder="Search resources, commands, or tags...">
+                <div class="search-shortcut"><kbd>Ctrl</kbd>+<kbd>K</kbd></div>
+            </div>
+
+            <div class="nav-actions">
+                <button id="themeToggle" class="icon-btn theme-toggle" title="Toggle Theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-wrapper">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <h3>Library</h3>
+                    <ul id="categoryList" class="category-list">
+                        <li class="active" data-category="all"><span class="cat-icon">📚</span> All Commands</li>
+                        <li data-category="Cluster & Node Management"><span class="cat-icon">🎛️</span> Cluster & Node Management</li>
+                        <li data-category="Pod Management"><span class="cat-icon">📦</span> Pod Management</li>
+                        <li data-category="Deployment Management"><span class="cat-icon">🚀</span> Deployment Management</li>
+                        <li data-category="Services & Networking"><span class="cat-icon">📚</span> Services & Networking</li>
+                        <li data-category="Ingress & Load Balancer"><span class="cat-icon">📚</span> Ingress & Load Balancer</li>
+                        <li data-category="ConfigMaps & Secrets"><span class="cat-icon">📚</span> ConfigMaps & Secrets</li>
+                        <li data-category="Namespace Management"><span class="cat-icon">📁</span> Namespace Management</li>
+                        <li data-category="Persistent Storage"><span class="cat-icon">📚</span> Persistent Storage</li>
+                        <li data-category="StatefulSets & DaemonSets"><span class="cat-icon">📚</span> StatefulSets & DaemonSets</li>
+                        <li data-category="Events & Debugging"><span class="cat-icon">📚</span> Events & Debugging</li>
+                        <li data-category="RBAC & Security"><span class="cat-icon">📚</span> RBAC & Security</li>
+                        <li data-category="Resource Management"><span class="cat-icon">📚</span> Resource Management</li>
+                        <li data-category="Helm"><span class="cat-icon">📚</span> Helm</li>
+                        <li data-category="Jobs & CronJobs"><span class="cat-icon">📚</span> Jobs & CronJobs</li>
+                        <li data-category="Miscellaneous"><span class="cat-icon">📚</span> Miscellaneous</li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Your Workspace</h3>
+                    <ul class="category-list" id="workspaceList">
+                        <li data-category="Favorites" class="accent-fav"><span class="cat-icon">⭐</span> Favorites</li>
+                        <li data-category="Recent" class="accent-rec"><span class="cat-icon">🕒</span> Recently Used</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+            <main class="main-content">
+                <div class="content-header">
+                    <div>
+                        <h2>Command Reference</h2>
+                        <p class="subtitle">Press <kbd>c</kbd> while hovering a card to quick-copy</p>
+                    </div>
+                    <div class="stat-badge"><span id="commandCount">0</span> elements</div>
+                </div>
+                
+                <div id="cardsContainer" class="cards-grid"></div>
+                
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></div>
+                    <h3>No results found</h3>
+                    <p>Try adjusting your search query or filters.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <template id="cardTemplate">
+        <div class="command-card" tabindex="0">
+            <div class="card-glow"></div>
+            <div class="card-inner">
+                <div class="card-header">
+                    <div class="card-meta"><span class="difficulty-badge"></span><span class="category-label"></span></div>
+                    <button class="fav-btn" title="Toggle Favorite"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+                </div>
+                <h3 class="card-title"></h3>
+                <p class="card-description"></p>
+                <div class="terminal-wrapper">
+                    <div class="terminal-header">
+                        <div class="term-dots"><span class="term-dot close"></span><span class="term-dot min"></span><span class="term-dot max"></span></div>
+                        <span class="term-title">bash — kubectl</span>
+                    </div>
+                    <div class="terminal-body">
+                        <span class="prompt">$</span><code class="command-text"></code>
+                        <button class="copy-btn" title="Copy to clipboard"><svg class="copy-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="tags-container"></div>
+                    <button class="expand-btn"><span>Details</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+                </div>
+                <div class="card-expanded-content">
+                    <div class="notes-wrapper"><div class="notes-icon">💡</div><p class="expanded-notes"></p></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const COMMANDS_DATA = [
+  {
+    "id": "cmd-1",
+    "title": "Get cluster info.",
+    "command": "kubectl cluster-info",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Get cluster info. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-2",
+    "title": "List all nodes.",
+    "command": "kubectl get nodes",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "List all nodes. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-3",
+    "title": "Get node details.",
+    "command": "kubectl describe node <node-name>",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster",
+      "#debug"
+    ],
+    "notes": "Get node details. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-4",
+    "title": "Mark a node as unschedulable.",
+    "command": "kubectl cordon <node-name>",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Mark a node as unschedulable. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-5",
+    "title": "Mark a node as schedulable.",
+    "command": "kubectl uncordon <node-name>",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Mark a node as schedulable. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-6",
+    "title": "Evict all pods from a node.",
+    "command": "kubectl drain <node-name> --ignore-daemonsets",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Advanced",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Evict all pods from a node. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-7",
+    "title": "Taint a node.",
+    "command": "kubectl taint nodes <node-name> key=value:NoSchedule",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Advanced",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Taint a node. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-8",
+    "title": "Add a label to a node.",
+    "command": "kubectl label nodes <node-name> key=value",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Add a label to a node. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-9",
+    "title": "Display node labels.",
+    "command": "kubectl get nodes --show-labels",
+    "description": "Quick Action — Cluster & Node Management",
+    "difficulty": "Essential",
+    "category": "Cluster & Node Management",
+    "tags": [
+      "#cluster"
+    ],
+    "notes": "Display node labels. — Included in Cluster & Node Management commands group."
+  },
+  {
+    "id": "cmd-10",
+    "title": "Delete a node from the cluster.",
+    "command": "kubectl delete node <node-name>",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod",
+      "#destructive"
+    ],
+    "notes": "Delete a node from the cluster. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-11",
+    "title": "List all pods in the current namespace.",
+    "command": "kubectl get pods",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod"
+    ],
+    "notes": "List all pods in the current namespace. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-12",
+    "title": "List all pods in all namespaces.",
+    "command": "kubectl get pods -A",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod"
+    ],
+    "notes": "List all pods in all namespaces. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-13",
+    "title": "List pods with node details.",
+    "command": "kubectl get pods -o wide",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod"
+    ],
+    "notes": "List pods with node details. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-14",
+    "title": "Get pod details.",
+    "command": "kubectl describe pod <pod-name>",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod",
+      "#debug"
+    ],
+    "notes": "Get pod details. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-15",
+    "title": "View logs of a pod.",
+    "command": "kubectl logs <pod-name>",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod",
+      "#debug"
+    ],
+    "notes": "View logs of a pod. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-16",
+    "title": "View logs of a specific container.",
+    "command": "kubectl logs <pod-name> -c <container-name>",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod",
+      "#debug"
+    ],
+    "notes": "View logs of a specific container. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-17",
+    "title": "Access a running pod’s shell.",
+    "command": "kubectl exec -it <pod-name> -- /bin/sh",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod"
+    ],
+    "notes": "Access a running pod’s shell. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-18",
+    "title": "Delete a pod.",
+    "command": "kubectl delete pod <pod-name>",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Essential",
+    "category": "Pod Management",
+    "tags": [
+      "#pod",
+      "#destructive"
+    ],
+    "notes": "Delete a pod. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-19",
+    "title": "Force delete a pod.",
+    "command": "kubectl delete pod --force --grace-period=0 <pod-name>",
+    "description": "Quick Action — Pod Management",
+    "difficulty": "Advanced",
+    "category": "Pod Management",
+    "tags": [
+      "#pod",
+      "#destructive"
+    ],
+    "notes": "Force delete a pod. — Included in Pod Management commands group."
+  },
+  {
+    "id": "cmd-20",
+    "title": "Get pod YAML configuration.",
+    "command": "kubectl get pod <pod-name> -o yaml",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Intermediate",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment",
+      "#manifests"
+    ],
+    "notes": "Get pod YAML configuration. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-21",
+    "title": "List all deployments.",
+    "command": "kubectl get deployments",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment"
+    ],
+    "notes": "List all deployments. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-22",
+    "title": "Get deployment details.",
+    "command": "kubectl describe deployment <deployment-name>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment",
+      "#debug"
+    ],
+    "notes": "Get deployment details. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-23",
+    "title": "Deploy resources from a YAML file.",
+    "command": "kubectl apply -f <deployment.yaml>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment",
+      "#manifests"
+    ],
+    "notes": "Deploy resources from a YAML file. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-24",
+    "title": "Create a simple deployment.",
+    "command": "kubectl create deployment <name> --image=<image>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment"
+    ],
+    "notes": "Create a simple deployment. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-25",
+    "title": "Delete a deployment.",
+    "command": "kubectl delete deployment <deployment-name>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment",
+      "#destructive"
+    ],
+    "notes": "Delete a deployment. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-26",
+    "title": "Check deployment rollout status.",
+    "command": "kubectl rollout status deployment <deployment-name>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment"
+    ],
+    "notes": "Check deployment rollout status. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-27",
+    "title": "View deployment history.",
+    "command": "kubectl rollout history deployment <deployment-name>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment"
+    ],
+    "notes": "View deployment history. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-28",
+    "title": "Rollback to a previous version.",
+    "command": "kubectl rollout undo deployment <deployment-name>",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment"
+    ],
+    "notes": "Rollback to a previous version. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-29",
+    "title": "Get all ReplicaSets.",
+    "command": "kubectl get rs",
+    "description": "Quick Action — Deployment Management",
+    "difficulty": "Essential",
+    "category": "Deployment Management",
+    "tags": [
+      "#deployment"
+    ],
+    "notes": "Get all ReplicaSets. — Included in Deployment Management commands group."
+  },
+  {
+    "id": "cmd-30",
+    "title": "Scale a deployment.",
+    "command": "kubectl scale deployment <deployment-name> --replicas=3",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services"
+    ],
+    "notes": "Scale a deployment. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-31",
+    "title": "List all services.",
+    "command": "kubectl get svc",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services"
+    ],
+    "notes": "List all services. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-32",
+    "title": "List all services in all namespaces.",
+    "command": "kubectl get svc -A",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services"
+    ],
+    "notes": "List all services in all namespaces. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-33",
+    "title": "Get service details.",
+    "command": "kubectl describe svc <service-name>",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services",
+      "#debug"
+    ],
+    "notes": "Get service details. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-34",
+    "title": "Delete a service.",
+    "command": "kubectl delete svc <service-name>",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services",
+      "#destructive"
+    ],
+    "notes": "Delete a service. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-35",
+    "title": "Expose a deployment as a service.",
+    "command": "kubectl expose deployment <deployment-name> --type=NodePort --port=80",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services"
+    ],
+    "notes": "Expose a deployment as a service. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-36",
+    "title": "List all service endpoints.",
+    "command": "kubectl get endpoints",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services"
+    ],
+    "notes": "List all service endpoints. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-37",
+    "title": "Forward local port to a pod.",
+    "command": "kubectl port-forward pod/<pod-name> 8080:80",
+    "description": "Quick Action — Services & Networking",
+    "difficulty": "Essential",
+    "category": "Services & Networking",
+    "tags": [
+      "#services"
+    ],
+    "notes": "Forward local port to a pod. — Included in Services & Networking commands group."
+  },
+  {
+    "id": "cmd-38",
+    "title": "Start a proxy to access the API server.",
+    "command": "kubectl proxy",
+    "description": "Quick Action — Ingress & Load Balancer",
+    "difficulty": "Essential",
+    "category": "Ingress & Load Balancer",
+    "tags": [
+      "#ingress"
+    ],
+    "notes": "Start a proxy to access the API server. — Included in Ingress & Load Balancer commands group."
+  },
+  {
+    "id": "cmd-39",
+    "title": "List all ingress resources.",
+    "command": "kubectl get ingress",
+    "description": "Quick Action — Ingress & Load Balancer",
+    "difficulty": "Essential",
+    "category": "Ingress & Load Balancer",
+    "tags": [
+      "#ingress"
+    ],
+    "notes": "List all ingress resources. — Included in Ingress & Load Balancer commands group."
+  },
+  {
+    "id": "cmd-40",
+    "title": "Get ingress details.",
+    "command": "kubectl describe ingress <ingress-name>",
+    "description": "Quick Action — Ingress & Load Balancer",
+    "difficulty": "Essential",
+    "category": "Ingress & Load Balancer",
+    "tags": [
+      "#ingress",
+      "#debug"
+    ],
+    "notes": "Get ingress details. — Included in Ingress & Load Balancer commands group."
+  },
+  {
+    "id": "cmd-41",
+    "title": "Delete an ingress resource.",
+    "command": "kubectl delete ingress <ingress-name>",
+    "description": "Quick Action — Ingress & Load Balancer",
+    "difficulty": "Essential",
+    "category": "Ingress & Load Balancer",
+    "tags": [
+      "#ingress",
+      "#destructive"
+    ],
+    "notes": "Delete an ingress resource. — Included in Ingress & Load Balancer commands group."
+  },
+  {
+    "id": "cmd-42",
+    "title": "Deploy an ingress rule.",
+    "command": "kubectl apply -f ingress.yaml",
+    "description": "Quick Action — Ingress & Load Balancer",
+    "difficulty": "Essential",
+    "category": "Ingress & Load Balancer",
+    "tags": [
+      "#ingress",
+      "#manifests"
+    ],
+    "notes": "Deploy an ingress rule. — Included in Ingress & Load Balancer commands group."
+  },
+  {
+    "id": "cmd-43",
+    "title": "Get Ingress external IP.",
+    "command": "kubectl get ingress -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip}'",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps"
+    ],
+    "notes": "Get Ingress external IP. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-44",
+    "title": "List all ConfigMaps.",
+    "command": "kubectl get configmaps",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps"
+    ],
+    "notes": "List all ConfigMaps. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-45",
+    "title": "Get ConfigMap details.",
+    "command": "kubectl describe configmap <configmap-name>",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps",
+      "#debug"
+    ],
+    "notes": "Get ConfigMap details. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-46",
+    "title": "Create a ConfigMap.",
+    "command": "kubectl create configmap <config-name> --from-literal=key=value",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps"
+    ],
+    "notes": "Create a ConfigMap. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-47",
+    "title": "Delete a ConfigMap.",
+    "command": "kubectl delete configmap <configmap-name>",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps",
+      "#destructive"
+    ],
+    "notes": "Delete a ConfigMap. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-48",
+    "title": "List all secrets.",
+    "command": "kubectl get secrets",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps"
+    ],
+    "notes": "List all secrets. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-49",
+    "title": "Get secret details.",
+    "command": "kubectl describe secret <secret-name>",
+    "description": "Quick Action — ConfigMaps & Secrets",
+    "difficulty": "Essential",
+    "category": "ConfigMaps & Secrets",
+    "tags": [
+      "#configmaps",
+      "#debug"
+    ],
+    "notes": "Get secret details. — Included in ConfigMaps & Secrets commands group."
+  },
+  {
+    "id": "cmd-50",
+    "title": "Create a secret.",
+    "command": "kubectl create secret generic <secret-name> --from-literal=key=value",
+    "description": "Quick Action — Namespace Management",
+    "difficulty": "Essential",
+    "category": "Namespace Management",
+    "tags": [
+      "#namespace"
+    ],
+    "notes": "Create a secret. — Included in Namespace Management commands group."
+  },
+  {
+    "id": "cmd-51",
+    "title": "List all namespaces.",
+    "command": "kubectl get namespaces",
+    "description": "Quick Action — Namespace Management",
+    "difficulty": "Essential",
+    "category": "Namespace Management",
+    "tags": [
+      "#namespace"
+    ],
+    "notes": "List all namespaces. — Included in Namespace Management commands group."
+  },
+  {
+    "id": "cmd-52",
+    "title": "Create a new namespace.",
+    "command": "kubectl create namespace <namespace>",
+    "description": "Quick Action — Namespace Management",
+    "difficulty": "Essential",
+    "category": "Namespace Management",
+    "tags": [
+      "#namespace"
+    ],
+    "notes": "Create a new namespace. — Included in Namespace Management commands group."
+  },
+  {
+    "id": "cmd-53",
+    "title": "Delete a namespace.",
+    "command": "kubectl delete namespace <namespace>",
+    "description": "Quick Action — Namespace Management",
+    "difficulty": "Essential",
+    "category": "Namespace Management",
+    "tags": [
+      "#namespace",
+      "#destructive"
+    ],
+    "notes": "Delete a namespace. — Included in Namespace Management commands group."
+  },
+  {
+    "id": "cmd-54",
+    "title": "List pods in a specific namespace.",
+    "command": "kubectl get pods -n <namespace>",
+    "description": "Quick Action — Persistent Storage",
+    "difficulty": "Essential",
+    "category": "Persistent Storage",
+    "tags": [
+      "#persistent"
+    ],
+    "notes": "List pods in a specific namespace. — Included in Persistent Storage commands group."
+  },
+  {
+    "id": "cmd-55",
+    "title": "List all Persistent Volumes.",
+    "command": "kubectl get pv",
+    "description": "Quick Action — Persistent Storage",
+    "difficulty": "Essential",
+    "category": "Persistent Storage",
+    "tags": [
+      "#persistent"
+    ],
+    "notes": "List all Persistent Volumes. — Included in Persistent Storage commands group."
+  },
+  {
+    "id": "cmd-56",
+    "title": "List all Persistent Volume Claims.",
+    "command": "kubectl get pvc",
+    "description": "Quick Action — Persistent Storage",
+    "difficulty": "Essential",
+    "category": "Persistent Storage",
+    "tags": [
+      "#persistent"
+    ],
+    "notes": "List all Persistent Volume Claims. — Included in Persistent Storage commands group."
+  },
+  {
+    "id": "cmd-57",
+    "title": "Get PV details.",
+    "command": "kubectl describe pv <pv-name>",
+    "description": "Quick Action — Persistent Storage",
+    "difficulty": "Essential",
+    "category": "Persistent Storage",
+    "tags": [
+      "#persistent",
+      "#debug"
+    ],
+    "notes": "Get PV details. — Included in Persistent Storage commands group."
+  },
+  {
+    "id": "cmd-58",
+    "title": "Get PVC details.",
+    "command": "kubectl describe pvc <pvc-name>",
+    "description": "Quick Action — StatefulSets & DaemonSets",
+    "difficulty": "Essential",
+    "category": "StatefulSets & DaemonSets",
+    "tags": [
+      "#statefulsets",
+      "#debug"
+    ],
+    "notes": "Get PVC details. — Included in StatefulSets & DaemonSets commands group."
+  },
+  {
+    "id": "cmd-59",
+    "title": "List all StatefulSets.",
+    "command": "kubectl get statefulsets",
+    "description": "Quick Action — StatefulSets & DaemonSets",
+    "difficulty": "Essential",
+    "category": "StatefulSets & DaemonSets",
+    "tags": [
+      "#statefulsets"
+    ],
+    "notes": "List all StatefulSets. — Included in StatefulSets & DaemonSets commands group."
+  },
+  {
+    "id": "cmd-60",
+    "title": "Get StatefulSet details.",
+    "command": "kubectl describe statefulset <statefulset-name>",
+    "description": "Quick Action — StatefulSets & DaemonSets",
+    "difficulty": "Essential",
+    "category": "StatefulSets & DaemonSets",
+    "tags": [
+      "#statefulsets",
+      "#debug"
+    ],
+    "notes": "Get StatefulSet details. — Included in StatefulSets & DaemonSets commands group."
+  },
+  {
+    "id": "cmd-61",
+    "title": "List all DaemonSets.",
+    "command": "kubectl get daemonsets",
+    "description": "Quick Action — StatefulSets & DaemonSets",
+    "difficulty": "Essential",
+    "category": "StatefulSets & DaemonSets",
+    "tags": [
+      "#statefulsets"
+    ],
+    "notes": "List all DaemonSets. — Included in StatefulSets & DaemonSets commands group."
+  },
+  {
+    "id": "cmd-62",
+    "title": "Get DaemonSet details.",
+    "command": "kubectl describe daemonset <daemonset-name>",
+    "description": "Quick Action — Events & Debugging",
+    "difficulty": "Essential",
+    "category": "Events & Debugging",
+    "tags": [
+      "#events",
+      "#debug"
+    ],
+    "notes": "Get DaemonSet details. — Included in Events & Debugging commands group."
+  },
+  {
+    "id": "cmd-63",
+    "title": "List all events.",
+    "command": "kubectl get events",
+    "description": "Quick Action — Events & Debugging",
+    "difficulty": "Essential",
+    "category": "Events & Debugging",
+    "tags": [
+      "#events"
+    ],
+    "notes": "List all events. — Included in Events & Debugging commands group."
+  },
+  {
+    "id": "cmd-64",
+    "title": "Sort events by time.",
+    "command": "kubectl get events --sort-by=.metadata.creationTimestamp",
+    "description": "Quick Action — Events & Debugging",
+    "difficulty": "Essential",
+    "category": "Events & Debugging",
+    "tags": [
+      "#events"
+    ],
+    "notes": "Sort events by time. — Included in Events & Debugging commands group."
+  },
+  {
+    "id": "cmd-65",
+    "title": "Debug a running pod.",
+    "command": "kubectl debug pod/<pod-name> --image=busybox",
+    "description": "Quick Action — RBAC & Security",
+    "difficulty": "Essential",
+    "category": "RBAC & Security",
+    "tags": [
+      "#rbac"
+    ],
+    "notes": "Debug a running pod. — Included in RBAC & Security commands group."
+  },
+  {
+    "id": "cmd-66",
+    "title": "List all roles.",
+    "command": "kubectl get roles",
+    "description": "Quick Action — RBAC & Security",
+    "difficulty": "Intermediate",
+    "category": "RBAC & Security",
+    "tags": [
+      "#rbac"
+    ],
+    "notes": "List all roles. — Included in RBAC & Security commands group."
+  },
+  {
+    "id": "cmd-67",
+    "title": "List all role bindings.",
+    "command": "kubectl get rolebindings",
+    "description": "Quick Action — RBAC & Security",
+    "difficulty": "Intermediate",
+    "category": "RBAC & Security",
+    "tags": [
+      "#rbac"
+    ],
+    "notes": "List all role bindings. — Included in RBAC & Security commands group."
+  },
+  {
+    "id": "cmd-68",
+    "title": "Get role details.",
+    "command": "kubectl describe role <role-name>",
+    "description": "Quick Action — RBAC & Security",
+    "difficulty": "Intermediate",
+    "category": "RBAC & Security",
+    "tags": [
+      "#rbac",
+      "#debug"
+    ],
+    "notes": "Get role details. — Included in RBAC & Security commands group."
+  },
+  {
+    "id": "cmd-69",
+    "title": "List all cluster roles.",
+    "command": "kubectl get clusterroles",
+    "description": "Quick Action — RBAC & Security",
+    "difficulty": "Intermediate",
+    "category": "RBAC & Security",
+    "tags": [
+      "#rbac"
+    ],
+    "notes": "List all cluster roles. — Included in RBAC & Security commands group."
+  },
+  {
+    "id": "cmd-70",
+    "title": "List all cluster role bindings.",
+    "command": "kubectl get clusterrolebindings",
+    "description": "Quick Action — Resource Management",
+    "difficulty": "Intermediate",
+    "category": "Resource Management",
+    "tags": [
+      "#resource"
+    ],
+    "notes": "List all cluster role bindings. — Included in Resource Management commands group."
+  },
+  {
+    "id": "cmd-71",
+    "title": "View CPU & memory usage of nodes.",
+    "command": "kubectl top nodes",
+    "description": "Quick Action — Resource Management",
+    "difficulty": "Essential",
+    "category": "Resource Management",
+    "tags": [
+      "#resource",
+      "#debug"
+    ],
+    "notes": "View CPU & memory usage of nodes. — Included in Resource Management commands group."
+  },
+  {
+    "id": "cmd-72",
+    "title": "View CPU & memory usage of pods.",
+    "command": "kubectl top pods",
+    "description": "Quick Action — Resource Management",
+    "difficulty": "Essential",
+    "category": "Resource Management",
+    "tags": [
+      "#resource",
+      "#debug"
+    ],
+    "notes": "View CPU & memory usage of pods. — Included in Resource Management commands group."
+  },
+  {
+    "id": "cmd-73",
+    "title": "Edit a live deployment.",
+    "command": "kubectl edit deployment <deployment-name>",
+    "description": "Quick Action — Resource Management",
+    "difficulty": "Essential",
+    "category": "Resource Management",
+    "tags": [
+      "#resource"
+    ],
+    "notes": "Edit a live deployment. — Included in Resource Management commands group."
+  },
+  {
+    "id": "cmd-74",
+    "title": "View Kubeconfig settings.",
+    "command": "kubectl config view",
+    "description": "Quick Action — Resource Management",
+    "difficulty": "Essential",
+    "category": "Resource Management",
+    "tags": [
+      "#resource"
+    ],
+    "notes": "View Kubeconfig settings. — Included in Resource Management commands group."
+  },
+  {
+    "id": "cmd-75",
+    "title": "List available Kubernetes contexts.",
+    "command": "kubectl config get-contexts",
+    "description": "Quick Action — Resource Management",
+    "difficulty": "Essential",
+    "category": "Resource Management",
+    "tags": [
+      "#resource"
+    ],
+    "notes": "List available Kubernetes contexts. — Included in Resource Management commands group."
+  },
+  {
+    "id": "cmd-76",
+    "title": "Switch to a different context.",
+    "command": "kubectl config use-context <context-name>",
+    "description": "Quick Action — Helm",
+    "difficulty": "Essential",
+    "category": "Helm",
+    "tags": [
+      "#helm"
+    ],
+    "notes": "Switch to a different context. — Included in Helm commands group."
+  },
+  {
+    "id": "cmd-77",
+    "title": "List all Helm releases.",
+    "command": "helm list",
+    "description": "Quick Action — Helm",
+    "difficulty": "Essential",
+    "category": "Helm",
+    "tags": [
+      "#helm"
+    ],
+    "notes": "List all Helm releases. — Included in Helm commands group."
+  },
+  {
+    "id": "cmd-78",
+    "title": "Install a Helm chart.",
+    "command": "helm install <name> <chart>",
+    "description": "Quick Action — Helm",
+    "difficulty": "Essential",
+    "category": "Helm",
+    "tags": [
+      "#helm"
+    ],
+    "notes": "Install a Helm chart. — Included in Helm commands group."
+  },
+  {
+    "id": "cmd-79",
+    "title": "Upgrade a Helm release.",
+    "command": "helm upgrade <name> <chart>",
+    "description": "Quick Action — Helm",
+    "difficulty": "Essential",
+    "category": "Helm",
+    "tags": [
+      "#helm"
+    ],
+    "notes": "Upgrade a Helm release. — Included in Helm commands group."
+  },
+  {
+    "id": "cmd-80",
+    "title": "Rollback a Helm release.",
+    "command": "helm rollback <name> <revision>",
+    "description": "Quick Action — Jobs & CronJobs",
+    "difficulty": "Essential",
+    "category": "Jobs & CronJobs",
+    "tags": [
+      "#jobs"
+    ],
+    "notes": "Rollback a Helm release. — Included in Jobs & CronJobs commands group."
+  },
+  {
+    "id": "cmd-81",
+    "title": "List all jobs.",
+    "command": "kubectl get jobs",
+    "description": "Quick Action — Jobs & CronJobs",
+    "difficulty": "Essential",
+    "category": "Jobs & CronJobs",
+    "tags": [
+      "#jobs"
+    ],
+    "notes": "List all jobs. — Included in Jobs & CronJobs commands group."
+  },
+  {
+    "id": "cmd-82",
+    "title": "Get job details.",
+    "command": "kubectl describe job <job-name>",
+    "description": "Quick Action — Jobs & CronJobs",
+    "difficulty": "Essential",
+    "category": "Jobs & CronJobs",
+    "tags": [
+      "#jobs",
+      "#debug"
+    ],
+    "notes": "Get job details. — Included in Jobs & CronJobs commands group."
+  },
+  {
+    "id": "cmd-83",
+    "title": "Delete a job.",
+    "command": "kubectl delete job <job-name>",
+    "description": "Quick Action — Jobs & CronJobs",
+    "difficulty": "Essential",
+    "category": "Jobs & CronJobs",
+    "tags": [
+      "#jobs",
+      "#destructive"
+    ],
+    "notes": "Delete a job. — Included in Jobs & CronJobs commands group."
+  },
+  {
+    "id": "cmd-84",
+    "title": "List all cron jobs.",
+    "command": "kubectl get cronjobs",
+    "description": "Quick Action — Jobs & CronJobs",
+    "difficulty": "Essential",
+    "category": "Jobs & CronJobs",
+    "tags": [
+      "#jobs"
+    ],
+    "notes": "List all cron jobs. — Included in Jobs & CronJobs commands group."
+  },
+  {
+    "id": "cmd-85",
+    "title": "Delete a cron job.",
+    "command": "kubectl delete cronjob <cronjob-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete a cron job. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-86",
+    "title": "Get documentation for pod resources.",
+    "command": "kubectl explain pod",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get documentation for pod resources. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-87",
+    "title": "Run a temporary pod.",
+    "command": "kubectl run --rm -it busybox -- /bin/sh",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Run a temporary pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-88",
+    "title": "Test YAML before applying.",
+    "command": "kubectl apply --dry-run=client -f <file>.yaml",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#manifests"
+    ],
+    "notes": "Test YAML before applying. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-89",
+    "title": "Delete all resources in the namespace.",
+    "command": "kubectl delete all --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all resources in the namespace. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-90",
+    "title": "Delete all pods and services.",
+    "command": "kubectl delete pod,svc --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all pods and services. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-91",
+    "title": "Delete all jobs.",
+    "command": "kubectl delete jobs --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all jobs. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-92",
+    "title": "Check component health.",
+    "command": "kubectl get componentstatus",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Check component health. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-93",
+    "title": "View certificate signing requests.",
+    "command": "kubectl get csr",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "View certificate signing requests. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-94",
+    "title": "Drain a node with emptyDir cleanup.",
+    "command": "kubectl drain <node> --delete-emptydir-data",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Advanced",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Drain a node with emptyDir cleanup. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-95",
+    "title": "Add a label to a pod.",
+    "command": "kubectl label pod <pod-name> env=prod",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Add a label to a pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-96",
+    "title": "Get pods by label.",
+    "command": "kubectl get pod --selector=env=prod",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get pods by label. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-97",
+    "title": "Add an annotation.",
+    "command": "kubectl annotate pod <pod-name> description=\"Test pod\"",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Add an annotation. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-98",
+    "title": "Patch a resource.",
+    "command": "kubectl patch deployment <deployment-name> -p '{\"spec\":{\"replicas\":5}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Patch a resource. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-99",
+    "title": "Delete failed pods.",
+    "command": "kubectl delete pod --field-selector=status.phase=Failed",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete failed pods. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-100",
+    "title": "List all API resources.",
+    "command": "kubectl api-resources",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List all API resources. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-101",
+    "title": "Get nodes with a specific label.",
+    "command": "kubectl get nodes --selector=env=prod",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get nodes with a specific label. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-102",
+    "title": "Assign a node role.",
+    "command": "kubectl label node <node-name> node-role.kubernetes.io/worker=",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Assign a node role. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-103",
+    "title": "Forcefully drain a node.",
+    "command": "kubectl drain <node-name> --delete-local-data --force --ignore-daemonsets",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Advanced",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Forcefully drain a node. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-104",
+    "title": "Custom format output.",
+    "command": "kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.conditions[3].type",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Custom format output. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-105",
+    "title": "Display node resource usage efficiently.",
+    "command": "kubectl top nodes --use-protocol-buffers",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#debug"
+    ],
+    "notes": "Display node resource usage efficiently. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-106",
+    "title": "Set default namespace for the current context.",
+    "command": "kubectl config set-context --current --namespace=<namespace>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Set default namespace for the current context. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-107",
+    "title": "Get only running pods.",
+    "command": "kubectl get pods --field-selector=status.phase=Running",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get only running pods. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-108",
+    "title": "List pods with a specific label.",
+    "command": "kubectl get pods -l app=myapp",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List pods with a specific label. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-109",
+    "title": "Delete pods using a label selector.",
+    "command": "kubectl delete pods -l app=myapp",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete pods using a label selector. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-110",
+    "title": "View logs from a previous container instance.",
+    "command": "kubectl logs --previous <pod-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#debug"
+    ],
+    "notes": "View logs from a previous container instance. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-111",
+    "title": "Execute a command in a specific container.",
+    "command": "kubectl exec <pod-name> -c <container-name> -- ls /app",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Execute a command in a specific container. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-112",
+    "title": "Run a debug container.",
+    "command": "kubectl run debug --image=busybox --restart=Never --rm -it -- /bin/sh",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Run a debug container. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-113",
+    "title": "Copy a file from a pod.",
+    "command": "kubectl cp <pod-name>:<file-path> <destination>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Copy a file from a pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-114",
+    "title": "Copy a file to a pod.",
+    "command": "kubectl cp <source-file> <pod-name>:<destination-path>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Copy a file to a pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-115",
+    "title": "Sort pods by creation time.",
+    "command": "kubectl get pods --sort-by=.metadata.creationTimestamp",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Sort pods by creation time. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-116",
+    "title": "Force delete a pod immediately.",
+    "command": "kubectl delete pod <pod-name> --grace-period=0 --force",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Advanced",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Force delete a pod immediately. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-117",
+    "title": "Get the IP address of a pod.",
+    "command": "kubectl get pod <pod-name> -o jsonpath='{.status.podIP}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get the IP address of a pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-118",
+    "title": "List only pod names.",
+    "command": "kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{\"\\n\"}{end}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List only pod names. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-119",
+    "title": "Update deployment image.",
+    "command": "kubectl set image deployment/<deployment-name> <container-name>=nginx:latest",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Update deployment image. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-120",
+    "title": "Restart all pods in a deployment.",
+    "command": "kubectl rollout restart deployment <deployment-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Restart all pods in a deployment. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-121",
+    "title": "Show labels of deployments.",
+    "command": "kubectl get deployments --show-labels",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Show labels of deployments. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-122",
+    "title": "Delete all deployments.",
+    "command": "kubectl delete deployment --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all deployments. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-123",
+    "title": "Update container image in a deployment.",
+    "command": "kubectl patch deployment <deployment-name> -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"<container-name>\",\"image\":\"nginx:latest\"}]}}}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Update container image in a deployment. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-124",
+    "title": "Scale a deployment to zero.",
+    "command": "kubectl scale --replicas=0 deployment/<deployment-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Scale a deployment to zero. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-125",
+    "title": "Get deployment names only.",
+    "command": "kubectl get deployment -o=jsonpath='{.items[*].metadata.name}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get deployment names only. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-126",
+    "title": "List service names.",
+    "command": "kubectl get services -o=jsonpath='{range .items[*]}{.metadata.name}{\"\\n\"}{end}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List service names. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-127",
+    "title": "Delete all services.",
+    "command": "kubectl delete service --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all services. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-128",
+    "title": "Change a service type.",
+    "command": "kubectl patch svc <service-name> -p '{\"spec\": {\"type\": \"LoadBalancer\"}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Change a service type. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-129",
+    "title": "Get LoadBalancer IP.",
+    "command": "kubectl get svc <service-name> -o jsonpath='{.status.loadBalancer.ingress[0].ip}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get LoadBalancer IP. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-130",
+    "title": "Get the NodePort of a service.",
+    "command": "kubectl get svc <service-name> -o yaml | grep nodePort",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#manifests"
+    ],
+    "notes": "Get the NodePort of a service. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-131",
+    "title": "View ConfigMap in YAML format.",
+    "command": "kubectl get configmap <configmap-name> -o yaml",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#manifests"
+    ],
+    "notes": "View ConfigMap in YAML format. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-132",
+    "title": "Decode secret value.",
+    "command": "kubectl get secret <secret-name> -o jsonpath='{.data.<key>}' | base64 --decode",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Decode secret value. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-133",
+    "title": "Edit an existing ConfigMap.",
+    "command": "kubectl edit configmap <configmap-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Edit an existing ConfigMap. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-134",
+    "title": "Force delete a namespace.",
+    "command": "kubectl delete namespace <namespace> --grace-period=0 --force",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Advanced",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Force delete a namespace. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-135",
+    "title": "Get namespace names only.",
+    "command": "kubectl get namespace -o=jsonpath='{.items[*].metadata.name}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get namespace names only. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-136",
+    "title": "View PV details.",
+    "command": "kubectl get pv -o wide",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "View PV details. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-137",
+    "title": "List PVC names only.",
+    "command": "kubectl get pvc -o jsonpath='{.items[*].metadata.name}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List PVC names only. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-138",
+    "title": "Create a simple job.",
+    "command": "kubectl create job <job-name> --image=busybox -- /bin/sh -c \"echo Hello\"",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Create a simple job. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-139",
+    "title": "Delete all jobs.",
+    "command": "kubectl delete job --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all jobs. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-140",
+    "title": "Create a CronJob.",
+    "command": "kubectl create cronjob <cronjob-name> --schedule=\"*/5 * * * *\" --image=busybox -- /bin/sh -c \"date\"",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Create a CronJob. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-141",
+    "title": "Get ingress names only.",
+    "command": "kubectl get ingress -o=jsonpath='{.items[*].metadata.name}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get ingress names only. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-142",
+    "title": "Get events sorted by timestamp.",
+    "command": "kubectl get events --sort-by='.lastTimestamp'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get events sorted by timestamp. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-143",
+    "title": "Debug a node with a new pod.",
+    "command": "kubectl debug node/<node-name> --image=busybox",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Debug a node with a new pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-144",
+    "title": "Debug a pod interactively.",
+    "command": "kubectl debug pod/<pod-name> --image=busybox",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Debug a pod interactively. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-145",
+    "title": "Check if you can create deployments.",
+    "command": "kubectl auth can-i create deployments",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Check if you can create deployments. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-146",
+    "title": "Check permission for a specific user.",
+    "command": "kubectl auth can-i delete pods --as=<user>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Check permission for a specific user. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-147",
+    "title": "Bind a user to a role.",
+    "command": "kubectl create rolebinding <binding-name> --role=<role-name> --user=<username>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Bind a user to a role. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-148",
+    "title": "Uninstall a Helm release.",
+    "command": "helm uninstall <release-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Uninstall a Helm release. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-149",
+    "title": "Update Helm repositories.",
+    "command": "helm repo update",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Update Helm repositories. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-150",
+    "title": "Explain pod spec structure.",
+    "command": "kubectl explain pod.spec",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Explain pod spec structure. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-151",
+    "title": "Generate pod YAML.",
+    "command": "kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#manifests"
+    ],
+    "notes": "Generate pod YAML. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-152",
+    "title": "List all API services.",
+    "command": "kubectl get apiservices",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List all API services. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-153",
+    "title": "Get details of API services.",
+    "command": "kubectl describe apiservices",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#debug"
+    ],
+    "notes": "Get details of API services. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-154",
+    "title": "Delete a CertificateSigningRequest.",
+    "command": "kubectl delete csr <csr-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete a CertificateSigningRequest. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-155",
+    "title": "List only node names.",
+    "command": "kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{\"\\n\"}{end}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List only node names. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-156",
+    "title": "Restart a DaemonSet.",
+    "command": "kubectl rollout restart daemonset <daemonset-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Restart a DaemonSet. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-157",
+    "title": "Delete all CronJobs.",
+    "command": "kubectl get cronjobs --no-headers | awk '{print $1}' | xargs kubectl delete cronjob",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all CronJobs. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-158",
+    "title": "Get Kubelet version of nodes.",
+    "command": "kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.kubeletVersion}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get Kubelet version of nodes. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-159",
+    "title": "Check node capacity.",
+    "command": "kubectl get nodes -o yaml | grep capacity",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#manifests"
+    ],
+    "notes": "Check node capacity. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-160",
+    "title": "Get node taints.",
+    "command": "kubectl describe node <node-name> | grep Taint",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Advanced",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#debug"
+    ],
+    "notes": "Get node taints. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-161",
+    "title": "Label a node.",
+    "command": "kubectl label node <node-name> disktype=ssd",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Label a node. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-162",
+    "title": "Get nodes with a specific label.",
+    "command": "kubectl get nodes -l disktype=ssd",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get nodes with a specific label. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-163",
+    "title": "Drain a node and delete emptyDir volumes.",
+    "command": "kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Advanced",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Drain a node and delete emptyDir volumes. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-164",
+    "title": "Delete all nodes.",
+    "command": "kubectl get nodes --no-headers | awk '{print $1}' | xargs kubectl delete node",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all nodes. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-165",
+    "title": "Delete all pods.",
+    "command": "kubectl get pods --no-headers | awk '{print $1}' | xargs kubectl delete pod",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all pods. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-166",
+    "title": "Delete all failed pods.",
+    "command": "kubectl delete pod -n <namespace> --field-selector=status.phase=Failed",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all failed pods. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-167",
+    "title": "Get pod conditions.",
+    "command": "kubectl get pod <pod-name> -o jsonpath='{.status.conditions}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get pod conditions. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-168",
+    "title": "Get container images inside a pod.",
+    "command": "kubectl get pod <pod-name> -o jsonpath='{.spec.containers[*].image}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get container images inside a pod. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-169",
+    "title": "Patch container image.",
+    "command": "kubectl patch pod <pod-name> -p '{\"spec\":{\"containers\":[{\"name\":\"<container-name>\",\"image\":\"nginx:latest\"}]}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Patch container image. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-170",
+    "title": "Set resource requests/limits for a deployment.",
+    "command": "kubectl set resources deployment <deployment-name> --limits=cpu=200m,memory=512Mi --requests=cpu=100m,memory=256Mi",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Set resource requests/limits for a deployment. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-171",
+    "title": "Patch deployment label.",
+    "command": "kubectl patch deployment <deployment-name> -p '{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"version\":\"v2\"}}}}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Patch deployment label. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-172",
+    "title": "Pause a deployment rollout.",
+    "command": "kubectl rollout pause deployment <deployment-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Pause a deployment rollout. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-173",
+    "title": "Resume a paused deployment rollout.",
+    "command": "kubectl rollout resume deployment <deployment-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Resume a paused deployment rollout. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-174",
+    "title": "Annotate a deployment.",
+    "command": "kubectl annotate deployment <deployment-name> kubernetes.io/change-cause=\"Updated image to v2\"",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Annotate a deployment. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-175",
+    "title": "Change service port mapping.",
+    "command": "kubectl patch service <service-name> -p '{\"spec\":{\"ports\":[{\"port\":8080,\"targetPort\":80}]}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Change service port mapping. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-176",
+    "title": "Forward a port to a deployment.",
+    "command": "kubectl port-forward deployment/<deployment-name> 8080:80",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Forward a port to a deployment. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-177",
+    "title": "Get services sorted by creation date.",
+    "command": "kubectl get svc --sort-by=.metadata.creationTimestamp",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get services sorted by creation date. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-178",
+    "title": "List all ingress hosts.",
+    "command": "kubectl get ingress -o jsonpath='{range .items[*]}{.spec.rules[*].host}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List all ingress hosts. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-179",
+    "title": "Edit an existing ingress rule.",
+    "command": "kubectl edit ingress <ingress-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Edit an existing ingress rule. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-180",
+    "title": "Delete all ingress rules.",
+    "command": "kubectl delete ingress --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all ingress rules. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-181",
+    "title": "Decode a secret value.",
+    "command": "kubectl get secret <secret-name> -o go-template='{{index .data \"password\"}}' | base64 --decode",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Decode a secret value. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-182",
+    "title": "Update an environment variable in a deployment.",
+    "command": "kubectl set env deployment/<deployment-name> CONFIG_VAR=value",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Update an environment variable in a deployment. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-183",
+    "title": "Create a ConfigMap from a file.",
+    "command": "kubectl create configmap my-config --from-env-file=config.env",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Create a ConfigMap from a file. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-184",
+    "title": "Get ConfigMap names only.",
+    "command": "kubectl get configmaps -o=jsonpath='{.items[*].metadata.name}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get ConfigMap names only. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-185",
+    "title": "Force delete a stuck namespace.",
+    "command": "kubectl patch namespace <namespace> -p '{\"metadata\":{\"finalizers\":null}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Force delete a stuck namespace. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-186",
+    "title": "Get the status of namespaces.",
+    "command": "kubectl get namespace -o jsonpath='{.items[*].status.phase}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get the status of namespaces. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-187",
+    "title": "Resize a PVC.",
+    "command": "kubectl patch pvc <pvc-name> -p '{\"spec\":{\"resources\":{\"requests\":{\"storage\":\"10Gi\"}}}}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Resize a PVC. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-188",
+    "title": "Get PVC storage size.",
+    "command": "kubectl get pvc -o jsonpath='{.items[*].spec.resources.requests.storage}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get PVC storage size. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-189",
+    "title": "Delete all CronJobs.",
+    "command": "kubectl delete cronjob --all",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#destructive"
+    ],
+    "notes": "Delete all CronJobs. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-190",
+    "title": "List successful jobs.",
+    "command": "kubectl get jobs --field-selector=status.successful=1",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "List successful jobs. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-191",
+    "title": "Create a service account.",
+    "command": "kubectl create serviceaccount my-sa",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Create a service account. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-192",
+    "title": "Get service account details.",
+    "command": "kubectl get serviceaccount my-sa -o yaml",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous",
+      "#manifests"
+    ],
+    "notes": "Get service account details. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-193",
+    "title": "Bind a service account to a role.",
+    "command": "kubectl create rolebinding my-rolebinding --role=my-role --serviceaccount=default:my-sa --namespace=default",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Bind a service account to a role. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-194",
+    "title": "Get subjects of all role bindings.",
+    "command": "kubectl get rolebindings -o jsonpath='{.items[*].subjects}'",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Intermediate",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get subjects of all role bindings. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-195",
+    "title": "Search for an nginx Helm chart.",
+    "command": "helm search repo nginx",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Search for an nginx Helm chart. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-196",
+    "title": "Show values of an nginx Helm chart.",
+    "command": "helm show values stable/nginx-ingress",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Show values of an nginx Helm chart. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-197",
+    "title": "Render a Helm template without installing.",
+    "command": "helm template <name> <chart>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Render a Helm template without installing. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-198",
+    "title": "Get Helm release manifest.",
+    "command": "helm get manifest <release-name>",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Get Helm release manifest. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-199",
+    "title": "Debug a node interactively.",
+    "command": "kubectl debug node/<node-name> -it --image=busybox -- sh",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Debug a node interactively. — Included in Miscellaneous commands group."
+  },
+  {
+    "id": "cmd-200",
+    "title": "Attach a debug container to a running pod.",
+    "command": "kubectl debug pod/<pod-name> -it --image=busybox -- sh",
+    "description": "Quick Action — Miscellaneous",
+    "difficulty": "Essential",
+    "category": "Miscellaneous",
+    "tags": [
+      "#miscellaneous"
+    ],
+    "notes": "Attach a debug container to a running pod. — Included in Miscellaneous commands group."
+  }
+];
+
+        const State = {
+            favorites: JSON.parse(localStorage.getItem('opsflow_favs')) || [],
+            recent: JSON.parse(localStorage.getItem('opsflow_recent')) || [],
+            currentCategory: 'all',
+            searchQuery: '',
+            hoveredCardId: null
+        };
+
+        const DOM = {
+            searchInput: document.getElementById('searchInput'),
+            cardsContainer: document.getElementById('cardsContainer'),
+            cardTemplate: document.getElementById('cardTemplate'),
+            categoryList: document.getElementById('categoryList'),
+            workspaceList: document.getElementById('workspaceList'),
+            commandCount: document.getElementById('commandCount'),
+            emptyState: document.getElementById('emptyState'),
+            themeToggleBtn: document.getElementById('themeToggle'),
+            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+            sidebar: document.getElementById('sidebar'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            toastContainer: document.getElementById('toastContainer')
+        };
+
+        function init() {
+            initTheme();
+            setupEventListeners();
+            renderCards();
+        }
+
+        function setupEventListeners() {
+            DOM.searchInput.addEventListener('input', debounce((e) => {
+                State.searchQuery = e.target.value.toLowerCase().trim();
+                renderCards();
+            }, 200));
+
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); DOM.searchInput.focus(); }
+                if (e.key === 'c' && document.activeElement !== DOM.searchInput && State.hoveredCardId) {
+                    const cmdObj = COMMANDS_DATA.find(c => c.id === State.hoveredCardId);
+                    if (cmdObj) copyCommand(cmdObj.command, cmdObj.id);
+                }
+                if (e.key === 'Escape') {
+                    DOM.searchInput.value = ''; State.searchQuery = ''; DOM.searchInput.blur();
+                    DOM.sidebar.classList.remove('open'); DOM.sidebarOverlay.classList.remove('active');
+                    renderCards();
+                }
+            });
+
+            const handleNavClick = (e) => {
+                const li = e.target.closest('li');
+                if (!li) return;
+                document.querySelectorAll('.sidebar li').forEach(el => el.classList.remove('active'));
+                li.classList.add('active');
+                State.currentCategory = li.dataset.category;
+                if (window.innerWidth <= 768) toggleMobileSidebar();
+                renderCards();
+            };
+
+            DOM.categoryList.addEventListener('click', handleNavClick);
+            DOM.workspaceList.addEventListener('click', handleNavClick);
+            DOM.themeToggleBtn.addEventListener('click', toggleTheme);
+            DOM.mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+            DOM.sidebarOverlay.addEventListener('click', toggleMobileSidebar);
+        }
+
+        function renderCards() {
+            const fragment = document.createDocumentFragment();
+            let filtered = COMMANDS_DATA.filter(cmd => filterLogic(cmd));
+
+            if (State.currentCategory === 'Recent') {
+                filtered.sort((a, b) => State.recent.indexOf(a.id) - State.recent.indexOf(b.id));
+            }
+
+            DOM.cardsContainer.innerHTML = '';
+            DOM.commandCount.textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                DOM.emptyState.classList.remove('hidden');
+            } else {
+                DOM.emptyState.classList.add('hidden');
+                filtered.forEach((cmd, index) => {
+                    const node = createCardNode(cmd);
+                    node.querySelector('.command-card').style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
+                    fragment.appendChild(node);
+                });
+                DOM.cardsContainer.appendChild(fragment);
+            }
+        }
+
+        function filterLogic(cmd) {
+            const q = State.searchQuery;
+            const matchSearch = !q || 
+                cmd.title.toLowerCase().includes(q) ||
+                cmd.command.toLowerCase().includes(q) ||
+                cmd.description.toLowerCase().includes(q) ||
+                cmd.tags.some(t => t.toLowerCase().includes(q));
+
+            let matchCategory = true;
+            if (State.currentCategory === 'Favorites') matchCategory = State.favorites.includes(cmd.id);
+            else if (State.currentCategory === 'Recent') matchCategory = State.recent.includes(cmd.id);
+            else if (State.currentCategory !== 'all') matchCategory = cmd.category === State.currentCategory;
+
+            return matchSearch && matchCategory;
+        }
+
+        function createCardNode(cmd) {
+            const clone = DOM.cardTemplate.content.cloneNode(true);
+            const cardEl = clone.querySelector('.command-card');
+            cardEl.dataset.id = cmd.id;
+
+            cardEl.addEventListener('mouseenter', () => State.hoveredCardId = cmd.id);
+            cardEl.addEventListener('mouseleave', () => { if (State.hoveredCardId === cmd.id) State.hoveredCardId = null; });
+
+            const badge = clone.querySelector('.difficulty-badge');
+            badge.textContent = cmd.difficulty;
+            badge.classList.add(cmd.difficulty.toLowerCase());
+            
+            clone.querySelector('.category-label').textContent = String(cmd.category).split(' & ')[0];
+            clone.querySelector('.card-title').textContent = cmd.title;
+            clone.querySelector('.card-description').textContent = cmd.description;
+            clone.querySelector('.command-text').textContent = cmd.command;
+            clone.querySelector('.expanded-notes').innerHTML = cmd.notes;
+
+            const tagsContainer = clone.querySelector('.tags-container');
+            cmd.tags.forEach(tag => {
+                const span = document.createElement('span'); span.className = 'tag'; span.textContent = tag;
+                tagsContainer.appendChild(span);
+            });
+
+            clone.querySelector('.copy-btn').addEventListener('click', () => copyCommand(cmd.command, cmd.id));
+
+            const expandBtn = clone.querySelector('.expand-btn');
+            const expandedContent = clone.querySelector('.card-expanded-content');
+            expandBtn.addEventListener('click', () => {
+                expandedContent.classList.toggle('show');
+                expandBtn.classList.toggle('open');
+            });
+
+            const favBtn = clone.querySelector('.fav-btn');
+            if (State.favorites.includes(cmd.id)) favBtn.classList.add('active');
+            favBtn.addEventListener('click', () => toggleFavorite(cmd.id, favBtn));
+
+            return clone;
+        }
+
+        function copyCommand(text, id) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Command copied to clipboard!');
+                addToRecent(id);
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>${message}</span>`;
+            DOM.toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('fadeOut');
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 3000);
+        }
+
+        function addToRecent(id) {
+            State.recent = [id, ...State.recent.filter(r => r !== id)].slice(0, 15);
+            localStorage.setItem('opsflow_recent', JSON.stringify(State.recent));
+            if (State.currentCategory === 'Recent') renderCards();
+        }
+
+        function toggleFavorite(id, btnElement) {
+            const index = State.favorites.indexOf(id);
+            if (index > -1) {
+                State.favorites.splice(index, 1);
+                btnElement.classList.remove('active');
+            } else {
+                State.favorites.push(id);
+                btnElement.classList.add('active');
+            }
+            localStorage.setItem('opsflow_favs', JSON.stringify(State.favorites));
+            if (State.currentCategory === 'Favorites') renderCards();
+        }
+
+        function toggleMobileSidebar() {
+            DOM.sidebar.classList.toggle('open'); DOM.sidebarOverlay.classList.toggle('active');
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('opsflow_theme') || 'dark';
+            if (saved === 'light') document.body.classList.add('light-theme');
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-theme');
+            localStorage.setItem('opsflow_theme', isLight ? 'light' : 'dark');
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
