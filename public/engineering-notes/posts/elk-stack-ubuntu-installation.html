@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">Building a Real-Time Observability Pipeline: Installing Elasticsearch and Kibana on Ubuntu</title>
+    <title lang="fr">Construire un Pipeline d'Observabilité en Temps Réel : Installation d'Elasticsearch et Kibana sur Ubuntu</title>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px;
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: color 0.2s; 
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+        .note-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .mermaid { margin: 32px 0; background: #ffffff; padding: 24px; border: 1px solid var(--border); border-radius: 12px; text-align: center; }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    </style>
+
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--accent); font-weight: 600;">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    <main id="content">
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <article>
+        <header>
+            <div class="meta">April 2026 • Observability • 7 min read</div>
+            <h1>Building a Real-Time Observability Pipeline: Installing Elasticsearch and Kibana on Ubuntu</h1>
+        </header>
+
+        <section id="introduction">
+            <p>In the world of data engineering and DevOps, the <strong>ELK Stack</strong> (Elasticsearch, Logstash, Kibana) stands as the gold standard for searching, analyzing, and visualizing big data in real-time. Whether you are monitoring kubernetes logs, analyzing security events, or building an enterprise search engine, a deep understanding of deploying this stack effectively is a fundamental engineering skill.</p>
+            <p>In this guide, I will walk you through the architecture of the stack and provide an advanced, production-grade installation guide for Elasticsearch and Kibana on an Ubuntu server. This is not just a quick start; we will focus on zero-trust networking parameters, OS fine-tuning for JVM memory allocation, and industry-standard security boundaries.</p>
+        </section>
+
+        <section id="architecture">
+            <h2>1. The Architecture</h2>
+            <p>Before diving into the terminal, we must understand the topology of how data flows through our infrastructure.</p>
+            
+            <div class="mermaid">
+                graph LR
+                A[Data Sources: Logs, Metrics] -->|Shipped via| B[Logstash / Beats]
+                B -->|Ingest / Mutate| C[(Elasticsearch)]
+                C -->|Query| D[Kibana UI]
+                D -->|Visualize| E[End User / Admin]
+                style C fill:#00bfb3,stroke:#fff,stroke-width:2px,color:#fff
+                style D fill:#f04e98,stroke:#fff,stroke-width:2px,color:#fff
+            </div>
+
+            <ul>
+                <li><strong>Elasticsearch (The Engine):</strong> A distributed, RESTful search and analytics engine running on Apache Lucene. It serves as your primary data store and inverted index.</li>
+                <li><strong>Kibana (The Viewport):</strong> Operational dashboard layer. Connects securely to the Elasticsearch cluster, allowing operators to build robust visualization pipelines, alert thresholds, and manage node health.</li>
+                <li><strong>Beats / Logstash (The Pipeline):</strong> Lightweight edge shippers and robust ETL processors that normalize logs before persisting them to disk.</li>
+            </ul>
+        </section>
+
+        <section id="prerequisites">
+            <h2>2. Prerequisites & Environment Specs</h2>
+            <p>Modern versions of the Elastic Stack (8.x) require careful resource provisioning. A heavily utilized Elasticsearch node will easily exhaust an under-provisioned server.</p>
+            <ul>
+                <li><strong>OS:</strong> Ubuntu 22.04 LTS or 24.04 LTS.</li>
+                <li><strong>Memory:</strong> Minimum 4GB RAM (8GB+ recommended). Elasticsearch JVM consumes 50% of available RAM by default.</li>
+                <li><strong>Disk:</strong> Fast SSD storage (NVMe preferred) mapped to <code>/var/lib/elasticsearch</code>. IOPS performance dictates search speeds.</li>
+                <li><strong>Network:</strong> Ports 9200 (Elasticsearch API) and 5601 (Kibana Web).</li>
+            </ul>
+        </section>
+
+        <section id="installation">
+            <h2>3. Step-by-Step Production Installation</h2>
+            
+            <h3>Step 1: System Tuning & Dependencies</h3>
+            <p>First, we configure the kernel. Elasticsearch utilizes `mmapfs` to map indices into memory. The default OS limits on mmap counts are too low and will cause out-of-memory errors on startup.</p>
+            
+<div class="code-header">Bash</div>
+<pre><code class="language-bash"># Update package index and install TLS dependencies
+sudo apt update && sudo apt upgrade -y
+sudo apt install wget curl gnupg2 apt-transport-https -y
+
+# Permanently increase highly critical max_map_count parameter
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p</code></pre>
+
+            <h3>Step 2: Add the Elastic Repository Securely</h3>
+            <p>Modern Ubuntu drops support for <code>apt-key</code>. We follow the strict GPG dearmor pipeline to authorize Elastic signatures.</p>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash"># Fetch and process the official Elastic Stack GPG Key
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /usr/share/keyrings/elasticsearch-keyring.gpg > /dev/null
+
+# Register the 8.x stable repository pointing to our keyring
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+
+sudo apt update</code></pre>
+
+            <h3>Step 3: Install & Solidify Elasticsearch</h3>
+            <p>Version 8.x ships with TLS (SSL) enabled by default for all HTTP and transport-layer communication.</p>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">sudo apt install elasticsearch -y</code></pre>
+
+            <div class="note-box">
+                <strong>Crucial:</strong> Save the terminal output! Immediately after the package finishes, the installer prints the autogenerated password for the <code>elastic</code> superuser and the Kibana setup token.
+            </div>
+
+            <p>Configure the Node for a Single-Server footprint (if not deployed in a cluster to avoid Bootstrap checks failing) and set the correct network bindings.</p>
+
+<div class="code-header">Configuration</div>
+<pre><code class="language-yaml"># /etc/elasticsearch/elasticsearch.yml
+cluster.name: prod-observability-cluster
+node.name: node-1
+network.host: localhost  # Keep localhost if Kibana is on same server, use VPN IP otherwise.
+discovery.type: single-node
+</code></pre>
+
+            <p>Tune the JVM Heap. Never exceed 50% of total system RAM, up to a maximum of 31GB.</p>
+
+<div class="code-header">Configuration</div>
+<pre><code class="language-bash"># /etc/elasticsearch/jvm.options.d/heap.options
+-Xms2g
+-Xmx2g
+</code></pre>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl enable --now elasticsearch
+</code></pre>
+
+            <h3>Step 4: Install Kibana & Complete Enrollment</h3>
+            <p>The web layer, Kibana, uses the Elasticsearch token to instantly establish a secure connection using the pre-generated CA certificates.</p>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">sudo apt install kibana -y
+
+# Configure Kibana for external access (Reverse Proxy recommended)
+sudo nano /etc/kibana/kibana.yml</code></pre>
+
+<div class="code-header">Configuration</div>
+<pre><code class="language-yaml"># /etc/kibana/kibana.yml
+server.port: 5601
+server.host: "0.0.0.0" # Expose to network
+</code></pre>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">sudo systemctl enable --now kibana</code></pre>
+
+            <p>Missed the initial token? Regenerate it via cli:</p>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">sudo /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+sudo /usr/share/kibana/bin/kibana-verification-code
+</code></pre>
+            <p>Navigate to <code>http://YOUR_SERVER_IP:5601</code>, paste the token, verify with the secondary code, and authenticate using the <code>elastic</code> username.</p>
+
+        </section>
+
+        <section id="best-practices">
+            <h2>4. Essential Production Best Practices</h2>
+            <p>If you aim to run this in strict production environments, keep these practices in your playbook:</p>
+            <ul>
+                <li><strong>Reverse Proxying:</strong> Never expose port 5601 and absolutely never expose 9200 over the raw internet. Set Kibana to `server.host: localhost` and proxy traffic via <strong>NGINX</strong> using properly signed Let's Encrypt SSL Certs.</li>
+                <li><strong>Firewall (UFW):</strong> <code>sudo ufw block 9200</code>. Only the internal servers (Logstash/Beats endpoints) should be allowed to hit the ingest port.</li>
+                <li><strong>Index Lifecycle Management (ILM):</strong> Data explodes. Utilize Kibana's ILM UI to define strict rollover profiles. E.g., Move to "Warm" storage after 15 days, "Delete" after 30 days.</li>
+                <li><strong>Kernel Swap:</strong> Swapping Elasticsearch memory pages to disk will destroy performance. Disable swap via <code>sudo swapoff -a</code> and add <code>bootstrap.memory_lock: true</code> in elasticsearch.yml.</li>
+            </ul>
+        </section>
+            </article>
+        </div>
+
+        <!-- FRENCH VERSION -->
+        <div lang="fr">
+            <article>
+        <header>
+            <div class="meta">Avril 2026 • Observabilité • 7 min de lecture</div>
+            <h1>Construire un Pipeline d'Observabilité en Temps Réel : Installation d'Elasticsearch et Kibana sur Ubuntu</h1>
+        </header>
+        <section id="introduction-fr">
+            <p>Dans l'ingénierie DevOps moderne, la stack ELK (Elasticsearch, Logstash, Kibana) demeure le standard industriel pour ingérer et interroger des flux de données colossaux. Ce guide documente le déploiement optimal d’Elasticsearch et Kibana sur Ubuntu, intégrant paramétrages noyaux de bas niveau (mmap), réglages de machine virtuelle Java, et sécurité réseau pour la production.</p>
+        </section>
+        <section>
+            <em>Consultez la version anglaise pour l'intégralité du guide technique, incluant les configurations avancées, les réglages de cluster Elasticsearch 8.x et la gestion du reverse proxy.</em>
+        </section>
+            </article>
+        </div>
+    </main>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

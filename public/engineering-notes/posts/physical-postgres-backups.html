@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">Physical Database Backups: Archiving the Entire PostgreSQL Data Directory</title>
+    <title lang="fr">Sauvegardes Physiques de Base de Données : Archivage Complet du Répertoire de Données PostgreSQL</title>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px;
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: color 0.2s; 
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+        .note-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .mermaid { margin: 32px 0; background: #ffffff; padding: 24px; border: 1px solid var(--border); border-radius: 12px; text-align: center; }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    </style>
+
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--accent); font-weight: 600;">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    <main id="content">
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <article>
+        <header>
+            <div class="meta">April 2026 • Database & Automation • 5 min read</div>
+            <h1>Physical Database Backups: Archiving the Entire PostgreSQL Data Directory</h1>
+        </header>
+
+        <section id="introduction">
+            <p>When managing PostgreSQL in Docker, there are two fundamental ways to back up your data: <strong>Logical</strong> (exporting SQL text via <code>pg_dump</code>) and <strong>Physical</strong> (copying the actual raw data files on the disk).</p>
+            <p>While SQL exports are excellent for portability and schema updates, Physical Backups are significantly faster for large databases (100GB+) and ensure that your entire environment—including configuration files, indexes, and Write-Ahead Logs (WAL)—is preserved exactly as it is. In this technical guide, I’ll show you how to automate a compressed archive of a complete PostgreSQL data folder living on the host filesystem.</p>
+        </section>
+
+        <section id="architecture">
+            <h2>1. The Architecture</h2>
+            <p>This workflow involves interacting directly with the Host File System and the Docker Engine daemon to ensure complete data consistency during the backup phase.</p>
+            
+            <div class="mermaid">
+                graph TD
+                    A[Cron Job Trigger] --> B[Docker Compose: Stop Container]
+                    B --> C[Host System: Tar & Gzip pg_data folder]
+                    C --> D[Docker Compose: Start Container]
+                    D --> E[Retention Policy: Delete Old Archives]
+                    E --> F[(Backup Storage / Cloud)]
+                    
+                    style B fill:#e11d48,stroke:#fff,stroke-width:2px,color:#fff
+                    style C fill:#0284c7,stroke:#fff,stroke-width:2px,color:#fff
+                    style D fill:#16a34a,stroke:#fff,stroke-width:2px,color:#fff
+            </div>
+
+            <h3>Component Breakdown:</h3>
+            <ul>
+                <li><strong>pg_data Folder:</strong> The physical directory mapped onto your Ubuntu instance where Postgres stores its internal files (tables, schemas, WAL logs).</li>
+                <li><strong>Docker Compose:</strong> Used to "Pause/Stop" the database. This is crucial because copying a "live" database folder can lead to permanently corrupted files if Postgres writes to the disk during the copy interval.</li>
+                <li><strong>Tar & Gzip:</strong> Native Linux tools used to bundle the entire directory into a single, highly compressed immutable <code>.tar.gz</code> archive.</li>
+                <li><strong>Cron:</strong> The strict Linux scheduler that triggers this process hands-free.</li>
+            </ul>
+        </section>
+
+        <section id="automated-script">
+            <h2>2. The Automated Backup Script</h2>
+            <p>This bash script safely orchestrates the process: it gracefully stops the database, heavily archives the directory, and brings the microservice back online immediately. By explicitly capturing the exit code of `tar`, we guarantee the database boots back up even if the disk runs out of space.</p>
+            
+            <p><strong>File:</strong> <code>~/scripts/backup_folder_all.sh</code></p>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">#!/usr/bin/env bash
+
+# Exit immediately on any strictly unhandled error
+set -e
+
+# --- CONFIGURATION ---
+BACKUP_BASE_DIR="$HOME/backups/physical"
+TODAY=$(date +"%Y-%m-%d")
+BACKUP_DIR="$BACKUP_BASE_DIR/$TODAY"
+RETENTION_DAYS=7
+
+# Ensure daily backup directory exists
+mkdir -p "$BACKUP_DIR"
+
+backup_physical_folder() {
+    local env_name=$1
+    local compose_dir=$2
+    local data_folder_name="pg_data" # Change this if your mounted volume folder name differs
+
+    echo "--- Starting Physical Backup for: $env_name ---"
+
+    cd "$compose_dir"
+
+    # 1. STOP the database to prevent data corruption during copy operations
+    echo "-> Stopping container to ensure strict data consistency..."
+    docker compose stop postgres
+
+    # 2. Archive the volume folder
+    echo "-> Creating highly compressed block archive..."
+    if tar -czf "$BACKUP_DIR/${env_name}_full_dir.tar.gz" -C "$compose_dir" "$data_folder_name"; then
+        echo "   [SUCCESS] Native archive created."
+    else
+        echo "   [ERROR] Archiving failed (check disk space or inode exhaustion)."
+        # Rescue condition: Ensure DB starts even if backup pipeline fails
+        docker compose start postgres 
+        exit 1
+    fi
+
+    # 3. RESTART the database
+    echo "-> Restarting container to resume network traffic..."
+    docker compose start postgres
+
+    echo "--- Finished $env_name ---"
+}
+
+# --- EXECUTION ---
+# Syntax: backup_physical_folder "ProjectName" "PathToDockerComposeFolder"
+backup_physical_folder "ProjectName" "PathToDockerComposeFolder"
+
+# --- CLEANUP (Retention Policy) ---
+# Prevent disk burnout by purging physical backups older than 7 days
+find "$BACKUP_BASE_DIR" -type d -mtime +$RETENTION_DAYS -exec rm -rf {} +
+
+echo "Backup pipeline finished optimally at $(date)"</code></pre>
+        </section>
+
+        <section id="scheduling">
+            <h2>3. Automation via Crontab</h2>
+            <p>To ensure this runs every Monday at 8:00 AM without human intervention, we schedule it utilizing Cron equipped with <strong>process politeness</strong> settings to avoid tanking the host's performance.</p>
+
+            <h3>Step 1: Execute Permissions</h3>
+            <p>Make the script securely executable:</p>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">chmod +x ~/scripts/backup_folder_all.sh</code></pre>
+
+            <h3>Step 2: Edit the Schedule</h3>
+            <p>Inject the payload into the cron daemon:</p>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">crontab -e</code></pre>
+
+            <p>Add the exact schedule syntax with CPU adjustments:</p>
+<div class="code-header">Cron</div>
+<pre><code class="language-cron">00 08 * * 1 nice -n 19 ionice -c 3 /bin/bash /home/ubuntu/scripts/backup_folder_all.sh >> /home/ubuntu/backups/cron_folder.log 2>&1</code></pre>
+
+            <div class="note-box">
+                <strong>Why use <code>nice</code> and <code>ionice</code>?</strong><br>
+                Since we are heavily compressing an entire folder (which can easily exceed multiple gigabytes), it burns massive CPU cycles and Disk IOPS:
+                <ul>
+                    <li><code>nice -n 19</code>: Yields the highest niceness. Gives the backup shell process the lowest possible CPU priority relative to production traffic.</li>
+                    <li><code>ionice -c 3</code>: Instructs the Linux kernel to only write the tarball stream to the disk when the hard drive is completely idle. This strictly ensures your server remains responsive and handles HTTP requests without spikes during the compression.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices">
+            <h2>4. Best Practices for Folder Backups</h2>
+            
+            <h3>A. The "Consistency" Rule</h3>
+            <p><strong>Never</strong> copy a <code>pg_data</code> folder while the database is aggressively running. Postgres constantly flushes data to "Write-Ahead Logs" (WAL) asynchronously. If you copy the folder mid-write utilizing <code>rsync</code> or <code>cp</code>, the resulting backup will suffer from corrupted byte boundaries and will be entirely unstartable. Always rigidly wrap your copies in <code>docker compose stop</code> or utilize native filesystem snapshots (like ZFS/LVM) if available.</p>
+
+            <h3>B. Version Matching</h3>
+            <p>Physical backups are intrinsically "version-dependent". If you back up a raw <code>pg_data</code> folder synthesized from PostgreSQL 15, you absolutely cannot easily restore it into a running PostgreSQL 16 container. The underlying binary layouts are completely different. Always rigorously document which immutable version tag of Postgres you were running at the instance of the physical backup.</p>
+
+            <h3>C. Test Your Restores</h3>
+            <p>A backup is solely a "promise" until you validate it. To safely test a physical backup pipeline:</p>
+            <ol>
+                <li>Scp the <code>.tar.gz</code> payload to a staging machine.</li>
+                <li>Decompress it: <code>tar -xzf backup.tar.gz</code>.</li>
+                <li>Mount a fresh isolated Docker container securely to that newly generated folder.</li>
+                <li>Verify your indices and critical data tables are fully accessible inside the <code>psql</code> shell.</li>
+            </ol>
+        </section>
+        
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+            <p>By capturing the entire <code>pg_data</code> directory, we have effectively constructed an immutable "snapshot in time" of our entire infrastructural state space. This physical methodology translates to the fastest technical path to recover from a total catastrophic server failure, as it uniquely allows us to restore the database configuration, users, layouts, and indices exactly as they were prior to the incident.</p>
+            <p>Always mix logical logical backups with physical off-site tarballs for true enterprise resilience!</p>
+        </section>
+
+            </article>
+        </div>
+
+        <!-- FRENCH VERSION -->
+        <div lang="fr">
+            <article>
+        <header>
+            <div class="meta">Avril 2026 • Base de Données & Automatisation • 5 min de lecture</div>
+            <h1>Sauvegardes Physiques de Base de Données : Archivage Complet du Répertoire de Données PostgreSQL</h1>
+        </header>
+
+        <section id="introduction-fr">
+            <p>Lors de la gestion de PostgreSQL sous Docker, il existe la sauvegarde <strong>Logique</strong> (via <code>pg_dump</code>) et <strong>Physique</strong> (copie des fichiers de données bruts sur le disque).</p>
+            <p>Bien que l'export SQL soit excellent pour la portabilité, les sauvegardes physiques sont beaucoup plus rapides pour les bases de données très volumineuses, et garantissent la préservation totale de votre environnement. Ce guide explique comment automatiser en toute sécurité l'archivage complet du dossier <code>pg_data</code> de PostgreSQL au niveau du système hôte.</p>
+        </section>
+
+        <section>
+            <em>Consultez la version anglaise (bouton EN en haut à droite) pour l'intégralité de ce guide technique technique, incluant le diagramme d'architecture, les scripts Bash d'automatisation et les commandes d'ajustement du Kernel (nice/ionice).</em>
+        </section>
+            </article>
+        </div>
+    </main>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

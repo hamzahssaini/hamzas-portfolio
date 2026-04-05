@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">Automating Database Backups: From Manual to "Set and Forget"</title>
+    <title lang="fr">Automatisation des Sauvegardes de Bases de Données : Du Manuel au "Set and Forget"</title>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px;
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: color 0.2s; 
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+        .note-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    </style>
+
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--accent); font-weight: 600;">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    <main id="content">
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <article>
+        <header>
+            <div class="meta">April 2026 • Database & Automation • 6 min read</div>
+            <h1>Automating Database Backups: From Manual to "Set and Forget"</h1>
+        </header>
+
+        <section id="the-strategy">
+            <h2>1. The Strategy: When and How?</h2>
+            <p>Before we automate, we must decide on the frequency. A missing backup strategy is a disaster waiting to happen.</p>
+            
+            <h3>Best Practice Timing</h3>
+            <ul>
+                <li><strong>The "Golden Hour":</strong> Most production databases are backed up between 1:00 AM and 3:00 AM. This is typically when user traffic is lowest, minimizing the performance impact of the <code>pg_dump</code> process on active connections and IOPS.</li>
+                <li><strong>Frequency:</strong>
+                    <ul>
+                        <li><em>Standard Apps:</em> Once every 24 hours (Daily).</li>
+                        <li><em>Critical Apps:</em> Every 4 or 6 hours.</li>
+                        <li><em>High-Transaction Apps:</em> Hourly + Write-Ahead Logging (WAL) archiving.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>The 3-2-1 Backup Rule</h3>
+            <p>To ensure your data is truly resilient against ransomware or physical hardware failure, mandate the 3-2-1 rule:</p>
+            <ul>
+                <li><strong>3</strong> copies of your data (Live DB, Local Backup, Offsite Backup).</li>
+                <li><strong>2</strong> different media types (Local Storage, Object Storage/Cloud).</li>
+                <li><strong>1</strong> copy offsite (A distinct geographic physical location or cloud provider).</li>
+            </ul>
+        </section>
+
+        <section id="refining-script">
+            <h2>2. Refining Your Script for Automation</h2>
+            <p>When running scripts via headless automation tools like Cron, they execute without an interactive terminal handler (tty). We must architect the script to handle explicit logging pipelines and embed a strict retention policy (pruning old backups to prevent catastrophic disk saturation).</p>
+            
+            <p>Below is an enterprise-grade shell script built to automate PostgreSQL backups via Docker Compose:</p>
+
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">#!/usr/bin/env bash
+
+# Exit immediately if a pipeline or command fails
+set -e
+
+# --- CONFIGURATION ---
+BACKUP_BASE_DIR="$HOME/backups"
+LOG_FILE="$BACKUP_BASE_DIR/backup_log.log"
+RETENTION_DAYS=7  # Prune backups older than 7 days
+TODAY=$(date +"%Y-%m-%d")
+BACKUP_DIR="$BACKUP_BASE_DIR/$TODAY"
+
+# Ensure base directory and log file exist safely
+mkdir -p "$BACKUP_BASE_DIR"
+touch "$LOG_FILE"
+
+# Capture stdout and stderr and pipe it into the log file simultaneously
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+echo "--- Backup Started: $(date) ---"
+
+# Create today's backup directory with strict read-only permissions
+if [[ ! -d "$BACKUP_DIR" ]]; then
+    mkdir -p "$BACKUP_DIR"
+    chmod 700 "$BACKUP_DIR"
+fi
+
+backup_postgres() {
+    local env_name=$1
+    local compose_dir=$2
+    local service_name="postgres"
+
+    echo "-> Backing up $env_name..."
+    cd "$compose_dir"
+
+    # Best practice: Execute purely non-interactive (-T) against the db container
+    docker compose exec -T "$service_name" sh -c 'pg_dumpall -U "$POSTGRES_USER"' | gzip > "$BACKUP_DIR/${env_name}_${TODAY}.sql.gz"
+
+    echo "   [SUCCESS] ${env_name} saved and compressed."
+}
+
+# Run Backups via Absolute Paths
+backup_postgres "SRV-DB-NAME" "$HOME/path/to/db-name"
+
+# --- RETENTION POLICY (Pruning) ---
+echo "-> Cleaning up historical root aggregates older than $RETENTION_DAYS days..."
+find "$BACKUP_BASE_DIR" -type d -mtime +$RETENTION_DAYS -exec rm -rf {} +
+
+echo "--- Backup Completed Successfully: $(date) ---"
+</code></pre>
+        </section>
+
+        <section id="scheduling">
+            <h2>3. Scheduling with Cron</h2>
+            <p>The <strong>Cron</strong> daemon is the POSIX standard for scheduling unattended background jobs.</p>
+            
+            <h3>Step 1: Open the Crontab editor</h3>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">crontab -e</code></pre>
+
+            <h3>Step 2: Declare the Schedule</h3>
+            <p>To explicitly execute the DB backup sequence every night precisely at 2:30 AM, inject this payload into the file:</p>
+<div class="code-header">Cron</div>
+<pre><code class="language-cron">30 2 * * * /bin/bash /home/your_username/scripts/db_backup_all.sh</code></pre>
+
+            <div class="note-box">
+                <strong>Cron Syntax Breakdown (<code>30 2 * * *</code>):</strong><br>
+                <code>30</code>: Minute (0-59)<br>
+                <code>2</code>: Hour (0-23)<br>
+                <code>*</code>: Day of month (1-31)<br>
+                <code>*</code>: Month (1-12)<br>
+                <code>*</code>: Day of week (0-6, Sunday is 0)
+            </div>
+
+            <h3>Step 3: Verify the Job Allocation</h3>
+            <p>List your active, bound cron configurations:</p>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">crontab -l</code></pre>
+        </section>
+
+        <section id="best-practices">
+            <h2>4. Production Best Practices for Backups</h2>
+            
+            <h3>A. Monitor your Backups (Dead Man's Snitch)</h3>
+            <p>A prevalent post-mortem failure point is a cron job that silently dies because of a full inode disk or rotated DB credentials. Use an external heartbeat service (like Healthchecks.io) to ensure successful egress execution. Attach a standard curl ping to the footer of the bash script:</p>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash">curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/your-uuid-here</code></pre>
+
+            <h3>B. Offsite Sync (The "Cloud" Step)</h3>
+            <p>Maintaining localized backups creates a single point of catastrophic failure. Push your compressed `.gz` files into immutable Object Storage (S3). Utilize the AWS CLI native sync engine:</p>
+<div class="code-header">Bash</div>
+<pre><code class="language-bash"># Syncing natively to AWS S3
+aws s3 sync "$BACKUP_BASE_DIR" s3://my-unique-backup-bucket/db-backups/ --delete</code></pre>
+
+            <h3>C. Test Your Restores (Mandatory)</h3>
+            <p>A pristine backup is completely worthless until safely restored into an isolated state. Dedicate an operational window once per month to spin up a volatile Docker container and enforce a DB schema restoration using one of your `.sql.gz` files. Do not wait for a crisis to realize there's silent memory corruption during `pg_dump`.</p>
+
+            <h3>D. Environmental Variable Security</h3>
+            <p>As utilizing `docker compose exec`, always enforce strict credential mapping inside isolated `.env` parameter configurations pointing to your containerized POSTGRES_USER and POSTGRES_PASSWORD strings. Your shell environment is now securely decoupled and inherits environmental execution context directly through the container binary pipeline.</p>
+        </section>
+        
+            </article>
+        </div>
+
+        <!-- FRENCH VERSION -->
+        <div lang="fr">
+            <article>
+        <header>
+            <div class="meta">Avril 2026 • Base de Données & Automatisation • 6 min de lecture</div>
+            <h1>Automatisation des Sauvegardes de Bases de Données : Du Manuel au "Set and Forget"</h1>
+        </header>
+
+        <section id="introduction-fr">
+            <p>Avant d'automatiser, nous devons déterminer la fréquence de sauvegarde. Ne pas avoir de stratégie est la garantie d'un désastre technique.</p>
+            <p>Cet article plonge dans la mise en œuvre d'un script Bash de production avec une réelle stratégie de sauvegarde (règle du 3-2-1), la gestion des journaux pour Cron, et des politiques de suppression d'anciens fichiers automatiques.</p>
+        </section>
+
+        <section>
+            <em>Consultez la version anglaise pour l'intégralité du guide technique, incluant les scripts Bash complets prêts pour la production, la syntaxe Cron détaillée et l'intégration de synchronisation vers le cloud avec AWS S3 CLI.</em>
+        </section>
+            </article>
+        </div>
+    </main>
+</body>
+</html>
