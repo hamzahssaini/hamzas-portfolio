@@ -205,6 +205,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -259,7 +267,7 @@
                 <p>Dozens, sometimes hundreds, of dead pods cluttering your namespace.</p>
                 <p>In this post, I will break down exactly what this error means, how to clean it up instantly, and most importantly, the <strong>Enterprise Best Practices</strong> to ensure it never happens to your production cluster again.</p>
 
-                <h2> What is the "Eviction Graveyard"?</h2>
+                <h2 class="text-blue"  >What is the "Eviction Graveyard"?</h2>
                 <p>When a pod shows as <code>Evicted</code>, it means the Kubernetes Worker Node completely ran out of a critical resource—usually RAM or Hard Drive space (<code>ephemeral-storage</code>).</p>
                 <p>To prevent the entire Linux server from crashing, the Kubelet goes into <strong>"survival mode"</strong> and aggressively assassinates the pods consuming the most resources.</p>
                 
@@ -267,7 +275,7 @@
                 
                 <p>If you see <code>ContainerStatusUnknown</code>, it means the Worker Node was struggling so badly (likely at 100% CPU or 100% Disk IO) that it temporarily lost communication with the Kubernetes Control Plane.</p>
 
-                <h2> The Immediate Fix (Putting out the fire)</h2>
+                <h2 class="text-red"  >The Immediate Fix (Putting out the fire)</h2>
                 <p>Before we fix the root cause, let's clean up your terminal and free up the node.</p>
 
                 <h3>1. Clean up the Graveyard</h3>
@@ -284,11 +292,11 @@ sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
 # If using standard Docker:
 docker image prune -a</code></pre>
 
-                <h2> The Root Cause: Ephemeral-Storage</h2>
+                <h2 class="text-orange"  >The Root Cause: Ephemeral-Storage</h2>
                 <p>In my case, the issue was tied to <strong>AI Document Processing microservices</strong>.</p>
                 <p>When your application downloads large PDFs or images, processes them, and saves temp files to the local Linux container (<code>/tmp</code>), it consumes <code>ephemeral-storage</code>. If the app doesn't delete those files after processing, the pod bloats until it consumes the node's entire hard drive.</p>
 
-                <h2> Enterprise Best Practices (The Permanent Fix)</h2>
+                <h2 class="text-green"  >Enterprise Best Practices (The Permanent Fix)</h2>
                 <p>In a professional DevOps environment, you never want a single rogue microservice to fill up a server's hard drive and take down neighboring applications. Here is the two-step best practice to secure your cluster.</p>
 
                 <h3>1. The DevOps Fix: Enforce Resource Limits</h3>
@@ -309,7 +317,7 @@ docker image prune -a</code></pre>
                 <p>Infrastructure limits are the safety net, but the actual cure requires good software engineering. If your application processes files (like an AI model running inference on documents), the code must include a cleanup phase.</p>
                 <p>Ensure your developers are using standard cleanup methods in their code (e.g., Python's <code>os.remove(temp_file_path)</code> or <code>tempfile.TemporaryDirectory()</code>) as soon as the API response is sent to the user.</p>
 
-                <h2>Conclusion</h2>
+                <h2 class="text-purple"  >Conclusion</h2>
                 <p>Kubernetes is incredibly resilient, but it relies on us to give it the right boundaries. By combining automated cleanup commands, strict YAML resource limits, and good developer practices, you can permanently banish the Eviction Graveyard from your cluster.</p>
                 <p><em>Have you run into the Eviction Graveyard before? Let me know how you solved it on LinkedIn!</em></p>
             </article>
@@ -332,7 +340,7 @@ docker image prune -a</code></pre>
                 <p>Des dizaines, parfois des centaines, de pods morts encombrent votre namespace.</p>
                 <p>Dans cet article, je vais vous expliquer exactement ce que signifie cette erreur, comment la nettoyer instantanément, et surtout, les <strong>Meilleures Pratiques d'Entreprise</strong> pour s'assurer que cela ne se produise plus jamais sur votre cluster de production.</p>
 
-                <h2> Qu'est-ce que le « Cimetière d'Évictions » ?</h2>
+                <h2 class="text-blue"  >Qu'est-ce que le « Cimetière d'Évictions » ?</h2>
                 <p>Lorsqu'un pod affiche le statut <code>Evicted</code> (Évincé), cela signifie que le nœud de travail Kubernetes est complètement à court d'une ressource critique, généralement de la RAM ou de l'espace disque (<code>ephemeral-storage</code>).</p>
                 <p>Pour éviter que le serveur Linux entier ne plante, le Kubelet passe en <strong>« mode survie »</strong> et assassine agressivement les pods qui consomment le plus de ressources.</p>
                 
@@ -340,7 +348,7 @@ docker image prune -a</code></pre>
                 
                 <p>Si vous voyez <code>ContainerStatusUnknown</code>, cela signifie que le nœud de travail était tellement en difficulté (probablement à 100 % de CPU ou 100 % d'E/S disque) qu'il a temporairement perdu la communication avec le Control Plane de Kubernetes.</p>
 
-                <h2> La Correction Immédiate (Éteindre l'incendie)</h2>
+                <h2 class="text-red"  >La Correction Immédiate (Éteindre l'incendie)</h2>
                 <p>Avant de corriger la cause fondamentale, nettoyons votre terminal et soulageons le nœud.</p>
 
                 <h3>1. Nettoyer le Cimetière</h3>
@@ -357,11 +365,11 @@ sudo /var/lib/rancher/rke2/bin/crictl rmi --prune
 # Si vous utilisez Docker standard :
 docker image prune -a</code></pre>
 
-                <h2> La Cause Profonde : Stockage Éphémère (ephemeral-storage)</h2>
+                <h2 class="text-orange"  >La Cause Profonde : Stockage Éphémère (ephemeral-storage)</h2>
                 <p>Dans mon cas, le problème était lié aux <strong>microservices de traitement de documents par IA</strong>.</p>
                 <p>Lorsque votre application télécharge de gros PDF ou images, les traite et enregistre des fichiers temporaires dans le conteneur Linux local (<code>/tmp</code>), elle consomme du <code>ephemeral-storage</code>. Si l'application ne supprime pas ces fichiers après traitement, le pod gonfle jusqu'à consommer tout le disque dur du nœud.</p>
 
-                <h2> Meilleures Pratiques d'Entreprise (La Solution Permanente)</h2>
+                <h2 class="text-green"  >Meilleures Pratiques d'Entreprise (La Solution Permanente)</h2>
                 <p>Dans un environnement DevOps professionnel, vous ne voulez jamais qu'un seul microservice malveillant remplisse le disque dur d'un serveur et fasse tomber les applications voisines. Voici la meilleure pratique en deux étapes pour sécuriser votre cluster.</p>
 
                 <h3>1. La Solution DevOps : Appliquer les Limites de Ressources</h3>
@@ -382,7 +390,7 @@ docker image prune -a</code></pre>
                 <p>Les limites d'infrastructure sont un filet de sécurité, mais le véritable remède nécessite une bonne ingénierie logicielle. Si votre application traite des fichiers (comme un modèle d'IA effectuant des inférences sur des documents), le code doit inclure une phase de nettoyage.</p>
                 <p>Assurez-vous que vos développeurs utilisent des méthodes de nettoyage standard dans leur code (par ex. <code>os.remove(chemin_fichier_temp)</code> en Python ou <code>tempfile.TemporaryDirectory()</code>) dès que la réponse API est envoyée à l'utilisateur.</p>
 
-                <h2>Conclusion</h2>
+                <h2 class="text-purple"  >Conclusion</h2>
                 <p>Kubernetes est incroyablement résilient, mais il compte sur nous pour lui donner les bonnes limites. En combinant des commandes de nettoyage automatisées, des limites de ressources YAML strictes et de bonnes pratiques de développement, vous pouvez bannir définitivement le Cimetière d'Évictions de votre cluster.</p>
                 <p><em>Avez-vous déjà rencontré le Cimetière d'Évictions ? Dites-moi comment vous l'avez résolu sur LinkedIn !</em></p>
             </article>

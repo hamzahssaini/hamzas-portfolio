@@ -185,6 +185,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -236,7 +244,7 @@
         </section>
 
         <section id="architecture">
-            <h2>1. The Architecture</h2>
+            <h2 class="text-blue"  >1. The Architecture</h2>
             <p>This workflow involves interacting directly with the Host File System and the Docker Engine daemon to ensure complete data consistency during the backup phase.</p>
             
             <div class="mermaid">
@@ -262,7 +270,7 @@
         </section>
 
         <section id="automated-script">
-            <h2>2. The Automated Backup Script</h2>
+            <h2 class="text-red"  >2. The Automated Backup Script</h2>
             <p>This bash script safely orchestrates the process: it gracefully stops the database, heavily archives the directory, and brings the microservice back online immediately. By explicitly capturing the exit code of `tar`, we guarantee the database boots back up even if the disk runs out of space.</p>
             
             <p><strong>File:</strong> <code>~/scripts/backup_folder_all.sh</code></p>
@@ -325,7 +333,7 @@ echo "Backup pipeline finished optimally at $(date)"</code></pre>
         </section>
 
         <section id="scheduling">
-            <h2>3. Automation via Crontab</h2>
+            <h2 class="text-orange"  >3. Automation via Crontab</h2>
             <p>To ensure this runs every Monday at 8:00 AM without human intervention, we schedule it utilizing Cron equipped with <strong>process politeness</strong> settings to avoid tanking the host's performance.</p>
 
             <h3>Step 1: Execute Permissions</h3>
@@ -353,7 +361,7 @@ echo "Backup pipeline finished optimally at $(date)"</code></pre>
         </section>
 
         <section id="best-practices">
-            <h2>4. Best Practices for Folder Backups</h2>
+            <h2 class="text-green"  >4. Best Practices for Folder Backups</h2>
             
             <h3>A. The "Consistency" Rule</h3>
             <p><strong>Never</strong> copy a <code>pg_data</code> folder while the database is aggressively running. Postgres constantly flushes data to "Write-Ahead Logs" (WAL) asynchronously. If you copy the folder mid-write utilizing <code>rsync</code> or <code>cp</code>, the resulting backup will suffer from corrupted byte boundaries and will be entirely unstartable. Always rigidly wrap your copies in <code>docker compose stop</code> or utilize native filesystem snapshots (like ZFS/LVM) if available.</p>
@@ -372,7 +380,7 @@ echo "Backup pipeline finished optimally at $(date)"</code></pre>
         </section>
         
         <section id="conclusion">
-            <h2>Conclusion</h2>
+            <h2 class="text-purple"  >Conclusion</h2>
             <p>By capturing the entire <code>pg_data</code> directory, we have effectively constructed an immutable "snapshot in time" of our entire infrastructural state space. This physical methodology translates to the fastest technical path to recover from a total catastrophic server failure, as it uniquely allows us to restore the database configuration, users, layouts, and indices exactly as they were prior to the incident.</p>
             <p>Always mix logical logical backups with physical off-site tarballs for true enterprise resilience!</p>
         </section>

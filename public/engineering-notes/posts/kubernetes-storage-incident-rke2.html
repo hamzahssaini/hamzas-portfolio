@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Storage Incident Deep Dive (RKE2) — From Failure to Best Practices</title>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px;
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+        .note-box { 
+            background: #eff6ff; 
+            border-left: 4px solid var(--accent); 
+            padding: 16px; 
+            margin-bottom: 24px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 16px; 
+        }
+        .alert-box { 
+            background: #fef2f2; 
+            border-left: 4px solid #ef4444; 
+            padding: 16px; 
+            margin-bottom: 24px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 16px; 
+        }
+        .success-box { 
+            background: #f0fdf4; 
+            border-left: 4px solid #22c55e; 
+            padding: 16px; 
+            margin-bottom: 24px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 16px; 
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Architecture Diagram (Mermaid) */
+        .mermaid { 
+            margin: 32px 0; 
+            background: #ffffff; 
+            padding: 24px; 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            text-align: center; 
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Tags */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 32px;
+        }
+        .tag {
+            background: #e0e7ff;
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .author-section {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        .author-name {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 18px;
+        }
+        .author-title {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    </style>
+
+    <!-- Load Mermaid for Diagram -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-left">
+            <a href="../archive.html" aria-label="Go back" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <header>
+            <div class="meta">Case Study &amp; Best Practices</div>
+            <h1>Kubernetes Storage Incident Deep Dive (RKE2)</h1>
+            <p style="margin: 0; font-size: 18px;">From Failure to Best Practices</p>
+        </header>
+
+        <section>
+            <h2 class="text-blue">Architecture Diagram (Storage Flow)</h2>
+            <p>This diagram outlines the flow of ephemeral storage resources from the application pod down to the node disk, highlighting the key monitoring checkpoints.</p>
+            <div class="mermaid">
+                flowchart TD
+                    subgraph Pod[Application Pod]
+                        App[Data Processing / API Worker]
+                    end
+                    
+                    subgraph Node[Node Environment]
+                        Ephemeral[Ephemeral Storage <br/> emptyDir / /tmp FS]
+                        
+                        RunK3s["/run/k3s (runtime)<br/>tmpfs / mounts"]
+                        VarLib["/var/lib/rancher<br/>rke2/agent<br/>container layers & volumes"]
+                        
+                        NodeDisk[Node Disk VM]
+                    end
+                    
+                    subgraph Monitoring[Monitoring Layer]
+                        Prom[Prometheus + Grafana<br/>node_filesystem_usage<br/>container_fs_usage]
+                    end
+
+                    App -->|Temp Data| Ephemeral
+                    Ephemeral -->|Runtime Data| RunK3s
+                    Ephemeral -->|Persistent Data| VarLib
+                    RunK3s -->|Saturates| NodeDisk
+                    VarLib -->|Stores to| NodeDisk
+                    
+                    Prom -.->|Monitors| NodeDisk
+                    
+                    classDef default fill:#f9fafb,stroke:#d1d5db,stroke-width:2px;
+                    classDef disk fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#991b1b;
+                    classDef monitor fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e40af;
+                    
+                    class NodeDisk disk;
+                    class Prom monitor;
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-blue">Introduction</h2>
+            <p>In modern cloud-native environments, most engineers focus heavily on CPU and memory. However, during a recent production-like scenario, I encountered a critical issue that highlighted a less-discussed but equally important resource: <strong>Ephemeral Storage in Kubernetes</strong>.</p>
+            
+            <p>This article walks through:</p>
+            <ul>
+                <li>How the issue happened</li>
+                <li>How RKE2 manages storage internally</li>
+                <li>Step-by-step troubleshooting methodology</li>
+                <li>Immediate recovery actions</li>
+                <li>Long-term best practices</li>
+            </ul>
+
+            <div class="note-box">
+                <strong>Environment:</strong><br/>
+                Kubernetes: <strong>RKE2 (v1.31)</strong><br/>
+                OS: <strong>Ubuntu 22.04</strong><br/>
+                Runtime: <strong>containerd</strong>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-red">The Incident</h2>
+            <p>Pods started getting evicted with the following event log:</p>
+            
+            <div class="code-header">Log</div>
+            <pre><code>The node was low on resource: ephemeral-storage</code></pre>
+
+            <p>At the same time, the cluster experienced cascading effects:</p>
+            <ul>
+                <li>Nodes became unstable</li>
+                <li>Disk usage reached <strong>100%</strong></li>
+                <li>Services degraded</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-orange">Investigation</h2>
+
+            <h3>1. Disk Check</h3>
+            <div class="code-header">Bash</div>
+            <pre><code>df -h</code></pre>
+            <p><strong>Result:</strong> Root disk fully saturated.</p>
+
+            <h3>2. Identify Large Directories</h3>
+            <div class="code-header">Bash</div>
+            <pre><code>sudo du -h / --max-depth=1 | sort -rh</code></pre>
+            <p><strong>Key findings:</strong></p>
+            <ul>
+                <li><code>/var</code> → very large</li>
+                <li><code>/run</code> → abnormally large</li>
+            </ul>
+
+            <h3>3. Deep Dive into Specific Paths</h3>
+            <div class="code-header">Bash</div>
+            <pre><code>sudo du -h /var/lib/rancher --max-depth=2 | sort -rh
+sudo du -h /run --max-depth=1 | sort -rh</code></pre>
+            <p><strong>Findings:</strong></p>
+            <ul>
+                <li><code>/var/lib/rancher/rke2/agent</code> → contained bloated container layers & volumes</li>
+                <li><code>/run/k3s</code> → contained temporary runtime data (unexpectedly huge)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-red">Root Cause</h2>
+            <p>The issue was primarily caused by:</p>
+            <ol>
+                <li>Applications generating <strong>temporary files (images, processing data, etc.)</strong></li>
+                <li>Files stored directly in ephemeral storage</li>
+                <li><strong>No cleanup mechanism</strong> in place</li>
+            </ol>
+
+            <div class="alert-box">
+                <strong>Resulting Flow:</strong><br/>
+                Application → Temp files → Node filesystem → No cleanup → Disk full → Pod eviction
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-blue">How RKE2 Manages Storage</h2>
+            <p>Understanding internal storage management is key to resolving capacity issues.</p>
+
+            <h3>1. Persistent Node Storage</h3>
+            <p>Located at <code>/var/lib/rancher/rke2/</code>. This path contains:</p>
+            <ul>
+                <li>Container images</li>
+                <li>Writable layers (overlayfs)</li>
+                <li>Volumes</li>
+                <li>Cluster data (etcd)</li>
+            </ul>
+
+            <h3>2. Runtime Storage</h3>
+            <p>Located at <code>/run/k3s/</code>. This manages:</p>
+            <ul>
+                <li>Temporary mounts</li>
+                <li>Sockets</li>
+                <li>Runtime data</li>
+            </ul>
+            <div class="alert-box">
+                <strong>Warning:</strong> This directory should remain small. Ongoing growth indicates application misuse.
+            </div>
+
+            <h3>3. Logs (stdout)</h3>
+            <p>Maintained under <code>/var/log/containers/</code> and <code>/var/log/pods/</code>.</p>
+            <ul>
+                <li>All container logs flow here</li>
+                <li>Managed strictly by journald / container runtime</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-orange">Immediate Recovery Actions</h2>
+
+            <div class="code-header">Bash</div>
+            <pre><code>sudo systemctl restart rke2-agent</code></pre>
+            <p><strong>Effect:</strong> Clears runtime temp storage proactively.</p>
+
+            <div class="code-header">Bash</div>
+            <pre><code>sudo crictl rmi --prune</code></pre>
+            <p><strong>Effect:</strong> Removes unused images filling up <code>/var/lib</code>.</p>
+
+            <div class="code-header">Bash</div>
+            <pre><code>sudo crictl pods --state Exited -q | xargs -r crictl rmp</code></pre>
+            <p><strong>Effect:</strong> Cleans stopped containers safely.</p>
+
+            <div class="code-header">Bash</div>
+            <pre><code>sudo journalctl --vacuum-size=500M</code></pre>
+            <p><strong>Effect:</strong> Reduces system logs footprint.</p>
+        </section>
+
+        <section>
+            <h2 class="text-purple">Troubleshooting Methodology (Reusable)</h2>
+            <div class="success-box">
+                <strong>Step 1:</strong> Check disk <code>df -h</code><br/>
+                <strong>Step 2:</strong> Find biggest directories <code>du -h / --max-depth=1 | sort -rh</code><br/>
+                <strong>Step 3:</strong> Drill down persistent <code>du -h /var/lib/rancher --max-depth=2</code><br/>
+                <strong>Step 4:</strong> Check runtime <code>du -h /run</code><br/>
+                <strong>Step 5:</strong> Inspect containers <code>crictl ps -a</code> and <code>crictl images</code>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-green">Best Practices (Production Ready)</h2>
+
+            <h3>1. Set Ephemeral Storage Limits</h3>
+            <div class="code-header">YAML</div>
+            <pre><code>resources:
+  requests:
+    ephemeral-storage: "200Mi"
+  limits:
+    ephemeral-storage: "1Gi"</code></pre>
+
+            <h3>2. Clean Temporary Files (Application Level)</h3>
+            <ul>
+                <li>Always delete files immediately after processing</li>
+                <li>Avoid completely uncontrolled <code>/tmp</code> usage in code</li>
+            </ul>
+
+            <h3>3. Use Controlled Volumes</h3>
+            <div class="code-header">YAML</div>
+            <pre><code>emptyDir:
+  sizeLimit: 1Gi</code></pre>
+
+            <h3>4. Monitoring (Critical)</h3>
+            <p>Deploy standard tools like <strong>Prometheus &amp; Grafana</strong> to track metrics:</p>
+            <ul>
+                <li>Node disk usage</li>
+                <li>Container filesystem usage</li>
+            </ul>
+
+            <h3>5. Log Management (stdout)</h3>
+            <p>Configure journald limits inside <code>/etc/systemd/journald.conf</code>:</p>
+            <div class="code-header">Config</div>
+            <pre><code>SystemMaxUse=500M
+MaxFileSec=7day</code></pre>
+
+            <h3>6. Capacity Planning</h3>
+            <ul>
+                <li>Minimum 50GB+ per node recommended</li>
+                <li>Consider placing a separate physical disk layout targeted for <code>/var</code></li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-blue">Key Takeaways &amp; Conclusion</h2>
+            <ul>
+                <li>Kubernetes does <strong>NOT</strong> manage disk automatically out of the box.</li>
+                <li>Ephemeral storage is frequently overlooked but ultimately critical for stability.</li>
+                <li>AI &amp; processing workloads can silently fill up entire disks if untracked.</li>
+                <li>Without well-defined limits and active cleanup, complete cluster instability is inevitable.</li>
+            </ul>
+
+            <div class="success-box">
+                <strong>Storage is a first-class resource in Kubernetes.</strong><br/>
+                Proper management requires application discipline (cleanup), Kubernetes configuration (limits), and infrastructure monitoring.
+            </div>
+        </section>
+
+        <div class="tags">
+            <span class="tag">#Kubernetes</span>
+            <span class="tag">#RKE2</span>
+            <span class="tag">#DevOps</span>
+            <span class="tag">#Cloud</span>
+            <span class="tag">#SRE</span>
+            <span class="tag">#Observability</span>
+            <span class="tag">#Containers</span>
+            <span class="tag">#Linux</span>
+        </div>
+
+        <div class="author-section">
+            <div class="author-name">Hamza Hssaini</div>
+            <div class="author-title">Cloud &amp; Kubernetes Enthusiast | DevOps Engineer</div>
+        </div>
+    </main>
+
+</body>
+</html>

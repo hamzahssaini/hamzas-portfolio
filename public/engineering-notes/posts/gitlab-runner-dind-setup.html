@@ -183,6 +183,14 @@
             main { padding: 0 20px 60px; }
             h1 { font-size: 32px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -222,7 +230,7 @@
             <p>To process the workloads, I needed to bootstrap a dedicated Linux compute node, configure it for <strong>Docker-in-Docker (DinD)</strong> build executions, and connect it to the master GitLab server.</p>
             <p>What seemed like a simple binary installation turned into a masterclass in DevOps networking and security token management. Here is how I architected the runner and bypassed the networking roadblocks I hit along the way.</p>
 
-            <h2>Phase 1: Bootstrapping the Compute (The Privileged Executor)</h2>
+            <h2 class="text-blue"  >Phase 1: Bootstrapping the Compute (The Privileged Executor)</h2>
             <p>To execute pipeline jobs, GitLab relies on a background service called a <code>gitlab-runner</code>. I SSH'd into my deployment Linux server and systematically pulled the binaries and registered the service:</p>
 
             <div class="code-header">Bash</div>
@@ -254,7 +262,7 @@ sudo gitlab-runner start</code></pre>
 
             <p>While the setup architecture was sound, connecting on-premise components always surfaces network and security traps. Here are my Trench Notes from resolving them.</p>
 
-            <h2> Trench Notes: Overcoming Self-Hosted Networking & Security</h2>
+            <h2 class="text-red"  >Trench Notes: Overcoming Self-Hosted Networking & Security</h2>
 
             <div class="incident-card">
                 <h3>Roadblock 1: The "Ghost Token" (403 Forbidden)</h3>
@@ -303,7 +311,7 @@ ERROR: Job failed: exit code 1</code></pre>
                 <p>Applying this fix to <code>config.toml</code> and executing <code>sudo gitlab-runner restart</code> bridged the networking gap perfectly.</p>
             </div>
 
-            <h2> Conclusion</h2>
+            <h2 class="text-orange"  >Conclusion</h2>
             <p>Successfully engineering a CI/CD environment requires significantly more logic than basic CLI utilization; it requires an inherent understanding of network abstraction and daemon isolation. Whether bypassing containerized DNS boundaries through configuration injection or handling container privileges, the value of a Senior Platform Engineer is in recognizing the specific communication roadblocks across a decoupled infrastructure stack.</p>
 
         </article>

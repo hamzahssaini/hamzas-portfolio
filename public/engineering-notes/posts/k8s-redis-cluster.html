@@ -204,6 +204,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -263,7 +271,7 @@
             </section>
 
             <section>
-                <h2> Phase 1: The Architecture & Deployment</h2>
+                <h2 class="text-blue"  >Phase 1: The Architecture & Deployment</h2>
                 <p>To build a true HA database in Kubernetes, you cannot use a standard Deployment. I structured my manifest using industry best practices, relying heavily on <code>StatefulSets</code>.</p>
                 <p>Here are the core components I engineered for this stack:</p>
 
@@ -295,7 +303,7 @@
             </section>
 
             <section>
-                <h2> Phase 2: The Validation Runbook</h2>
+                <h2 class="text-red"  >Phase 2: The Validation Runbook</h2>
                 <p>In the DevOps world, deploying infrastructure is only 50% of the job. The other 50% is mathematically proving that it works. You cannot just trust that <code>kubectl get pods</code> says Running. You have to dive into the database engine itself.</p>
                 <p>Here is my 4-step testing runbook to certify a Redis cluster for production.</p>
 
@@ -369,7 +377,7 @@
             </section>
 
             <section>
-                <h2> Conclusion</h2>
+                <h2 class="text-orange"  >Conclusion</h2>
                 <p>By combining Kubernetes StatefulSets with a rigorous testing runbook, you can deploy enterprise-grade databases with absolute confidence.</p>
                 <p>Never assume an infrastructure deployment is successful just because the pods have a green status. Always verify the application-level logic—check the replication links, test the data propagation, and audit the logs. That is how you build unbreakable platforms.</p>
             </section>
@@ -397,7 +405,7 @@
             </section>
 
             <section>
-                <h2> Phase 1: L'Architecture & Déploiement</h2>
+                <h2 class="text-green"  >Phase 1: L'Architecture & Déploiement</h2>
                 <p>Pour construire une véritable base de données HA dans Kubernetes, vous ne pouvez pas utiliser un Déploiement standard. J'ai structuré mon manifeste en utilisant les meilleures pratiques de l'industrie, m'appuyant fortement sur les <code>StatefulSets</code>.</p>
                 <p>Voici les composants de base que j'ai conçus pour cette pile (stack) :</p>
 
@@ -429,7 +437,7 @@
             </section>
 
             <section>
-                <h2> Phase 2: Le Plan de Validation (Runbook)</h2>
+                <h2 class="text-purple"  >Phase 2: Le Plan de Validation (Runbook)</h2>
                 <p>Dans le monde DevOps, déployer une infrastructure ne représente que 50 % du travail. Les autres 50 % consistent à prouver mathématiquement que cela fonctionne. Vous ne pouvez pas vous contenter de croire que <code>kubectl get pods</code> indique Running. Vous devez plonger dans le moteur de la base de données lui-même.</p>
                 <p>Voici mon plan de test en 4 étapes pour certifier un cluster Redis pour la production.</p>
 
@@ -503,7 +511,7 @@
             </section>
 
             <section>
-                <h2> Conclusion</h2>
+                <h2 class="text-blue"  >Conclusion</h2>
                 <p>En combinant les StatefulSets de Kubernetes avec un runbook de test rigoureux, vous pouvez déployer des bases de données de qualité entreprise avec une confiance absolue.</p>
                 <p>Ne présumez jamais qu'un déploiement d'infrastructure est un succès sous prétexte que les pods affichent un statut au vert. Vérifiez toujours la logique au niveau de l'application : examinez les liens de réplication, testez la propagation des données, et analysez les journaux (logs). C'est ainsi que l'on construit des plateformes incassables.</p>
             </section>

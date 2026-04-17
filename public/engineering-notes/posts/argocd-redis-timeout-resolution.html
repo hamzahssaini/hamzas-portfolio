@@ -204,6 +204,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -256,7 +264,7 @@
         </section>
 
         <section id="what-does-this-mean">
-            <h2>1. What does this error mean?</h2>
+            <h2 class="text-blue"  >1. What does this error mean?</h2>
             <ul>
                 <li><strong>"Failed to generate manifest":</strong> Argo CD is trying to convert your Git files (Helm, Kustomize, or YAML) into Kubernetes objects, but it failed.</li>
                 <li><strong>"failed to list refs":</strong> To generate the manifest, Argo CD needs to check the Git repository (refs). It tries to check its cache first or store the result in the cache.</li>
@@ -266,7 +274,7 @@
         </section>
 
         <section id="source-of-error">
-            <h2>2. What is the source of the error?</h2>
+            <h2 class="text-red"  >2. What is the source of the error?</h2>
             <p>The source is a network connectivity or service availability issue within your Kubernetes cluster, specifically between the <code>argocd-repo-server</code> pod and the <code>argocd-redis</code> pod.</p>
             
             <h3>Common causes:</h3>
@@ -280,7 +288,7 @@
         </section>
 
         <section id="how-to-fix">
-            <h2>3. How to fix it?</h2>
+            <h2 class="text-orange"  >3. How to fix it?</h2>
             
             <h3>Step 1: Check the Redis Pod Status</h3>
             <p>Run this command to see if the Redis pod is running:</p>
@@ -315,7 +323,7 @@
         </section>
 
         <section id="best-practices">
-            <h2>4. Best Practices & Prevention</h2>
+            <h2 class="text-green"  >4. Best Practices & Prevention</h2>
             <p>To prevent this from happening again, follow these best practices:</p>
             <ul>
                 <li><strong>Resource Requests & Limits:</strong> Ensure Redis has enough memory. Redis stores data in RAM; if your Argo CD manages hundreds of apps, the default 256MB might not be enough.

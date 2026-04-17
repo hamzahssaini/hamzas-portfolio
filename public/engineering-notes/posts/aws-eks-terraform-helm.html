@@ -204,6 +204,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -262,7 +270,7 @@
         </section>
 
         <section id="phase-1-infrastructure">
-            <h2> Phase 1: The Infrastructure (Codified with Terraform)</h2>     
+            <h2 class="text-blue"  >Phase 1: The Infrastructure (Codified with Terraform)</h2>     
             <p>A junior engineer builds infrastructure specifically for the workload immediately in front of them, usually by relying on "ClickOps" in the AWS Management Console. A senior engineer abstracts the infrastructure entirely through standardized code.</p>
             <p>To guarantee that this environment remains 100% reproducible and state-managed, I modularized the AWS infrastructure utilizing Terraform. My project structure adopts best-practices for logical separation:</p>
 
@@ -335,7 +343,7 @@ variable "cluster_name" {
         </section>
 
         <section id="phase-2-provisioning">
-            <h2> Phase 2: Provisioning the Cluster</h2>
+            <h2 class="text-red"  >Phase 2: Provisioning the Cluster</h2>
             <p>With infrastructure treated purely as software, orchestrating the entire AWS footprint requires merely three standard operations.</p>
 <div class="code-header">Bash</div>
 <pre><code class="language-bash"># Initialize Terraform backend and download AWS Provider modules
@@ -352,7 +360,7 @@ terraform apply --auto-approve</code></pre>
         </section>
 
         <section id="phase-3-helm">
-            <h2> Phase 3: The Cloud Networking Gotcha & Helm Deployment</h2>    
+            <h2 class="text-orange"  >Phase 3: The Cloud Networking Gotcha & Helm Deployment</h2>    
             <p>With the physical and virtual control plane online, workload deployment commenced utilizing a Helm Umbrella Chart.</p>
             <p>However, migrating to an AWS-backed cloud environment introduced a specific networking challenge. Locally within RKE2, I resolved ingress traffic by setting my service type to <code>NodePort</code>. In AWS, traffic hitting random high-numbered NodePorts is automatically dropped by default EC2 Security Groups.</p>
             <p>The elegant cloud-native solution involved a simple declarative modification to my <code>values.yaml</code>, specifically requesting an integrated cloud Load Balancer instead constraints:</p>
@@ -369,7 +377,7 @@ frontend:
         </section>
 
         <section id="validation">
-            <h2>📊 Results & Validation</h2>
+            <h2 class="text-green"  >Results & Validation</h2>
             <p>The culmination of this IaC process presents a pristine, operational cloud architecture accessible to the public web.</p>
 
             <div class="visual-container">
@@ -395,7 +403,7 @@ frontend:
 
         
         <section id="troubleshooting">
-            <h2> Troubleshooting AWS Guardrails & Security Traps</h2>
+            <h2 class="text-purple"  >Troubleshooting AWS Guardrails & Security Traps</h2>
             <p>Enterprise cloud deployments rarely survive first contact with the cloud provider's API without hitting security or quota guardrails. During this migration, I encountered and resolved several advanced AWS and Kubernetes roadblocks. Documenting these challenges highlights the realities of transitioning from bare-metal orchestration to managed cloud environments.</p>
 
             <h3>1. Bypassing Cloud Sandbox Quotas (EC2 FinOps)</h3>
@@ -461,7 +469,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="finops">
-            <h2> FinOps & Cost Management: Embracing Ephemeral Infrastructure</h2>
+            <h2 class="text-blue"  >FinOps & Cost Management: Embracing Ephemeral Infrastructure</h2>
             <p>Managed cloud environments possess immense capabilities, but they inherently carry substantial billing implications. The managed EKS Control Plane independently incurs roughly <strong>$73/month</strong>. Because I am currently operating on a strict $53 AWS promotional credit margin, leaving this cluster perpetually running would completely drain my budget within weeks.</p>
             <p><strong>This highlights the ultimate leverage of strict Infrastructure as Code.</strong> Because my entire environment is thoroughly codified and stateless, my cluster itself can act as ephemeral infrastructure. At the end of my technical sessions, I reduce my daily AWS burn rate back down to strictly <strong>$0.00</strong> by executing:</p>
 <div class="code-header">Bash</div>
@@ -474,7 +482,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="conclusion">
-            <h2> Conclusion</h2>
+            <h2 class="text-red"  >Conclusion</h2>
             <p>Migrating my workloads from on-premise localized orchestration into AWS EKS proves definitively that Kubernetes remains the ultimate computing equalizer. By layering Terraform for rock-solid deterministic infrastructure and Helm for agile application delivery, I successfully built a platform-agnostic enterprise pipeline.</p>
             <p>Whether I am deploying a rudimentary two-tier portfolio architecture or maintaining a massive 100-service AI processing platform, the fundamental pipeline remains utterly identical, aggressively automated, and infinitely scalable.</p>
         </section>
@@ -502,7 +510,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="phase-1-infrastructure">
-            <h2> Phase 1: L'Infrastructure (Codifiée avec Terraform)</h2>     
+            <h2 class="text-orange"  >Phase 1: L'Infrastructure (Codifiée avec Terraform)</h2>     
             <p>Un ingénieur junior construit une infrastructure spécifiquement pour la charge de travail se trouvant immédiatement devant lui, s'appuyant souvent sur le "ClickOps" dans la console de gestion AWS. Un ingénieur senior abstrait entièrement l'infrastructure grâce à du code standardisé.</p>
             <p>Afin de garantir que cet environnement reste 100 % reproductible et géré par état, j'ai modularisé l'infrastructure AWS à l'aide de Terraform. La structure de mon projet adopte les meilleures pratiques en matière de séparation logique :</p>
 
@@ -575,7 +583,7 @@ variable "cluster_name" {
         </section>
 
         <section id="phase-2-provisioning">
-            <h2> Phase 2: Provisionnement du Cluster</h2>
+            <h2 class="text-green"  >Phase 2: Provisionnement du Cluster</h2>
             <p>L'infrastructure étant traitée purement comme du logiciel, l'orchestration de l'ensemble de l'empreinte AWS ne requiert que trois opérations standard.</p>
 <div class="code-header">Bash</div>
 <pre><code class="language-bash"># Initialiser le backend Terraform et télécharger les modules du Fournisseur AWS
@@ -592,7 +600,7 @@ terraform apply --auto-approve</code></pre>
         </section>
 
         <section id="phase-3-helm">
-            <h2> Phase 3: Le Piège du Réseau Cloud & Déploiement Helm</h2>    
+            <h2 class="text-purple"  >Phase 3: Le Piège du Réseau Cloud & Déploiement Helm</h2>    
             <p>Le plan de contrôle physique et virtuel étant en ligne, le déploiement des charges de travail a commencé à l'aide d'un Helm Umbrella Chart.</p>
             <p>Cependant, la migration vers un environnement cloud basé sur AWS a introduit un défi de réseau spécifique. Localement au sein de RKE2, je gérais le trafic d'entrée en définissant mon type de service sur <code>NodePort</code>. Dans AWS, le trafic arrivant sur des NodePorts élevés aléatoires est automatiquement rejeté par les groupes de sécurité EC2 par défaut.</p>
             <p>La solution élégante Cloud-native consistait en une simple modification déclarative de mon <code>values.yaml</code>, demandant spécifiquement un équilibreur de charge cloud intégré au lieu des contraintes précédentes :</p>
@@ -609,7 +617,7 @@ frontend:
         </section>
 
         <section id="validation">
-            <h2> Résultats & Validation</h2>
+            <h2 class="text-blue"  >Résultats & Validation</h2>
             <p>L'aboutissement de ce processus IaC présente une architecture cloud impeccable et opérationnelle, accessible sur le web.</p>
 
             <div class="visual-container">
@@ -630,7 +638,7 @@ frontend:
 
         
         <section id="troubleshooting">
-            <h2> Notes de Tranchée : Résolution des Problèmes liés aux Garde-fous et Pièges de Sécurité AWS</h2>
+            <h2 class="text-red"  >Notes de Tranchée : Résolution des Problèmes liés aux Garde-fous et Pièges de Sécurité AWS</h2>
             <p>Les déploiements cloud en entreprise survivent rarement au premier contact avec l'API du fournisseur cloud sans se heurter à des limites de sécurité ou de quotas. Lors de cette migration, j'ai rencontré et résolu plusieurs obstacles avancés liés à AWS et Kubernetes. Documenter ces défis met en évidence les réalités de la transition d'une orchestration bare-metal vers des environnements cloud managés.</p>
 
             <h3>1. Contourner les Quotas des Sandboxes Cloud (FinOps EC2)</h3>
@@ -696,7 +704,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="finops">
-            <h2> FinOps & Gestion des Coûts : Adopter l'Infrastructure Éphémère</h2>
+            <h2 class="text-orange"  >FinOps & Gestion des Coûts : Adopter l'Infrastructure Éphémère</h2>
             <p>Les environnements cloud managés possèdent d'immenses capacités, mais ils portent inévitablement des conséquences financières substantielles. Le Plan de Contrôle managé d'EKS engendre à lui seul environ <strong>73 $/mois</strong>. Comme je fonctionne actuellement avec une stricte marge de crédit promotionnel AWS de 53 $, laisser ce cluster fonctionner de manière continue viderait complètement mon budget en quelques semaines.</p>
             <p><strong>Ceci souligne l'effet de levier ultime d'une Infrastructure en tant que Code stricte.</strong> Étant donné que mon environnement complet est rigoureusement codifié et sans état, mon cluster lui-même peut agir comme une infrastructure éphémère. À la fin de mes sessions techniques, je réduis mon taux de consommation quotidien AWS pour atteindre strictement <strong>0,00 $</strong> en exécutant :</p>
 <div class="code-header">Bash</div>
@@ -709,7 +717,7 @@ error: You must be logged in to the server (the server has asked for the client 
         </section>
 
         <section id="conclusion">
-            <h2> Conclusion</h2>
+            <h2 class="text-green"  >Conclusion</h2>
             <p>La migration de mes charges de travail depuis une orchestration localisée sur site vers AWS EKS prouve que Kubernetes reste le grand égalisateur en termes de calcul. En combinant Terraform pour une infrastructure déterministe et très solide, ainsi qu'Helm pour une livraison d'applications agile, j'ai réussi à construire un pipeline de niveau entreprise agnostique de la plateforme.</p>
             <p>Que je déploie une architecture de portfolio à deux niveaux rudimentaire ou que je maintienne une plateforme massive de traitement de l'IA de plus de 100 services, le pipeline fondamental reste complètement identique, agressivement automatisé et évolutif à l'infini.</p>
         </section>

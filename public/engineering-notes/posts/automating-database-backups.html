@@ -183,6 +183,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -229,7 +237,7 @@
         </header>
 
         <section id="the-strategy">
-            <h2>1. The Strategy: When and How?</h2>
+            <h2 class="text-blue"  >1. The Strategy: When and How?</h2>
             <p>Before we automate, we must decide on the frequency. A missing backup strategy is a disaster waiting to happen.</p>
             
             <h3>Best Practice Timing</h3>
@@ -254,7 +262,7 @@
         </section>
 
         <section id="refining-script">
-            <h2>2. Refining Your Script for Automation</h2>
+            <h2 class="text-red"  >2. Refining Your Script for Automation</h2>
             <p>When running scripts via headless automation tools like Cron, they execute without an interactive terminal handler (tty). We must architect the script to handle explicit logging pipelines and embed a strict retention policy (pruning old backups to prevent catastrophic disk saturation).</p>
             
             <p>Below is an enterprise-grade shell script built to automate PostgreSQL backups via Docker Compose:</p>
@@ -313,7 +321,7 @@ echo "--- Backup Completed Successfully: $(date) ---"
         </section>
 
         <section id="scheduling">
-            <h2>3. Scheduling with Cron</h2>
+            <h2 class="text-orange"  >3. Scheduling with Cron</h2>
             <p>The <strong>Cron</strong> daemon is the POSIX standard for scheduling unattended background jobs.</p>
             
             <h3>Step 1: Open the Crontab editor</h3>
@@ -341,7 +349,7 @@ echo "--- Backup Completed Successfully: $(date) ---"
         </section>
 
         <section id="best-practices">
-            <h2>4. Production Best Practices for Backups</h2>
+            <h2 class="text-green"  >4. Production Best Practices for Backups</h2>
             
             <h3>A. Monitor your Backups (Dead Man's Snitch)</h3>
             <p>A prevalent post-mortem failure point is a cron job that silently dies because of a full inode disk or rotated DB credentials. Use an external heartbeat service (like Healthchecks.io) to ensure successful egress execution. Attach a standard curl ping to the footer of the bash script:</p>

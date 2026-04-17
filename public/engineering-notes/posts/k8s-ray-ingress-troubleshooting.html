@@ -204,6 +204,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -251,13 +259,13 @@
         </header>
 
         <section id="executive-summary">
-            <h2>Executive Summary</h2>
+            <h2 class="text-blue"  >Executive Summary</h2>
             <p>In distributed computing, Ray has become the standard for scaling AI and Python workloads. However, exposing a Ray Cluster (Dashboard, Client, and Serve) via an NGINX Ingress Controller often presents "Heisenbugs"—errors that appear and disappear after cluster restarts.</p>
             <p>This technical report documents a real-world scenario where a Ray Ingress setup failed due to security-hardened webhooks, missing Layer 4 mappings, and Node IP drift. It provides a "Best Practice" blueprint for a production-ready, static-entry configuration.</p>
         </section>
 
         <section id="the-challenge">
-            <h2>1. The Challenge: "It worked yesterday, but not today."</h2>
+            <h2 class="text-red"  >1. The Challenge: "It worked yesterday, but not today."</h2>
             <p>A common symptom in Kubernetes is a configuration that works during the initial session but fails after a node reboot or pod reschedule. In this case, three distinct layers failed:</p>
             <ul>
                 <li><strong>The Security Layer:</strong> Modern NGINX controllers (v1.10+) block <code>configuration-snippet</code> annotations to prevent code injection.</li>
@@ -267,7 +275,7 @@
         </section>
 
         <section id="technical-deep-dive">
-            <h2>2. Technical Deep-Dive: Root Cause Analysis</h2>
+            <h2 class="text-orange"  >2. Technical Deep-Dive: Root Cause Analysis</h2>
             
             <h3>A. The Admission Webhook Conflict</h3>
             <p>When trying to fix header issues, the use of <code>nginx.ingress.kubernetes.io/configuration-snippet</code> triggered a BadRequest.</p>
@@ -283,7 +291,7 @@
         </section>
 
         <section id="best-practice-solution">
-            <h2>3. The Best-Practice Solution: "Pinned Gateway" Architecture</h2>
+            <h2 class="text-green"  >3. The Best-Practice Solution: "Pinned Gateway" Architecture</h2>
             <p>To resolve this, we implemented a Pinned Gateway Architecture. This ensures the Ingress Controller always lands on a specific, reliable node (IP .33) and utilizes the Host Network for maximum stability.</p>
             
             <h3>Step 1: Node Labeling (Persistence)</h3>
@@ -342,7 +350,7 @@ spec:
         </section>
 
         <section id="operational-best-practices">
-            <h2>4. Operational Best Practices</h2>
+            <h2 class="text-purple"  >4. Operational Best Practices</h2>
             <p>To prevent future "Day 2" failures, follow these rules:</p>
             <ul>
                 <li><strong>Prefer ingressClassName over Annotations:</strong> Modern K8s clusters require the <code>spec.ingressClassName</code> field for proper routing.</li>
@@ -353,7 +361,7 @@ spec:
         </section>
 
         <section id="conclusion">
-            <h2>5. Conclusion</h2>
+            <h2 class="text-blue"  >5. Conclusion</h2>
             <p>Connectivity issues in Kubernetes are rarely about a single broken line of code; they are usually about the interaction between security webhooks, network protocols, and scheduling logic. By pinning the Ingress Controller and properly mapping TCP services, we transform a fragile setup into a robust, production-ready AI gateway.</p>
             <p><em>Tools Used: Kubernetes, KubeRay, NGINX Ingress, YAML Engineering.</em></p>
             <p>This documentation is part of my DevOps Portfolio, showcasing my ability to resolve complex cloud-native networking challenges.</p>
@@ -370,13 +378,13 @@ spec:
         </header>
 
         <section id="introduction-fr">
-            <h2>Résumé Exécutif</h2>
+            <h2 class="text-red"  >Résumé Exécutif</h2>
             <p>Dans l'informatique distribuée, Ray est devenu la norme pour faire évoluer les charges de travail IA et Python. Cependant, exposer un Cluster Ray (Dashboard, Client et Serve) via un contrôleur d'ingress NGINX présente souvent des "Heisenbugs"—des erreurs qui apparaissent et disparaissent après le redémarrage du cluster.</p>
             <p>Ce rapport technique documente un scénario réel où une configuration Ray Ingress a échoué en raison de webhooks de sécurité renforcés, de mappages de couche 4 manquants et de la dérive des adresses IP des nœuds. Il fournit un modèle de "Meilleure Pratique" pour une configuration d'entrée statique prête pour la production.</p>
         </section>
 
         <section id="le-defi-fr">
-            <h2>1. Le Défi : "Ça marchait hier, mais pas aujourd'hui."</h2>
+            <h2 class="text-orange"  >1. Le Défi : "Ça marchait hier, mais pas aujourd'hui."</h2>
             <p>Un symptôme courant dans Kubernetes est une configuration qui fonctionne lors de la session initiale mais échoue après le redémarrage d'un nœud ou la reprogrammation d'un pod. Dans ce cas, trois couches distinctes ont échoué :</p>
             <ul>
                 <li><strong>La Couche Sécurité :</strong> Les contrôleurs NGINX modernes (v1.10+) bloquent les annotations <code>configuration-snippet</code> pour empêcher l'injection de code.</li>
@@ -386,7 +394,7 @@ spec:
         </section>
 
         <section id="technique-fr">
-            <h2>2. Analyse Technique : Causes Profondes</h2>
+            <h2 class="text-green"  >2. Analyse Technique : Causes Profondes</h2>
             
             <h3>A. Le Conflit du Webhook d'Admission</h3>
             <p>En essayant de corriger les problèmes d'en-tête, l'utilisation de <code>nginx.ingress.kubernetes.io/configuration-snippet</code> a déclenché un BadRequest.</p>
@@ -402,7 +410,7 @@ spec:
         </section>
 
         <section id="solution-fr">
-            <h2>3. La Solution : Architecture de "Passerelle Épinglée"</h2>
+            <h2 class="text-purple"  >3. La Solution : Architecture de "Passerelle Épinglée"</h2>
             <p>Pour résoudre ce problème, nous avons implémenté une architecture de passerelle épinglée. Cela garantit que le contrôleur Ingress atterrit toujours sur un nœud spécifique et fiable (IP .33) et utilise le réseau hôte (Host Network) pour une stabilité maximale.</p>
             
             <h3>Étape 1 : Étiquetage des Nœuds (Persistance)</h3>
@@ -460,7 +468,7 @@ spec:
         </section>
 
         <section id="bonnes-pratiques-fr">
-            <h2>4. Bonnes Pratiques Opérationnelles</h2>
+            <h2 class="text-blue"  >4. Bonnes Pratiques Opérationnelles</h2>
             <ul>
                 <li><strong>Préférez ingressClassName aux Annotations :</strong> Les clusters K8s modernes nécessitent le champ <code>spec.ingressClassName</code> pour un routage approprié.</li>
                 <li><strong>Les Barres Obliques Finales Comptent :</strong> Lors de l'utilisation de <code>rewrite-target</code>, accédez toujours au dashboard via <code>http://&lt;IP&gt;/ray/</code>. S'il manque le <code>/</code> final, les actifs CSS/JS ne se chargeront pas.</li>
@@ -470,7 +478,7 @@ spec:
         </section>
 
         <section id="conclusion-fr">
-            <h2>5. Conclusion</h2>
+            <h2 class="text-red"  >5. Conclusion</h2>
             <p>Les problèmes de connectivité dans Kubernetes concernent rarement une seule ligne de code cassée ; ils concernent généralement l'interaction entre les webhooks de sécurité, les protocoles réseau et la logique de planification. En épinglant le contrôleur Ingress et en mappant correctement les services TCP, nous transformons une configuration fragile en une passerelle IA robuste et prête pour la production.</p>
             <p><em>Outils : Kubernetes, KubeRay, NGINX Ingress, YAML Engineering.</em></p>
         </section>

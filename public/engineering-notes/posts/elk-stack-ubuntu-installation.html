@@ -185,6 +185,14 @@
             h2 { font-size: 22px; }
             p, ul, ol { font-size: 16px; }
         }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
     </style>
 
     <script>
@@ -236,7 +244,7 @@
         </section>
 
         <section id="architecture">
-            <h2>1. The Architecture</h2>
+            <h2 class="text-blue"  >1. The Architecture</h2>
             <p>Before diving into the terminal, we must understand the topology of how data flows through our infrastructure.</p>
             
             <div class="mermaid">
@@ -257,7 +265,7 @@
         </section>
 
         <section id="prerequisites">
-            <h2>2. Prerequisites & Environment Specs</h2>
+            <h2 class="text-red"  >2. Prerequisites & Environment Specs</h2>
             <p>Modern versions of the Elastic Stack (8.x) require careful resource provisioning. A heavily utilized Elasticsearch node will easily exhaust an under-provisioned server.</p>
             <ul>
                 <li><strong>OS:</strong> Ubuntu 22.04 LTS or 24.04 LTS.</li>
@@ -268,7 +276,7 @@
         </section>
 
         <section id="installation">
-            <h2>3. Step-by-Step Production Installation</h2>
+            <h2 class="text-orange"  >3. Step-by-Step Production Installation</h2>
             
             <h3>Step 1: System Tuning & Dependencies</h3>
             <p>First, we configure the kernel. Elasticsearch utilizes `mmapfs` to map indices into memory. The default OS limits on mmap counts are too low and will cause out-of-memory errors on startup.</p>
@@ -355,7 +363,7 @@ sudo /usr/share/kibana/bin/kibana-verification-code
         </section>
 
         <section id="best-practices">
-            <h2>4. Essential Production Best Practices</h2>
+            <h2 class="text-green"  >4. Essential Production Best Practices</h2>
             <p>If you aim to run this in strict production environments, keep these practices in your playbook:</p>
             <ul>
                 <li><strong>Reverse Proxying:</strong> Never expose port 5601 and absolutely never expose 9200 over the raw internet. Set Kibana to `server.host: localhost` and proxy traffic via <strong>NGINX</strong> using properly signed Let's Encrypt SSL Certs.</li>
