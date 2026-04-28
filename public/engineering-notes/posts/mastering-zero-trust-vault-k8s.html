@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Zero-Trust Secrets: Integrating HashiCorp Vault with Kubernetes</title>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 800px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px;
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 40px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+        
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+        
+        /* Information Boxes */
+        .note-box { 
+            background: #eff6ff; 
+            border-left: 4px solid var(--accent); 
+            padding: 16px 20px; 
+            margin-bottom: 24px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 16px; 
+            color: #1e3a8a;
+        }
+        .alert-box { 
+            background: #fef2f2; 
+            border-left: 4px solid #ef4444; 
+            padding: 16px 20px; 
+            margin-bottom: 24px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 16px; 
+            color: #991b1b;
+        }
+        .success-box { 
+            background: #f0fdf4; 
+            border-left: 4px solid #22c55e; 
+            padding: 16px 20px; 
+            margin-bottom: 24px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 16px; 
+            color: #166534;
+        }
+
+        /* Image Placeholder */
+        .img-placeholder {
+            border: 2px dashed #94a3b8;
+            background: #f8fafc;
+            color: #64748b;
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin: 32px 0;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .img-placeholder svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.5;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 24px;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Architecture Diagram (Mermaid) */
+        .mermaid { 
+            margin: 32px 0; 
+            background: #ffffff; 
+            padding: 24px; 
+            border: 1px solid var(--border); 
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        /* Tags & Author */
+        .tags {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .tag {
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        .author-section {
+            margin-top: 48px;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .author-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .author-title {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-left">
+            <a href="../archive.html" aria-label="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <header>
+            <div class="meta">DevSecOps / Kubernetes</div>
+            <h1>Mastering Zero-Trust Secrets: Integrating HashiCorp Vault with Kubernetes</h1>
+        </header>
+
+        <section>
+            <h2 class="text-blue">1. The Challenge: Beyond Base64</h2>
+            <p>In modern cloud-native environments, the "standard" way of handling secrets (Kubernetes <code>Secret</code> objects) is often insufficient. Kubernetes Secrets are merely Base64 encoded, not encrypted at rest by default. For any organization serious about security, we need <strong>Zero-Trust</strong>: no hardcoded keys in Git, no sensitive data in Helm charts, and centralized audit trails.</p>
+            <p>This guide documents the implementation of a High-Availability (HA) Vault cluster and its seamless integration with Spring Boot microservices.</p>
+        </section>
+
+        <section>
+            <h2 class="text-purple">2. The Architecture</h2>
+            <p>Our setup utilizes the <strong>Vault Agent Sidecar Injection</strong> pattern. Instead of the application "asking" Vault for secrets via API code, Vault "pushes" secrets into the pod as local files.</p>
+            
+            <ul>
+                <li><strong>Vault Server:</strong> HA Cluster using Raft (integrated storage).</li>
+                <li><strong>Vault Injector:</strong> A mutating admission webhook that monitors pod annotations.</li>
+                <li><strong>Auth Method:</strong> Kubernetes Auth, where Vault verifies the pod's identity via its ServiceAccount JWT.</li>
+            </ul>
+
+            <div class="note-box">
+                <strong>The Secret Flow:</strong><br>
+                1. Pod starts with Vault annotations.<br>
+                2. Injector adds an init-container and a sidecar.<br>
+                3. Init-container logs into Vault, fetches secrets, and writes them to a shared memory volume (<code>/vault/secrets</code>).<br>
+                4. Main App container starts and reads the secrets as local files.
+            </div>
+
+            <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eff6ff', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f8fafc'}}}%%
+graph TD
+    A[Vault Server HA Cluster<br/>Raft Storage] -.->|Webhook| B(Vault Injector)
+    B -.->|Monitors Annotations & Injects| C[Pod: Microservice]
+    
+    subgraph K8s Pod
+        C1[Init Container: vault-agent-init] -->|Writes to| C2[(Shared Volume<br/>/vault/secrets)]
+        C2 -->|Reads from| C3[Main App Container<br/>Spring Boot]
+    end
+    
+    C --- C1
+    C1 == Kubernetes Auth (SA JWT) ==> A
+    A == Returns Secrets ==> C1
+            </div>
+
+            <figure style="margin: 32px 0; text-align: center;">
+                <img src="../images/vault/vault-dashboard.png" alt="Vault HA Dashboard Dashboard Showing Nodes" style="width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <figcaption style="color: var(--text-muted); font-size: 14px; margin-top: 12px;">Vault Dashboard: HA Cluster Nodes</figcaption>
+            </figure>
+        </section>
+
+        <section>
+            <h2 class="text-green">Phase 1: Clean Deployment (Helm)</h2>
+            <p>To install Vault with High Availability (HA) and the Web UI enabled, we use the official Helm chart.</p>
+            <div class="code-header">Bash</div>
+            <pre><code># 1. Add repo
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
+
+# 2. Install HA Cluster with Raft Storage
+helm install vault hashicorp/vault \
+  --namespace vault \
+  --create-namespace \
+  --set "server.ui.enabled=true" \
+  --set "server.ui.serviceType=NodePort" \
+  --set "server.ha.enabled=true" \
+  --set "server.ha.raft.enabled=true" \
+  --set "server.ha.raft.setNodeId=true"</code></pre>
+            
+            <figure style="margin: 32px 0; text-align: center;">
+                <img src="../images/vault/helm-insallation.png" alt="Helm Installation Output" style="width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <figcaption style="color: var(--text-muted); font-size: 14px; margin-top: 12px;">Successful Vault Helm deployment showing release status</figcaption>
+            </figure>
+        </section>
+
+        <section>
+            <h2 class="text-orange">Phase 2: The "Fortress" Initialization</h2>
+            <p>Vault starts in a "Sealed" state. It cannot read its own data until it is unsealed.</p>
+
+            <h3>Initializing the Leader</h3>
+            <div class="code-header">Bash</div>
+            <pre><code># 1. Initialize (Generating the Master Keys)
+# In production, use -key-shares=5 -key-threshold=3
+kubectl exec -n vault vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > cluster-keys.json
+
+# 2. Extract keys for convenience
+export UNSEAL_KEY=$(jq -r ".unseal_keys_b64[0]" cluster-keys.json)
+export ROOT_TOKEN=$(jq -r ".root_token" cluster-keys.json)
+
+# 3. Unseal the leader (vault-0)
+kubectl exec -n vault vault-0 -- vault operator unseal $UNSEAL_KEY</code></pre>
+
+            <h3>Joining HA Nodes (vault-1 and vault-2)</h3>
+            <p>For a true HA cluster, the other pods must join the Raft cluster:</p>
+            <div class="code-header">Bash</div>
+            <pre><code># Repeat for vault-1 and vault-2
+kubectl exec -n vault vault-1 -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -n vault vault-1 -- vault operator unseal $UNSEAL_KEY
+
+kubectl exec -n vault vault-2 -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -n vault vault-2 -- vault operator unseal $UNSEAL_KEY</code></pre>
+        </section>
+
+        <section>
+            <h2 class="text-blue">Phase 3: Core Configuration</h2>
+            <p>Log into the Vault CLI to enable the basic engines required for Kubernetes Integration.</p>
+            <div class="code-header">Bash</div>
+            <pre><code># Enter the Vault container
+kubectl exec -it -n vault vault-0 -- /bin/sh
+
+# Login as Admin
+vault login $ROOT_TOKEN
+
+# 1. Enable KV-V2 Secrets Engine (The 'internal' path)
+vault secrets enable -path=internal kv-v2
+
+# 2. Enable Kubernetes Authentication
+vault auth enable kubernetes
+
+# 3. Configure Auth to talk to the K8s API
+vault write auth/kubernetes/config \
+    kubernetes_host="https://kubernetes.default.svc:443"</code></pre>
+        </section>
+
+        <section>
+            <h2 class="text-purple">Phase 4: Application Onboarding</h2>
+            <p>Follow these steps for every new microservice you deploy to fetch secrets dynamically.</p>
+
+            <h3>1. Define the Policy (app-policy.hcl)</h3>
+            <p>Create a policy that limits the app to its own folder. Note: KV-V2 requires the <code>data/</code> prefix in the path.</p>
+            <div class="code-header">Bash</div>
+            <pre><code>vault policy write my-app-policy - &lt;&lt;EOF
+path "internal/data/my-app/config" {
+  capabilities = ["read"]
+}
+EOF</code></pre>
+
+            <figure style="margin: 32px 0; text-align: center;">
+                <img src="../images/vault/vault-policy.png" alt="Vault Policies Config" style="width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <figcaption style="color: var(--text-muted); font-size: 14px; margin-top: 12px;">Vault Policies &amp; Access Controls Configuration</figcaption>
+            </figure>
+
+            <h3>2. Create the Role</h3>
+            <p>Binds the Kubernetes ServiceAccount to the Policy.</p>
+            <div class="code-header">Bash</div>
+            <pre><code>vault write auth/kubernetes/role/my-app-role \
+    bound_service_account_names=my-app-sa \
+    bound_service_account_namespaces=production \
+    policies=my-app-policy \
+    ttl=24h</code></pre>
+
+            <figure style="margin: 32px 0; text-align: center;">
+                <img src="../images/vault/vault-roles.png" alt="Vault Kubernetes Role Setup" style="width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <figcaption style="color: var(--text-muted); font-size: 14px; margin-top: 12px;">Binding the Kubernetes ServiceAccount to the Vault Policy</figcaption>
+            </figure>
+
+            <h3>3. Seed the Secrets</h3>
+            <p>Push the actual sensitive data into Vault.</p>
+            <div class="code-header">Bash</div>
+            <pre><code>vault kv put internal/my-app/config \
+    DB_PASSWORD="super-secret-pass" \
+    API_KEY="AIzaSyB..." \
+    S3_SECRET="a6DuZ0E..."</code></pre>
+
+            <figure style="margin: 32px 0; text-align: center;">
+                <img src="../images/vault/vault-put.png" alt="Vault Write KV Secrets" style="width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <figcaption style="color: var(--text-muted); font-size: 14px; margin-top: 12px;">Creating Key-Value secrets in the Vault GUI/CLI</figcaption>
+            </figure>
+        </section>
+
+        <section>
+            <h2 class="text-red">Phase 5: Troubleshooting &amp; Best Practices</h2>
+
+            <h3>The "Permission Denied" (403) Checklist</h3>
+            <div class="alert-box">
+                <strong>If a pod is stuck in Init:0/1, check these 3 things:</strong><br/>
+                1. <strong>Policy Path:</strong> Does it have <code>/data/</code>? (e.g., <code>internal/data/...</code>)<br/>
+                2. <strong>Role Binding:</strong> Does the <code>bound_service_account_namespaces</code> include the namespace where your app is running?<br/>
+                3. <strong>Role Name:</strong> Does the <code>vault.hashicorp.com/role</code> annotation in the Deployment match the role name in Vault?
+            </div>
+
+            <h3>Best Practice: The Backup (Snapshot)</h3>
+            <p>Vault data is encrypted, but you must still back up the encrypted database.</p>
+            <div class="code-header">Bash</div>
+            <pre><code># Take a snapshot of the Raft database
+kubectl exec -n vault vault-0 -- vault operator raft snapshot save /share/vault-backup.snap</code></pre>
+
+            <h3>Best Practice: Maintenance</h3>
+            <div class="note-box">
+                When a Vault pod restarts (e.g., after a node upgrade), it will be <strong>Sealed</strong>.
+                <br/><br/>
+                <strong>Action:</strong> Always check <code>kubectl get pods -n vault</code>. If any show <code>0/1 Ready</code>, you must run the unseal command again for that pod (unless auto-unseal is configured).
+            </div>
+
+            <div class="success-box">
+                <strong>Summary of Architecture:</strong><br/>
+                • <strong>Auth:</strong> Kubernetes ServiceAccount JWT.<br/>
+                • <strong>Transport:</strong> Vault Agent Sidecar (Injector).<br/>
+                • <strong>Storage:</strong> Local Raft (HA).<br/>
+                • <strong>Security:</strong> Path-based ACL Policies.
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-green">Conclusion</h2>
+            <p>By moving secrets into Vault, we didn't just improve security; we drastically improved <strong>Developer Experience (DX)</strong>. Developers no longer manage and pass around <code>secret.yaml</code> files. They simply define what they need directly in Vault, and the infrastructure handles the rest securely and transparently.</p>
+
+            <div class="success-box" style="display: flex; gap: 16px; align-items: center; justify-content: space-around;">
+                <span><strong>Status:</strong> Successfully Deployed</span>
+                <span><strong>Security:</strong> Hardened</span>
+                <span><strong>Complexity:</strong> Managed</span>
+            </div>
+        </section>
+
+        <div class="tags">
+            <span class="tag">#Vault</span>
+            <span class="tag">#Kubernetes</span>
+            <span class="tag">#ZeroTrust</span>
+            <span class="tag">#DevSecOps</span>
+            <span class="tag">#Security</span>
+            <span class="tag">#Helm</span>
+            <span class="tag">#Architecture</span>
+        </div>
+
+        <div class="author-section">
+            <div class="author-name">Hamza Hssaini</div>
+            <div class="author-title">Cloud &amp; Kubernetes Enthusiast | DevOps Engineer</div>
+        </div>
+    </main>
+
+    <!-- Load Mermaid for Diagram -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        });
+    </script>
+</body>
+</html>

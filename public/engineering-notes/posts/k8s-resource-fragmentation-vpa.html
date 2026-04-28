@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">Architectural Reference: Solving Resource Fragmentation & Scheduling Deadlocks</title>
+    <title lang="fr">Référence Architecturale : Résoudre la Fragmentation des Ressources et les Blocages de Planification</title>
+    
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px; 
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: color 0.2s; 
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+
+        /* Images */
+        .visual-container { margin: 40px 0; border-radius: 12px; overflow: hidden; background: #f8fafc; padding: 16px; border: 1px solid var(--border); }
+        .visual-container img { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .visual-container p { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-top: 16px; 
+            margin-bottom: 0;
+            text-align: center; 
+            font-style: italic;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code, .table-code-block code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+    </style>
+
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--accent); font-weight: 600;">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    <main id="content">
+
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <article>
+        <header>
+            <div class="meta">April 2026 • Infrastructure & Orchestration • 6 min read</div>
+            <h1>Architectural Reference: Solving Resource Fragmentation & Scheduling Deadlocks in Kubernetes</h1>
+        </header>
+
+        <section id="executive-summary">
+            <h2>Executive Summary</h2>
+            <p>In high-density clusters running heavy compute workloads (such as AI engines or data processors), standard Kubernetes Deployment strategies often fail due to <strong>Scheduling Deadlocks</strong>. This occurs when a pod’s <em>CPU Reservation</em> (Request) is significantly higher than its <em>Actual Consumption</em>, preventing the scheduler from placing new pods safely during a Rolling Update.</p>
+            <p>This technical guide outlines the implementation of a <strong>Data-Driven Resource Lifecycle</strong> using GitOps (ArgoCD), Helm, and Vertical Pod Autoscaling (VPA) to eliminate fragmentation.</p>
+        </section>
+
+        <section id="the-problem">
+            <h2>1. The Theoretical Problem: Reservation vs. Reality</h2>
+            <p>In Kubernetes, the Scheduler makes node placement decisions based on <strong>Requests</strong>, not current active usage.</p>
+            <ul>
+                <li><strong>The Problem:</strong> If an ML inference pod requests <code>4 Cores</code> but only uses <code>100m</code> at idle, it effectively "locks" 4 Cores on the node entirely.</li>
+                <li><strong>The Deadlock:</strong> During a Sync or Rolling Update, Kubernetes tries to start a "Surge" pod. If the node is nearly full conceptually (due to these locked requests), the new pod stays infinitely in <code>Pending (Insufficient CPU)</code> because the old pod is still holding its 4-Core reservation.</li>
+                <li><strong>The Best Practice Fix:</strong> We must strictly align Requests with the <em>95th percentile of actual usage</em>, while keeping Limits high enough to allow for rapid processing spikes.</li>
+            </ul>
+        </section>
+
+        <section id="practical-implementation">
+            <h2>2. Practical Implementation: The "Pro" Workflow</h2>
+            
+            <h3>Step A: Automating Restarts (Config Checksumming)</h3>
+            <p><strong>Context:</strong> Pods do not detect changes in ConfigMaps automatically by default. If your environment configurations change, the deployment stays stale.</p>
+            <p><strong>Solution:</strong> Inject a SHA256 hash of the configuration into the Deployment template. When the Git configuration changes, the hash changes, forcing Kubernetes to cleanly roll out the new config.</p>
+            <p><em>Helm Best Practice (in <code>templates/deployment.yaml</code>):</em></p>
+<pre><code class="language-yaml">spec:
+  template:
+    metadata:
+      annotations:
+        # Forces restart only when config changes
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}</code></pre>
+
+            <h3>Step B: Solving Scheduling Deadlocks (Deployment Strategy)</h3>
+            <p>In resource-constrained clusters, we must avoid "Surging" (creating a new heavy pod before terminating the old one).</p>
+            <p><strong>Architectural Choice:</strong> Set <code>maxSurge</code> to 0. This guarantees the old pod physically releases its CPU slot before the new pod attempts to allocate its own.</p>
+<pre><code class="language-yaml">spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0           # Release CPU slot before taking a new one
+      maxUnavailable: 1     # Allow temporary downtime to ensure stability</code></pre>
+        </section>
+
+        <section id="observability-vpa">
+            <h2>3. The Observability Layer: Vertical Pod Autoscaling (VPA)</h2>
+            <p>Stop "guessing" your resource numbers. We utilize the Kubernetes VPA in <strong>Recommender Mode</strong> (<code>UpdateMode: "Off"</code>) to safely observe the "Truth" of our data pipelines.</p>
+
+            <h3>Centralized Resource Management</h3>
+            <p>Organize all VPAs in a centralized <code>infrastructure/vpas/</code> directory. This completely decouples resource optimization from application logic.</p>
+            <p><em>infrastructure/vpas/ai-inference-workloads/vpa.yaml:</em></p>
+<pre><code class="language-yaml">apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: nlp-classifier-vpa
+  namespace: ai-inference-workloads
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: nlp-document-classifier
+  updatePolicy:
+    updateMode: "Off" # Safest mode for Production: Recommendation only</code></pre>
+        </section>
+
+        <section id="operational-reference">
+            <h2>4. Operational Reference: Commands &amp; Troubleshooting</h2>
+            
+            <h3>Verifying Cluster Health</h3>
+            <p>Check the VPA "Engine Room" components to ensure the recommender is running:</p>
+<pre><code class="language-bash">kubectl get pods -n kube-system | grep vpa</code></pre>
+
+            <h3>Analyzing Resource Recommendations</h3>
+            <p>After letting workloads run for 24 hours, extract the algorithmic "Truth":</p>
+<pre><code class="language-bash"># Summary of all recommendations in the namespace
+kubectl get vpa -n ai-inference-workloads
+
+# Deep dive into a specific engine's metrics
+kubectl describe vpa nlp-classifier-vpa -n ai-inference-workloads</code></pre>
+
+            <h3>The "Root Cause" Identification</h3>
+            <p>Compare the VPA <code>Target</code> with your current <code>Requests</code>:</p>
+            <ul>
+                <li><strong>If Current Request &gt;&gt; Target CPU:</strong> You are wasting money and actively causing the scheduling deadlocks mentioned earlier.</li>
+                <li><strong>If Current Request &lt;&lt; Target Memory:</strong> You are risking severe <code>OOMKills</code> (Out of Memory) during peak processing.</li>
+            </ul>
+        </section>
+
+        <section id="senior-architect-practices">
+            <h2>5. Senior Architect's Best Practices</h2>
+            <ul>
+                <li><strong>Requests vs. Limits:</strong> Set Requests strictly to the VPA <em>Target</em> (Guaranteed space). Set Limits to the VPA <em>UpperBound</em> (Burstable peak allowance).</li>
+                <li><strong>GitOps First:</strong> Never use <code>kubectl edit</code>. Always map updates to <code>values.yaml</code> in Git and let ArgoCD sync and apply the changes declaratively.</li>
+                <li><strong>Readiness Probes:</strong> For ML models that take time to load weights into memory, implement strict <code>readinessProbes</code>. This ensures the old pod isn't evicted from the Endpoint slice until the new model is genuinely ready to handle neural inferences.</li>
+                <li><strong>Structure:</strong> Maintain a dedicated <code>infrastructure/</code> directory for VPAs, HPAs, and Ingresses. It keeps the cluster "portable" and your developers focused solely on code.</li>
+            </ul>
+        </section>
+
+        <section id="conclusion">
+            <h2>Final Result</h2>
+            <p>By implementing this architecture, the cluster is no longer a "Black Box." We have transformed it into a self-documenting, data-driven environment where scheduling deadlocks are prevented by design, and resource allocation is driven purely by actual metric telemetry.</p>
+            <hr>
+            <p><em>Ref: Infrastructure Optimization v1.0<br>Author: DevOps Engineer<br>Stack: Kubernetes, ArgoCD, Helm, VPA</em></p>
+        </section>
+            </article>
+        </div>
+
+        <!-- FRENCH VERSION -->
+        <div lang="fr">
+            <article>
+        <header>
+            <div class="meta">Avril 2026 • Infrastructure & Orchestration • 6 min de lecture</div>
+            <h1>Référence Architecturale : Résoudre la Fragmentation des Ressources et les Blocages de Planification</h1>
+        </header>
+
+        <section id="executive-summary-fr">
+            <h2>Résumé Exécutif</h2>
+            <p>Dans les clusters à haute densité exécutant des charges de calcul lourdes (comme des moteurs d'IA), les stratégies de Déploiement standards échouent souvent à cause de <strong>Blocages de Planification (Scheduling Deadlocks)</strong>. Cela se produit lorsque la <em>Réservation CPU</em> (Request) d'un pod est nettement supérieure à sa <em>Consommation Réelle</em>, empêchant le scheduler de placer de nouveaux pods en toute sécurité lors d'une mise à jour (Rolling Update).</p>
+            <p>Ce guide technique détaille la mise en œuvre d'un <strong>Cycle de Vie des Ressources Basé sur les Données</strong> utilisant GitOps (ArgoCD), Helm, et le Vertical Pod Autoscaler (VPA) pour éliminer cette fragmentation.</p>
+        </section>
+
+        <section id="the-problem-fr">
+            <h2>1. Le Problème Théorique : Réservation vs Réalité</h2>
+            <p>Dans Kubernetes, le Scheduler prend ses décisions de placement sur les nœuds en fonction des <strong>Requests</strong>, et non de l'utilisation active réelle.</p>
+            <ul>
+                <li><strong>Le Problème :</strong> Si un pod d'inférence ML demande <code>4 Cœurs</code> mais n'utilise que <code>100m</code> au repos, il "verrouille" littéralement les 4 cœurs sur le nœud.</li>
+                <li><strong>Le Blocage :</strong> Lors d'une mise à jour, Kubernetes tente de démarrer un pod de débordement ("Surge"). Si le nœud est conceptuellement plein, le nouveau pod reste indéfiniment en <code>Pending (Insufficient CPU)</code> car l'ancien pod maintient toujours sa réservation.</li>
+                <li><strong>La Solution (Bonne Pratique) :</strong> Il faut aligner strictement les Requests sur le <em>95ème centile de l'utilisation réelle</em>, tout en gardant des Limits élevées pour absorber les pics de traitement.</li>
+            </ul>
+        </section>
+
+        <section id="practical-implementation-fr">
+            <h2>2. Implémentation Pratique : Le Workflow "Pro"</h2>
+            
+            <h3>Étape A : Automatisation des Redémarrages (Checksum de Config)</h3>
+            <p><strong>Contexte :</strong> Par défaut, les pods ne détectent pas automatiquement les changements dans les ConfigMaps.</p>
+            <p><strong>Solution :</strong> Injecter un hash SHA256 de la configuration dans le modèle de Déploiement. Lorsque la configuration Git change, le hash change, forçant Kubernetes à effectuer un redémarrage propre.</p>
+            <p><em>Bonne Pratique Helm (dans <code>templates/deployment.yaml</code>) :</em></p>
+<pre><code class="language-yaml">spec:
+  template:
+    metadata:
+      annotations:
+        # Force le redémarrage uniquement lors d'un changement de config
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}</code></pre>
+
+            <h3>Étape B : Résoudre les Blocages de Planification</h3>
+            <p>Dans les clusters limités en ressources, il faut éviter le "Surging" (créer un pod lourd avant de fermer l'ancien).</p>
+            <p><strong>Choix Architectural :</strong> Régler <code>maxSurge</code> à 0. Cela garantit que l'ancien pod libère physiquement son allocation CPU avant que le nouveau ne tente de réserver la sienne.</p>
+<pre><code class="language-yaml">spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0           # Libère le slot CPU avant d'en prendre un nouveau
+      maxUnavailable: 1     # Autorise une brève indisponibilité pour la stabilité</code></pre>
+        </section>
+
+        <section id="observability-vpa-fr">
+            <h2>3. Couche d'Observabilité : Vertical Pod Autoscaling (VPA)</h2>
+            <p>Arrêtez de "deviner" vos ressources. Nous utilisons le VPA de Kubernetes en <strong>Mode Recommandation</strong> (<code>UpdateMode: "Off"</code>) pour observer la "Vérité" de nos pipelines.</p>
+
+            <h3>Gestion Centralisée des Ressources</h3>
+            <p>Rassemblez tous les VPAs dans un répertoire central <code>infrastructure/vpas/</code>. Cela découple l'optimisation des ressources de la logique applicative.</p>
+            <p><em>infrastructure/vpas/ai-inference-workloads/vpa.yaml :</em></p>
+<pre><code class="language-yaml">apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: nlp-classifier-vpa
+  namespace: ai-inference-workloads
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: nlp-document-classifier
+  updatePolicy:
+    updateMode: "Off" # Mode le plus sûr en Prod : Recommandation uniquement</code></pre>
+        </section>
+
+        <section id="operational-reference-fr">
+            <h2>4. Référence Opérationnelle : Commandes &amp; Debug</h2>
+            
+            <h3>Vérification de la Santé du Cluster</h3>
+<pre><code class="language-bash">kubectl get pods -n kube-system | grep vpa</code></pre>
+
+            <h3>Analyse des Recommandations</h3>
+            <p>Après 24h d'exécution, extrayez la "Vérité" algorithmique :</p>
+<pre><code class="language-bash"># Résumé des recommandations dans le namespace
+kubectl get vpa -n ai-inference-workloads
+
+# Analyse détaillée d'un moteur spécifique
+kubectl describe vpa nlp-classifier-vpa -n ai-inference-workloads</code></pre>
+
+            <h3>Identification de la "Cause Profonde"</h3>
+            <p>Comparez la valeur <code>Target</code> du VPA avec vos <code>Requests</code> actuelles :</p>
+            <ul>
+                <li><strong>Si Request Actuel &gt;&gt; Target CPU :</strong> Vous gaspillez de l'argent et provoquez les blocages de planification mentionnés.</li>
+                <li><strong>Si Request Actuel &lt;&lt; Target Memory :</strong> Vous risquez de sévères <code>OOMKills</code> (Mémoire saturée) lors des pics.</li>
+            </ul>
+        </section>
+
+        <section id="senior-architect-practices-fr">
+            <h2>5. Bonnes Pratiques d'Architecte Senior</h2>
+            <ul>
+                <li><strong>Requests vs. Limits :</strong> Réglez les Requests strictement sur le <em>Target</em> du VPA. Ajustez les Limits sur le <em>UpperBound</em> du VPA.</li>
+                <li><strong>GitOps First :</strong> N'utilisez <em>jamais</em> <code>kubectl edit</code>. Mettez toujours à jour le <code>values.yaml</code> dans Git et laissez ArgoCD synchroniser l'état.</li>
+                <li><strong>Readiness Probes :</strong> Pour les modèles ML longs à charger en RAM, utilisez des <code>readinessProbes</code> restrictives. Cela empêche de tuer l'ancien pod avant que le nouveau ne soit réellement prêt.</li>
+                <li><strong>Structure :</strong> Maintenez un dossier <code>infrastructure/</code> dédié (VPA, HPA, Ingress) pour garder le cluster portable.</li>
+            </ul>
+        </section>
+
+        <section id="conclusion-fr">
+            <h2>Résultat Final</h2>
+            <p>Grâce à cette architecture, le cluster n'est plus une "Boîte Noire". Il devient un environnement auto-documenté basé sur les données, où les erreurs de planification sont structurellement évitées et l'allocation des ressources reflète la réalité télémétrique des charges de travail.</p>
+            <hr>
+            <p><em>Réf : Optimisation d'Infrastructure v1.0<br>Auteur : Ingénieur DevOps<br>Stack : Kubernetes, ArgoCD, Helm, VPA</em></p>
+        </section>
+            </article>
+        </div>
+</main>
+</body>
+</html>

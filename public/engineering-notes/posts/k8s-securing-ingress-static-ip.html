@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title lang="en">Technical Guide: Securing Kubernetes Ingress via Static IP (RKE2/Nginx)</title>
+    <title lang="fr">Guide Technique: Sécurisation de l'Ingress Kubernetes via IP Statique (RKE2/Nginx)</title>
+    
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --container-width: 760px;
+        }
+
+        html[lang="en"] [lang="fr"] { display: none !important; }
+        html[lang="fr"] [lang="en"] { display: none !important; }
+
+        .lang-btn { margin-left: 12px; font-weight: 600 !important; font-size: 13px !important; color: var(--accent) !important; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border) !important; background: transparent; cursor: pointer;}
+        .lang-btn:hover { background: var(--border); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            -webkit-font-smoothing: antialiased; 
+            text-rendering: optimizeLegibility; 
+        }
+
+        /* Navigation */
+        nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 40px 24px; 
+        }
+        .nav-left a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            transition: opacity 0.2s; 
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-left a:hover { opacity: 0.8; transform: translateY(-1px); }
+        .nav-right { display: flex; gap: 24px; align-items: center; }
+        .nav-right a { 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: color 0.2s; 
+        }
+        .nav-right a:hover { color: var(--accent); }
+
+        /* Main Container */
+        main { 
+            max-width: var(--container-width); 
+            margin: 0 auto; 
+            padding: 0 24px 120px; 
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+
+        /* Header Styles */
+        header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        h1 { 
+            font-size: 36px; 
+            font-weight: 800; 
+            letter-spacing: -0.03em; 
+            color: var(--text-main); 
+            margin-bottom: 16px; 
+            line-height: 1.2; 
+        }
+        .meta { 
+            color: var(--accent); 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Typography */
+        h2 { 
+            margin-top: 48px; 
+            margin-bottom: 20px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h3 { 
+            margin-top: 32px; 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        p { margin-bottom: 24px; color: #4b5563; font-size: 17px; }
+        ul, ol { margin-bottom: 24px; padding-left: 24px; color: #4b5563; font-size: 17px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text-main); font-weight: 600; }
+
+        /* Images */
+        .visual-container { margin: 40px 0; border-radius: 12px; overflow: hidden; background: #f8fafc; padding: 16px; border: 1px solid var(--border); }
+        .visual-container img { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .visual-container p { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-top: 16px; 
+            margin-bottom: 0;
+            text-align: center; 
+            font-style: italic;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 32px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .code-header + pre {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        pre code, .table-code-block code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--code-text);
+            line-height: 1.6;
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-radius: 12px 12px 0 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-header::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 16px 0 0 #eab308, 32px 0 0 #22c55e;
+            margin-right: 48px;
+        }
+        p code, li code, td code:not(.block-code) {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 24px; }
+            main { margin: 0; border-radius: 0; padding: 0 20px 80px; }
+            h1 { font-size: 28px; }
+            h2 { font-size: 22px; }
+            p, ul, ol { font-size: 16px; }
+        }
+    
+        .text-blue { color: #2563eb; }
+        .text-red { color: #dc2626; }
+        .text-green { color: #16a34a; }
+        .text-orange { color: #ea580c; }
+        .text-purple { color: #9333ea; }
+        .alert-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0; font-size: 16px; }
+    </style>
+
+    <script>
+        function toggleLanguage() {
+            const docEl = document.documentElement;
+            const newLang = docEl.lang === 'en' ? 'fr' : 'en';
+            setLanguage(newLang);
+        }
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+            const btn = document.getElementById('lang-toggle');
+            if(btn) btn.innerText = lang === 'en' ? 'FR' : 'EN';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</head>
+<body>
+    <nav aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="/engineering-notes/archive.html" title="Back to Archive">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-right">
+            <a href="/engineering-notes/archive.html" style="color: var(--accent); font-weight: 600;">Blog</a>
+            <a href="/dashboard.html">Metrics</a>
+            <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">FR</button>
+        </div>
+    </nav>
+    <main id="content">
+
+        <!-- ENGLISH VERSION -->
+        <div lang="en">
+            <article>
+        <header>
+            <div class="meta">April 2026 • DevOps Engineering • 3 min read</div>
+            <h1>Technical Guide: Securing Kubernetes Ingress via Static IP (RKE2/Nginx)</h1>
+        </header>
+
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>When accessing Kubernetes services via an IP address (e.g., <code>https://192.168.5.x</code>) over a VPN, browsers fail to validate the connection for two reasons:</p>
+            <ul>
+                <li><strong>Host-less Requests:</strong> Browsers do not send an SNI (Server Name Indication) when hitting an IP, causing Nginx to serve its "Fake Ingress Certificate."</li>
+                <li><strong>Missing SANs:</strong> Modern security standards require the IP to be present in the Subject Alternative Name (SAN) field of the certificate.</li>
+            </ul>
+            <p><strong>The Solution:</strong> We generate a custom self-signed certificate with an IP-SAN and configure the Nginx Ingress Controller to use it as the Global Default/Fallback certificate.</p>
+        </section>
+
+        <section id="phase-1">
+            <h2>Phase 1: Generate the IP-Specific Certificate</h2>
+            <p>Generate the certificate on a Linux machine with OpenSSL. You must include the IP in the SAN.</p>
+            <div class="code-header">Bash</div>
+<pre><code class="language-bash"># 1. Create a directory for security
+mkdir ingress-certs && cd ingress-certs
+
+# 2. Generate the Private Key and Certificate
+# Replace 192.168.5.x with your actual target IP
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+  -keyout tls.key \
+  -out tls.crt \
+  -subj "/CN=192.168.5.x" \
+  -addext "subjectAltName=IP:192.168.5.x"</code></pre>
+        </section>
+
+        <section id="phase-2">
+            <h2>Phase 2: Create the Kubernetes Secret</h2>
+            <p>The secret must reside in the same namespace as the Ingress Controller pods. For RKE2, this is always <code>kube-system</code>.</p>
+            <div class="code-header">Bash</div>
+<pre><code class="language-bash">kubectl create secret tls ingress-fallback-cert \
+  --cert=tls.crt \
+  --key=tls.key \
+  -n kube-system</code></pre>
+        </section>
+
+        <section id="phase-3">
+            <h2>Phase 3: Configure Nginx Fallback (RKE2)</h2>
+            <p>Since RKE2 deploys Nginx as a DaemonSet, we must modify the controller arguments to point to our new secret.</p>
+            
+            <h3>Edit the DaemonSet:</h3>
+            <div class="code-header">Bash</div>
+<pre><code class="language-bash">kubectl edit ds rke2-ingress-nginx-controller -n kube-system</code></pre>
+
+            <h3>Add the Fallback Argument:</h3>
+            <p>Locate the <code>spec.template.spec.containers[0].args</code> section and add the <code>--default-ssl-certificate</code> flag:</p>
+            <div class="code-header">Yaml</div>
+<pre><code class="language-yaml">containers:
+- args:
+  - /nginx-ingress-controller
+  - --default-ssl-certificate=kube-system/ingress-fallback-cert # &lt;--- ADD THIS
+  - --election-id=rke2-ingress-nginx-leader
+  - --ingress-class=nginx
+  # ... existing args ...</code></pre>
+
+            <h3>Verify Rollout:</h3>
+            <p>Kubernetes will perform a rolling restart of the Ingress pods.</p>
+            <div class="code-header">Bash</div>
+<pre><code class="language-bash">kubectl get pods -n kube-system -l app.kubernetes.io/name=rke2-ingress-nginx -w</code></pre>
+        </section>
+
+        <section id="phase-4">
+            <h2>Phase 4: Configure the Ingress Resource</h2>
+            <p>In your Helm chart or YAML manifests, ensure your Ingress is a "catch-all" (no specific host) so it captures IP-based traffic.</p>
+            <p>Values.yaml snippet:</p>
+            <div class="code-header">Yaml</div>
+<pre><code class="language-yaml">ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: ""  # Leaving this empty targets the IP directly
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: [] # Leave empty; Nginx will use the global fallback secret</code></pre>
+        </section>
+
+        <section id="phase-5">
+            <h2>Phase 5: Client-Side Trust (The "Green Lock")</h2>
+            <p>Even with a valid IP-SAN, the certificate is self-signed. To remove the browser "Not Secure" warning:</p>
+            <ol>
+                <li>Distribute <code>tls.crt</code> to the end users on the VPN.</li>
+                <li><strong>Install on Windows:</strong>
+                    <ul>
+                        <li>Double-click <code>tls.crt</code> &gt; <strong>Install Certificate</strong>.</li>
+                        <li>Store Location: <strong>Local Machine</strong>.</li>
+                        <li>Place in: <strong>Trusted Root Certification Authorities</strong>.</li>
+                    </ul>
+                </li>
+            </ol>
+            <p><strong>Result:</strong> Browsers (Chrome/Edge) will now show a Green Lock for <code>https://192.168.5.x/</code>.</p>
+        </section>
+
+        <section id="best-practices">
+            <h2>Best Practices & Maintenance</h2>
+            <ul>
+                <li><strong>Certificate Expiry:</strong> The command above sets a 10-year (3650 days) expiry. Set a reminder to rotate the secret before it expires.</li>
+                <li><strong>RKE2 Upgrades:</strong> RKE2 manages its Ingress via Helm. A major upgrade might reset the DaemonSet arguments.
+                    <ul>
+                        <li><em>Advanced Tip:</em> To make this change permanent, create a HelmChartConfig file at <code>/var/lib/rancher/rke2/server/manifests/rke2-ingress-nginx-config.yaml</code> on the server node.</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Verification Command:</h3>
+            <p>To quickly verify if the correct certificate is being served:</p>
+            <div class="code-header">Bash</div>
+<pre><code class="language-bash">curl -v -k https://&lt;YOUR_IP&gt;/ 2&gt;&amp;1 | grep -i "subject"</code></pre>
+        </section>
+        
+        <hr style="margin: 40px 0; border: none; border-top: 1px solid var(--border);">
+        <p style="font-size: 14px; color: var(--text-muted);">
+            Ref Reference ID: K8S-SSL-IP-SAN-2024<br>
+            Environment: RKE2 / Nginx-Ingress<br>
+            Author: DevOps Engineering
+        </p>
+
+    </article>
+</div>
+</main>
+</body>
+</html>
